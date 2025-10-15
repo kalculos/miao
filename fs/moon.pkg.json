@@ -1,0 +1,7 @@
+{
+    "import":[
+      "iceBear67/miao",
+      "moonbitlang/async/fs",
+      "moonbitlang/async/io"
+    ]
+}
