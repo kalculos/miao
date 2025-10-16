@@ -1,0 +1,9 @@
+{
+  "import": [
+    "iceBear67/bytebuf",
+    "iceBear67/mnbt/nbt",
+    "iceBear67/miao",
+    "iceBear67/miao/net",
+    "iceBear67/mnbt/nbt/bnbt"
+  ]
+}
