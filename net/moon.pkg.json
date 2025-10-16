@@ -3,6 +3,7 @@
       "moonbitlang/async/io",
       "iceBear67/bytebuf",
       "iceBear67/miao",
-      "moonbitlang/async/socket"
+      "moonbitlang/async/socket",
+      "moonbitlang/async/tls"
     ]
 }

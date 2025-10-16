@@ -3,8 +3,7 @@
 ///  string (path) given from the filesystem. A FileSystem does not strictly related to a specific disk partition or 
 /// any filesystem softwares. For example, the whole accessible local storage is considered as a FileSystem.
 pub(open) trait FileSystem {
-  async is_read_only(Self) -> Unit
-  async open_file(Self, Path, mode : Int) -> &@miao.Channel
+  async open_file(Self, Path, mode : Int, permission~: Int) -> &@miao.Channel
 }
 
 ///|
