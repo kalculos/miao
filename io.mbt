@@ -2,6 +2,7 @@
 pub(open) trait Reader: @io.Reader {
   async read_buffer(Self, len : Int) -> &@bytebuf.ByteBuf = _
   async read_buffer_to(Self, buf : &@bytebuf.ByteBuf) -> Int = _
+  async read_byte(Self) -> Byte = _
   async close(Self) -> Unit
   async can_read(Self) -> Bool
 }
@@ -12,8 +13,14 @@ pub(open) trait Writer: @io.Writer {
   /// Returns: (read, written)
   async write_array(Self, arr : FixedArray[Byte], off : Int, len : Int) -> Int = _
   async write_buffer(Self, buf : &@bytebuf.ByteBuf) -> (Int, Int) = _
+  async write_byte(Self, Byte) -> Unit = _
   async close(Self) -> Unit
   async can_write(Self) -> Bool
+}
+
+///|
+impl Reader with read_byte(self) {
+  self.read_exactly(1)[0]
 }
 
 ///|
@@ -69,4 +76,9 @@ impl Writer with write_buffer(self, buf) -> (Int, Int) {
     }
   }
   (totalRead, totalWritten)
+}
+
+///|
+impl Writer with write_byte(self, byte) {
+  ignore(self.write_array([byte], 0, 1))
 }
