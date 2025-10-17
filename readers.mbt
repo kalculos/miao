@@ -42,21 +42,22 @@ impl Reader for TeeReader with can_read(self) -> Bool {
   self.reader.can_read()
 }
 
-///|
-pub(all) struct LimitReader {
+///| LimitReader is a special reader that closes itself when N<=remaining bytes are read.
+/// This does not close the underlying reader.
+pub(all) struct LimitedReader {
   reader : &Reader
   mut remaining : Int
 }
 
 ///|
-pub fn LimitReader::new(reader : &Reader, limit : Int) -> LimitReader {
+pub fn LimitedReader::new(reader : &Reader, limit : Int) -> LimitedReader {
   { reader, remaining: limit }
 }
 
 ///|
-impl @io.Reader for LimitReader with read(self, buf : FixedArray[Byte], offset~ : Int = 0, max_len~ : Int = buf.length() - offset) -> Int {
+impl @io.Reader for LimitedReader with read(self, buf : FixedArray[Byte], offset~ : Int = 0, max_len~ : Int = buf.length() - offset) -> Int {
   if self.remaining <= 0 {
-    return 0
+    raise fail("The LimitedReader has exceed its length limit")
   }
   let read_size = @cmp.minimum(max_len, self.remaining)
   let bytes_read = self.reader.read(buf, offset~, max_len=read_size)
@@ -65,18 +66,18 @@ impl @io.Reader for LimitReader with read(self, buf : FixedArray[Byte], offset~ 
 }
 
 ///|
-impl Reader for LimitReader with read_buffer(self, len : Int) -> &@bytebuf.ByteBuf {
+impl Reader for LimitedReader with read_buffer(self, len : Int) -> &@bytebuf.ByteBuf {
   if self.remaining <= 0 {
-    return @bytebuf.make_unpooled_from_bytes(b"")
+    return @bytebuf.make_unpooled_from_bytes(b"") 
   }
   let actual_len = @cmp.minimum(len, self.remaining)
   self.reader.read_buffer(actual_len)
 }
 
 ///|
-impl Reader for LimitReader with read_buffer_to(self, buf : &@bytebuf.ByteBuf) -> Int {
+impl Reader for LimitedReader with read_buffer_to(self, buf : &@bytebuf.ByteBuf) -> Int {
   if self.remaining <= 0 {
-    return 0
+    raise fail("The LimitedReader has exceed its length limit")
   }
   let available_space = buf.capacity()
   let read_size = @cmp.minimum(available_space, self.remaining)
@@ -87,12 +88,12 @@ impl Reader for LimitReader with read_buffer_to(self, buf : &@bytebuf.ByteBuf) -
 }
 
 ///|
-impl Reader for LimitReader with close(self) -> Unit {
+impl Reader for LimitedReader with close(self) -> Unit {
   self.reader.close()
 }
 
 ///|
-impl Reader for LimitReader with can_read(self) -> Bool {
+impl Reader for LimitedReader with can_read(self) -> Bool {
   self.remaining > 0 && self.reader.can_read()
 }
 

@@ -137,7 +137,7 @@ impl Writer for DuplexWriter with can_write(self) -> Bool {
 ///|
 pub(all) struct ByteBufWriter {
   buffer : &@bytebuf.ByteBuf
-  priv mut closed: Bool
+  priv mut closed : Bool
 }
 
 ///|
@@ -186,4 +186,71 @@ impl Writer for ByteBufWriter with close(self) -> Unit {
 ///|
 impl Writer for ByteBufWriter with can_write(self) -> Bool {
   true
+}
+
+///|
+pub(all) struct LimitedWriter {
+  inner : &Writer
+  priv mut remaining : Int
+}
+
+///|
+pub fn LimitedWriter::new(writer : &Writer, limit : Int) -> LimitedWriter {
+  LimitedWriter::{ inner: writer, remaining: limit }
+}
+
+///|
+impl @io.Writer for LimitedWriter with write_once(
+  self,
+  bytes : Bytes,
+  offset~ : Int,
+  len~ : Int,
+) -> Int {
+  if self.remaining <= 0 {
+    raise fail("Write limit exceeded")
+  }
+  let to_write = @cmp.minimum(len, self.remaining)
+  let written = self.inner.write_once(bytes, offset~, len=to_write)
+  self.remaining -= written
+  written
+}
+
+///|
+impl Writer for LimitedWriter with write_array(
+  self,
+  arr : FixedArray[Byte],
+  off : Int,
+  len : Int,
+) -> Int {
+  if self.remaining <= 0 {
+    raise fail("Write limit exceeded")
+  }
+  let to_write = @cmp.minimum(len, self.remaining)
+  let written = self.inner.write_array(arr, off, to_write)
+  self.remaining -= written
+  written
+}
+
+///|
+impl Writer for LimitedWriter with write_buffer(self, buf : &@bytebuf.ByteBuf) -> (
+  Int,
+  Int,
+) {
+  if self.remaining <= 0 {
+    raise fail("Write limit exceeded")
+  }
+  let to_write = @cmp.minimum(buf.remaining(), self.remaining)
+  let written = self.inner.write_once(buf.read_bytes(to_write).unwrap(), offset=0, len=to_write)
+  self.remaining -= written
+  (to_write, written)
+}
+
+///|
+impl Writer for LimitedWriter with close(self) -> Unit {
+  self.inner.close()
+}
+
+///|
+impl Writer for LimitedWriter with can_write(self) -> Bool {
+  self.remaining > 0 && self.inner.can_write()
 }
