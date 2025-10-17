@@ -1,4 +1,4 @@
-trait Packet {
+pub(open) trait Packet {
   clientbound(Self) -> Bool
 }
 
