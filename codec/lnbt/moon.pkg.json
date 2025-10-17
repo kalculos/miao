@@ -1,0 +1,8 @@
+{
+    "import": [
+        "iceBear67/mnbt/nbt",
+        "iceBear67/miao",
+        "moonbitlang/async/io",
+        "iceBear67/bytebuf"
+    ]
+}

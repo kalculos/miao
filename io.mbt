@@ -3,6 +3,7 @@ pub(open) trait Reader: @io.Reader {
   async read_buffer(Self, len : Int) -> &@bytebuf.ByteBuf = _
   async read_buffer_to(Self, buf : &@bytebuf.ByteBuf) -> Int = _
   async read_byte(Self) -> Byte = _
+  async skip_n(Self, Int) -> Unit = _
   async close(Self) -> Unit
   async can_read(Self) -> Bool
 }
@@ -21,6 +22,10 @@ pub(open) trait Writer: @io.Writer {
 ///|
 impl Reader with read_byte(self) {
   self.read_exactly(1)[0]
+}
+
+impl Reader with skip_n(self, n) {
+  ignore(self.read_exactly(n))
 }
 
 ///|
