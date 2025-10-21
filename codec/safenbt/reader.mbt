@@ -28,7 +28,7 @@ pub fn LimitedNBTReader::new(
 }
 
 ///|
-async fn LimitedNBTReader::read_nbt(
+pub async fn LimitedNBTReader::read_nbt(
   self : LimitedNBTReader,
 ) -> &@bytebuf.ByteBuf {
   let buf = self.upstream
@@ -79,6 +79,7 @@ async fn LimitedNBTReader::read_nbt(
           raise fail("NBT depth limit exceeded at \{self.collector.position()}")
         }
       }
+      _ => raise fail("Invalid type tag: \{byte}")
     }
   } else {
     raise fail("Impossible")
