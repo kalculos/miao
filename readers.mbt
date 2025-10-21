@@ -10,7 +10,7 @@ pub fn TeeReader::new(reader : &Reader, writer : &Writer) -> TeeReader {
 }
 
 ///|
-impl @io.Reader for TeeReader with read(self, buf : FixedArray[Byte], offset~ : Int = 0, max_len~ : Int = buf.length()) -> Int {
+pub impl @io.Reader for TeeReader with read(self, buf : FixedArray[Byte], offset~ : Int = 0, max_len~ : Int = buf.length()) -> Int {
   let read_bytes = self.reader.read(buf, offset~, max_len~)
   if read_bytes > 0 {
     // Write the read data to the tee writer
@@ -23,22 +23,22 @@ impl @io.Reader for TeeReader with read(self, buf : FixedArray[Byte], offset~ : 
 }
 
 ///|
-impl Reader for TeeReader with read_buffer(self, len : Int) -> &@bytebuf.ByteBuf {
+pub impl Reader for TeeReader with read_buffer(self, len : Int) -> &@bytebuf.ByteBuf {
   self.reader.read_buffer(len)
 }
 
 ///|
-impl Reader for TeeReader with read_buffer_to(self, buf : &@bytebuf.ByteBuf) -> Int {
+pub impl Reader for TeeReader with read_buffer_to(self, buf : &@bytebuf.ByteBuf) -> Int {
   self.reader.read_buffer_to(buf)
 }
 
 ///|
-impl Reader for TeeReader with close(self) -> Unit {
+pub impl Reader for TeeReader with close(self) -> Unit {
   self.reader.close()
 }
 
 ///|
-impl Reader for TeeReader with can_read(self) -> Bool {
+pub impl Reader for TeeReader with can_read(self) -> Bool {
   self.reader.can_read()
 }
 
@@ -54,7 +54,7 @@ pub fn LimitReader::new(reader : &Reader, limit : Int) -> LimitReader {
 }
 
 ///|
-impl @io.Reader for LimitReader with read(self, buf : FixedArray[Byte], offset~ : Int = 0, max_len~ : Int = buf.length() - offset) -> Int {
+pub impl @io.Reader for LimitedReader with read(self, buf : FixedArray[Byte], offset~ : Int = 0, max_len~ : Int = buf.length() - offset) -> Int {
   if self.remaining <= 0 {
     return 0
   }
@@ -65,7 +65,7 @@ impl @io.Reader for LimitReader with read(self, buf : FixedArray[Byte], offset~ 
 }
 
 ///|
-impl Reader for LimitReader with read_buffer(self, len : Int) -> &@bytebuf.ByteBuf {
+pub impl Reader for LimitedReader with read_buffer(self, len : Int) -> &@bytebuf.ByteBuf {
   if self.remaining <= 0 {
     return @bytebuf.make_unpooled_from_bytes(b"")
   }
@@ -74,7 +74,7 @@ impl Reader for LimitReader with read_buffer(self, len : Int) -> &@bytebuf.ByteB
 }
 
 ///|
-impl Reader for LimitReader with read_buffer_to(self, buf : &@bytebuf.ByteBuf) -> Int {
+pub impl Reader for LimitedReader with read_buffer_to(self, buf : &@bytebuf.ByteBuf) -> Int {
   if self.remaining <= 0 {
     return 0
   }
@@ -87,12 +87,12 @@ impl Reader for LimitReader with read_buffer_to(self, buf : &@bytebuf.ByteBuf) -
 }
 
 ///|
-impl Reader for LimitReader with close(self) -> Unit {
+pub impl Reader for LimitedReader with close(self) -> Unit {
   self.reader.close()
 }
 
 ///|
-impl Reader for LimitReader with can_read(self) -> Bool {
+pub impl Reader for LimitedReader with can_read(self) -> Bool {
   self.remaining > 0 && self.reader.can_read()
 }
 
@@ -108,7 +108,7 @@ pub fn ComposeReader::new(readers : Array[&Reader]) -> ComposeReader {
 }
 
 ///|
-impl @io.Reader for ComposeReader with read(self, buf : FixedArray[Byte], offset~ : Int = 0, max_len~ : Int = buf.length() - offset) -> Int {
+pub impl @io.Reader for ComposeReader with read(self, buf : FixedArray[Byte], offset~ : Int = 0, max_len~ : Int = buf.length() - offset) -> Int {
   let mut total_read = 0
   let mut current_offset = offset
   let max_bytes_to_read = max_len
@@ -134,7 +134,7 @@ impl @io.Reader for ComposeReader with read(self, buf : FixedArray[Byte], offset
 }
 
 ///|
-impl Reader for ComposeReader with read_buffer(self, len : Int) -> &@bytebuf.ByteBuf {
+pub impl Reader for ComposeReader with read_buffer(self, len : Int) -> &@bytebuf.ByteBuf {
   let result_buf = @bytebuf.make_unpooled(len)
   let mut remaining = len
   let mut total_read = 0
@@ -164,7 +164,7 @@ impl Reader for ComposeReader with read_buffer(self, len : Int) -> &@bytebuf.Byt
 }
 
 ///|
-impl Reader for ComposeReader with read_buffer_to(self, buf : &@bytebuf.ByteBuf) -> Int {
+pub impl Reader for ComposeReader with read_buffer_to(self, buf : &@bytebuf.ByteBuf) -> Int {
   let mut total_read = 0
   let target_capacity = buf.capacity()
   
@@ -190,14 +190,14 @@ impl Reader for ComposeReader with read_buffer_to(self, buf : &@bytebuf.ByteBuf)
 }
 
 ///|
-impl Reader for ComposeReader with close(self) -> Unit {
+pub impl Reader for ComposeReader with close(self) -> Unit {
   for i = 0; i < self.readers.length(); i = i + 1 {
     self.readers[i].close()
   }
 }
 
 ///|
-impl Reader for ComposeReader with can_read(self) -> Bool {
+pub impl Reader for ComposeReader with can_read(self) -> Bool {
   if self.current_index >= self.readers.length() {
     return false
   }
@@ -208,4 +208,68 @@ impl Reader for ComposeReader with can_read(self) -> Bool {
     }
   }
   false
+}
+
+
+pub struct ByteBufReader {
+  buffer: &@bytebuf.ByteBuf
+  priv mut closed: Bool
+}
+
+///|
+pub fn ByteBufReader::new(buf: &@bytebuf.ByteBuf) -> ByteBufReader {
+  { buffer: buf, closed: false }
+}
+
+///|
+pub impl @io.Reader for ByteBufReader with read(self, buf: FixedArray[Byte], offset~: Int = 0, max_len~: Int = buf.length() - offset) -> Int {
+  if self.closed {
+    return -1
+  }
+  let available = self.buffer.remaining()
+  if available == 0 {
+    return 0
+  }
+  let to_read = @cmp.minimum(available, max_len)
+  let temp =   self.buffer.read_bytes(to_read).unwrap()
+  for i = 0; i < temp.length(); i = i + 1 {
+    buf[offset + i] = temp[i]
+  }
+  temp.length()
+}
+
+///|
+pub impl Reader for ByteBufReader with read_buffer(self, len: Int) -> &@bytebuf.ByteBuf {
+  if self.closed {
+    return @bytebuf.make_unpooled_from_bytes(b"")
+  }
+  let available = self.buffer.remaining()
+  let actual_len = @cmp.minimum(available, len)
+  let result = @bytebuf.make_unpooled(actual_len)
+  ignore(self.buffer.transfer_to(result, actual_len))
+  result
+}
+
+///|
+pub impl Reader for ByteBufReader with read_buffer_to(self, buf: &@bytebuf.ByteBuf) -> Int {
+  if self.closed {
+    return -1
+  }
+  let available = self.buffer.remaining()
+  if available == 0 {
+    return 0
+  }
+  let capacity = buf.capacity()
+  let to_read = @cmp.minimum(available, capacity)
+  self.buffer.transfer_to(buf, to_read)
+}
+
+///|
+pub impl Reader for ByteBufReader with close(self) -> Unit {
+  self.closed = true
+}
+
+///|
+pub impl Reader for ByteBufReader with can_read(self) -> Bool {
+  !self.closed && self.buffer.remaining() > 0
 }

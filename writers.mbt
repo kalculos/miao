@@ -7,19 +7,32 @@ pub fn DiscardWriter::new() -> DiscardWriter {
 }
 
 ///|
-impl @io.Writer for DiscardWriter with write_once(self, _bytes : Bytes, offset~ : Int, len~ : Int) -> Int {
+pub impl @io.Writer for DiscardWriter with write_once(
+  self,
+  _bytes : Bytes,
+  offset~ : Int,
+  len~ : Int,
+) -> Int {
   // Simply return the length to indicate all bytes were "written" (discarded)
   len
 }
 
 ///|
-impl Writer for DiscardWriter with write_array(self, _arr : FixedArray[Byte], _off : Int, len : Int) -> Int {
+pub impl Writer for DiscardWriter with write_array(
+  self,
+  _arr : FixedArray[Byte],
+  _off : Int,
+  len : Int,
+) -> Int {
   // Simply return the length to indicate all bytes were "written" (discarded)
   len
 }
 
 ///|
-impl Writer for DiscardWriter with write_buffer(self, _buf : &@bytebuf.ByteBuf) -> (Int, Int) {
+pub impl Writer for DiscardWriter with write_buffer(self, _buf : &@bytebuf.ByteBuf) -> (
+  Int,
+  Int,
+) {
   // Return (read, written) - read all from buffer, "wrote" all to discard
   let remaining = _buf.remaining()
   let _ =_buf.read_bytes(remaining) // TODO: skipN
@@ -27,13 +40,13 @@ impl Writer for DiscardWriter with write_buffer(self, _buf : &@bytebuf.ByteBuf) 
 }
 
 ///|
-impl Writer for DiscardWriter with close(self) -> Unit {
+pub impl Writer for DiscardWriter with close(self) -> Unit {
   // Nothing to close for a discard writer
   ()
 }
 
 ///|
-impl Writer for DiscardWriter with can_write(self) -> Bool {
+pub impl Writer for DiscardWriter with can_write(self) -> Bool {
   // Always can write to discard
   true
 }
@@ -50,7 +63,12 @@ pub fn DuplexWriter::new(writer1 : &Writer, writer2 : &Writer) -> DuplexWriter {
 }
 
 ///|
-impl @io.Writer for DuplexWriter with write_once(self, bytes : Bytes, offset~ : Int, len~ : Int) -> Int {
+pub impl @io.Writer for DuplexWriter with write_once(
+  self,
+  bytes : Bytes,
+  offset~ : Int,
+  len~ : Int,
+) -> Int {
   // Write to both writers and return the minimum bytes written
   let written1 = self.writer1.write_once(bytes, offset~, len~)
   let written2 = self.writer2.write_once(bytes, offset~, len~)
@@ -58,7 +76,12 @@ impl @io.Writer for DuplexWriter with write_once(self, bytes : Bytes, offset~ : 
 }
 
 ///|
-impl Writer for DuplexWriter with write_array(self, arr : FixedArray[Byte], off : Int, len : Int) -> Int {
+pub impl Writer for DuplexWriter with write_array(
+  self,
+  arr : FixedArray[Byte],
+  off : Int,
+  len : Int,
+) -> Int {
   // Write to both writers and return the minimum bytes written
   let written1 = self.writer1.write_array(arr, off, len)
   let written2 = self.writer2.write_array(arr, off, len)
@@ -66,7 +89,10 @@ impl Writer for DuplexWriter with write_array(self, arr : FixedArray[Byte], off 
 }
 
 ///|
-impl Writer for DuplexWriter with write_buffer(self, buf : &@bytebuf.ByteBuf) -> (Int, Int) {
+pub impl Writer for DuplexWriter with write_buffer(self, buf : &@bytebuf.ByteBuf) -> (
+  Int,
+  Int,
+) {
   // Create a copy of the buffer to read from both writers
   let buf_copy = @bytebuf.make_unpooled(buf.capacity())
   let original_remaining = buf.remaining()
@@ -97,14 +123,135 @@ impl Writer for DuplexWriter with write_buffer(self, buf : &@bytebuf.ByteBuf) ->
 }
 
 ///|
-impl Writer for DuplexWriter with close(self) -> Unit {
+pub impl Writer for DuplexWriter with close(self) -> Unit {
   // Close both writers
   self.writer1.close()
   self.writer2.close()
 }
 
 ///|
-impl Writer for DuplexWriter with can_write(self) -> Bool {
+pub impl Writer for DuplexWriter with can_write(self) -> Bool {
   // Can write if both writers can write
   self.writer1.can_write() && self.writer2.can_write()
+}
+
+///|
+pub(all) struct ByteBufWriter {
+  buffer : &@bytebuf.ByteBuf
+  priv mut closed : Bool
+}
+
+///|
+pub fn ByteBufWriter::new(buf : &@bytebuf.ByteBuf) -> ByteBufWriter {
+  ByteBufWriter::{ buffer: buf, closed: false }
+}
+
+///|
+pub impl @io.Writer for ByteBufWriter with write_once(
+  self,
+  bytes : Bytes,
+  offset~ : Int,
+  len~ : Int,
+) -> Int {
+  self.buffer.write_bytes(bytes[offset:len].to_bytes()) //todo optimization
+  len
+}
+
+///|
+pub impl Writer for ByteBufWriter with write_array(
+  self,
+  arr : FixedArray[Byte],
+  off : Int,
+  len : Int,
+) -> Int {
+  self.buffer.write_array(arr, off, len)
+  len
+}
+
+///|
+pub impl Writer for ByteBufWriter with write_buffer(self, buf : &@bytebuf.ByteBuf) -> (
+  Int,
+  Int,
+) {
+  let a = buf.transfer_to(self.buffer, buf.remaining())
+  (a, a)
+}
+
+///|
+pub impl Writer for ByteBufWriter with close(self) -> Unit {
+  // Nothing to close for a buffer writer
+  guard !self.closed
+  self.closed = true
+}
+
+///|
+pub impl Writer for ByteBufWriter with can_write(self) -> Bool {
+  true
+}
+
+///|
+pub(all) struct LimitedWriter {
+  inner : &Writer
+  priv mut remaining : Int
+}
+
+///|
+pub fn LimitedWriter::new(writer : &Writer, limit : Int) -> LimitedWriter {
+  LimitedWriter::{ inner: writer, remaining: limit }
+}
+
+///|
+pub impl @io.Writer for LimitedWriter with write_once(
+  self,
+  bytes : Bytes,
+  offset~ : Int,
+  len~ : Int,
+) -> Int {
+  if self.remaining <= 0 {
+    raise fail("Write limit exceeded")
+  }
+  let to_write = @cmp.minimum(len, self.remaining)
+  let written = self.inner.write_once(bytes, offset~, len=to_write)
+  self.remaining -= written
+  written
+}
+
+///|
+pub impl Writer for LimitedWriter with write_array(
+  self,
+  arr : FixedArray[Byte],
+  off : Int,
+  len : Int,
+) -> Int {
+  if self.remaining <= 0 {
+    raise fail("Write limit exceeded")
+  }
+  let to_write = @cmp.minimum(len, self.remaining)
+  let written = self.inner.write_array(arr, off, to_write)
+  self.remaining -= written
+  written
+}
+
+///|
+pub impl Writer for LimitedWriter with write_buffer(self, buf : &@bytebuf.ByteBuf) -> (
+  Int,
+  Int,
+) {
+  if self.remaining <= 0 {
+    raise fail("Write limit exceeded")
+  }
+  let to_write = @cmp.minimum(buf.remaining(), self.remaining)
+  let written = self.inner.write_once(buf.read_bytes(to_write).unwrap(), offset=0, len=to_write)
+  self.remaining -= written
+  (to_write, written)
+}
+
+///|
+pub impl Writer for LimitedWriter with close(self) -> Unit {
+  self.inner.close()
+}
+
+///|
+pub impl Writer for LimitedWriter with can_write(self) -> Bool {
+  self.remaining > 0 && self.inner.can_write()
 }
