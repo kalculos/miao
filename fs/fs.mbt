@@ -7,6 +7,7 @@ pub(all) enum FileKind {
 } derive(Eq, Hash, Show)
 
 ///|
+/// TODO: append, truncate, etc.
 pub(all) enum AccessMode {
   ReadOnly = 0
   WriteOnly
@@ -30,10 +31,17 @@ pub suberror FileError { // consider merge them into one IOException
   Inaccessible(path~ : Path, error~ : Error, msg~: String)
 }
 
+pub(all) struct FileInfo {
+  kind: FileKind
+  access: AccessMode
+  attribute: FileAttribute
+  path: Path
+}
+
 ///|
 pub trait FileChannel: @io.Channel {
   access(Self) -> AccessMode
-  file_system(Self) -> &FileSystem
+  info(Self) -> FileInfo
 }
 
 ///|

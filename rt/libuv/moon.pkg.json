@@ -1,0 +1,8 @@
+{
+    "import": [
+      "tonyfettes/uv",
+      "iceBear67/miao/io",
+      "iceBear67/miao/fs",
+      "moonbitlang/x/encoding"
+    ]
+}
