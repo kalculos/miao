@@ -1,8 +1,6 @@
 {
     "import": [
-      "moonbitlang/async/io",
-      "iceBear67/miao",
+      "iceBear67/miao/io",
       "moonbitlang/async/socket",
-      "moonbitlang/async/tls"
     ]
 }
