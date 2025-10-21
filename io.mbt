@@ -1,19 +1,33 @@
 ///|
-pub(open) trait Reader: @io.Reader {
+pub(open) trait Reader {
+  /// Read a specific amount of bytes at most, to the destinated buffer.
+  /// It returns the actual bytes read or 0 if the Reader is closed or drained.
+  async read(Self, dst : FixedArray[Byte], off : Int, len : Int) -> Int
+  /// Read bytes to a bytebuffer until the reader is drained or closed.
+  async read_all(Self) -> &@bytebuf.ByteBuf = _
   async read_buffer(Self, len : Int) -> &@bytebuf.ByteBuf = _
-  async read_buffer_to(Self, buf : &@bytebuf.ByteBuf) -> Int = _
+  /// Read (buf.len - off) bytes at most to the buffer.
+  async read_buffer_to(Self, off : Int, buf : &@bytebuf.ByteBuf) -> Int = _
   async close(Self) -> Unit
-  async can_read(Self) -> Bool
+  ///| This also indicates the state of closer
+  async is_closed(Self) -> Bool
 }
 
 ///|
-pub(open) trait Writer: @io.Writer {
-  ///| Write a bytebuf into the writer.
-  /// Returns: (read, written)
-  async write_array(Self, arr : FixedArray[Byte], off : Int, len : Int) -> Int = _
-  async write_buffer(Self, buf : &@bytebuf.ByteBuf) -> (Int, Int) = _
+pub(open) trait Writer {
+  /// Write a byte array and returns the bytes that we actually write.
+  async write(Self, arr : FixedArray[Byte], off : Int, len : Int) -> Int
+  /// Write a buffer to the writer. The buffer must support marking & seeking
+  /// It returns the bytes actually written. 
+  async write_buffer(
+    Self,
+    off : Int,
+    buf : &@bytebuf.ByteBuf,
+    increase_reader_index : Bool,
+  ) -> Int = _
   async close(Self) -> Unit
-  async can_write(Self) -> Bool
+  ///| This also indicates the state of closer
+  async is_closed(Self) -> Bool
 }
 
 ///|
