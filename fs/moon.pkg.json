@@ -1,7 +1,5 @@
 {
     "import":[
-      "iceBear67/miao",
-      {"path": "moonbitlang/async/fs", "alias": "asyncfs"},
-      {"path":"moonbitlang/async/io","alias": "asyncio"}
+      "iceBear67/miao/io"
     ]
 }

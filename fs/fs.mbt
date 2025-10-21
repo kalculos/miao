@@ -17,7 +17,7 @@ pub(all) enum AccessMode {
 pub(all) struct FileAttribute {
   last_modified_time : Int64 // unix timestamp ( second )
   last_access_time : Int64
-  creation_time: Int64
+  creation_time: Int64 //todo Instant
   permission : Int
   size : Int64
   kind : FileKind
@@ -28,6 +28,12 @@ pub suberror FileError { // consider merge them into one IOException
   IncorrectKind(path~ : Path, expect~ : FileKind, actual~ : FileKind)
   NotExist(path~ : Path)
   Inaccessible(path~ : Path, error~ : Error, msg~: String)
+}
+
+///|
+pub trait FileChannel: @io.Channel {
+  access(Self) -> AccessMode
+  file_system(Self) -> &FileSystem
 }
 
 ///|
@@ -108,6 +114,7 @@ pub impl Eq for Path with equal(self, another) {
 pub fn path(str : String) -> Path {
   //todo windows support?
   let components = str.split("/").to_array()
+  //todo need a default runtime option
   let path = Path::{ fs: default_file_system, components, absolute: false }
   for root in default_file_system.system_roots() {
     if path.starts_with_path(root) {
@@ -304,10 +311,6 @@ pub fn relativize_path(self : Path, other : Path) -> Path {
 pub fn to_unix_path(self : Path) -> String {
   self.components.join("/")
 }
-
-///|
-pub let default_file_system : &FileSystem = LocalFileSystem::{  }
-
 
 pub async fn open(path: Path, mode: AccessMode, permission~: Int) -> &FileChannel {
   path.fs.open_file(path, mode, permission~)
