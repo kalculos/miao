@@ -10,7 +10,7 @@ pub fn TeeReader::new(reader : &Reader, writer : &Writer) -> TeeReader {
 }
 
 ///|
-impl Reader for TeeReader with read(self, dst : FixedArray[Byte], off : Int, len : Int) -> Int {
+pub impl Reader for TeeReader with read(self, dst : FixedArray[Byte], off : Int, len : Int) -> Int {
   let bytes_read = self.reader.read(dst, off, len)
   if bytes_read > 0 {
     // Write the same data to the writer
@@ -22,13 +22,13 @@ impl Reader for TeeReader with read(self, dst : FixedArray[Byte], off : Int, len
 }
 
 ///|
-impl Reader for TeeReader with close(self) -> Unit {
+pub impl Reader for TeeReader with close(self) -> Unit {
   self.reader.close()
   self.writer.close()
 }
 
 ///|
-impl Reader for TeeReader with is_closed(self) -> Bool {
+pub impl Reader for TeeReader with is_closed(self) -> Bool {
   self.reader.is_closed() && self.writer.is_closed()
 }
 

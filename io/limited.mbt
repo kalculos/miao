@@ -21,7 +21,7 @@ pub fn LimitedWriter::new(writer : &Writer, limit : Int) -> LimitedWriter {
 }
 
 ///|
-impl Reader for LimitReader with read(self, dst : FixedArray[Byte], off : Int, len : Int) -> Int {
+pub impl Reader for LimitReader with read(self, dst : FixedArray[Byte], off : Int, len : Int) -> Int {
   if self.remaining <= 0 {
     return 0
   }
@@ -34,17 +34,17 @@ impl Reader for LimitReader with read(self, dst : FixedArray[Byte], off : Int, l
 }
 
 ///|
-impl Reader for LimitReader with close(self) -> Unit {
+pub impl Reader for LimitReader with close(self) -> Unit {
   self.reader.close()
 }
 
 ///|
-impl Reader for LimitReader with is_closed(self) -> Bool {
+pub impl Reader for LimitReader with is_closed(self) -> Bool {
   self.reader.is_closed()
 }
 
 ///|
-impl Writer for LimitedWriter with write(self, arr : FixedArray[Byte], off : Int, len : Int) -> Int {
+pub impl Writer for LimitedWriter with write(self, arr : FixedArray[Byte], off : Int, len : Int) -> Int {
   if self.remaining <= 0 {
     return 0
   }
@@ -57,11 +57,11 @@ impl Writer for LimitedWriter with write(self, arr : FixedArray[Byte], off : Int
 }
 
 ///|
-impl Writer for LimitedWriter with close(self) -> Unit {
+pub impl Writer for LimitedWriter with close(self) -> Unit {
   self.inner.close()
 }
 
 ///|
-impl Writer for LimitedWriter with is_closed(self) -> Bool {
+pub impl Writer for LimitedWriter with is_closed(self) -> Bool {
   self.inner.is_closed()
 }
