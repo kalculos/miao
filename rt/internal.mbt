@@ -11,8 +11,3 @@ async fn _co_yield(self : &Runtime) -> Unit {
 
 ///|
 let default_runtime : Ref[&Runtime?] = Ref::new(None)
-
-///|
-pub fn get_default_runtime() -> &Runtime? {
-  default_runtime.val
-}

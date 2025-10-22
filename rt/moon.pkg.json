@@ -1,6 +1,5 @@
 {
   "import": [
-    "iceBear67/miao/io",
     "iceBear67/miao/fs"
   ]
 }

@@ -12,6 +12,12 @@ pub fn run_with_runtime(rt : &Runtime, main : Coroutine) -> Unit raise {
     raise fail("A default runtime cannot be initialized twice.")
   }
   default_runtime.val = Some(rt)
+  @fs.set_default_fs(rt.default_file_system())
   let context = BasicContext::new(rt)
   run_async(() => context.job(main).join())
+}
+
+///|
+pub fn get_default_runtime() -> &Runtime? {
+  default_runtime.val
 }
