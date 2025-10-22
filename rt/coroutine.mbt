@@ -8,20 +8,16 @@
 /// Suspend usually happens at I/O executions, like reading a file, etc. Once the Task reached those operations,
 /// the runtime should collect the context via async primitives and set the Task state to `Suspend`
 /// 
-/// Dead: The Task is terminated and won't be continued to run.
-/// It is observable because you're holding a reference to the Task. Users of the Task object should NOT keep
-/// the reference alive once post processings are done since its likely to leak memory.
+/// Completed: The Task is terminated and won't be continued to neither run nor cancel.
 /// 
-/// Cancelling/Cancelled: The Task is requested to be cancelled or already cancelled.
+/// Cancelled: The Task is already cancelled.
 /// Whenever a Task is being cancelled,it threw an Interruption error on the state transition.
-/// To be more specifically, the interruption mechanism can be triggered via setting Task#interrupted to true.
 pub enum TaskState {
   New
   Running
   Suspend
-  Cancelling
-  Calcelled
-  Dead
+  Cancelled
+  Completed
 } derive(Eq, Hash, Show)
 
 // todo TaskScope Value
@@ -30,43 +26,74 @@ pub enum TaskState {
 pub trait Task {
   id(Self) -> Int
   state(Self) -> TaskState
-  ///| Setting the state is actually advising the runtime to make a transition.
-  /// It may not succeed.
-  set_state(Self, TaskState) -> Unit
+  ///| Can only call on TaskState==New.
+  /// The underlying runtime will run this task in background
+  start(Self) -> Unit
+  ///| When a task is being cancelled, the user will synchronize with the job (aka waiting for the state transition) so it must be async function.
+  async cancel(Self) -> Unit
+  is_cancelling(Self) -> Bool
 }
 
 ///|
 /// A Job provides necessary information for the executed codes to fork or cancel themselves.
 pub struct Job {
   context : Context
-  cancel : () -> Unit
+  task : &Task
 }
 
 ///|
 pub struct Context { // share information in tasks, manage jobs in batch, etc.
+  priv mut cancelled : Bool
   priv rt : &Runtime
   priv tasks : Map[Int, &Task]
   priv children : Array[Context]
   parent : Context
-  priv mut closed : Bool
 }
 
 ///|
-pub fn[T] new_job(self : Context, task : async (Job) -> T) -> &Task {
+pub fn is_cancelled(self : Context) -> Bool {
+  self.cancelled
+}
+
+///|
+pub async fn cancel(self : Context) -> Unit {
+  self.cancelled = true
+  for child in self.children {
+    child.cancel() catch {
+      err => () // logging?
+    }
+  }
+  let tasks = self.tasks.values().to_array()
+  for task in tasks {
+    if !task.is_cancelling() {
+      task.cancel() catch {
+        err => () // logging?
+      }
+    }
+  }
+  self.join() // wait for completion...
+  self.tasks.clear()
+  self.children.clear()
+}
+
+///|
+pub async fn[T] new_job(self : Context, task : async (Job) -> T) -> &Task {
+  guard !self.cancelled else {
+    raise fail("The context is already cancelled! (new_job)")
+  }
   let taskToken = self.rt.new_task(t => {
+      // It can keep the state tracked even if the user called cancel() on returned tasks.
       defer self.tasks.remove(t.id())
-      Job::{ context: self, cancel: () => t.set_state(Cancelling) }
-      |> task
-      |> ignore
+      Job::{ context: self, task: t } |> task |> ignore
     })
   self.tasks[taskToken.id()] = taskToken
-  taskToken //todo: handle direct cancel() calls on the task, by providing a wrapper.
+  taskToken
 }
 
 ///|
-pub fn[T] run_job(self : Context, task : async (Job) -> T) -> &Task {
+pub async fn[T] run_job(self : Context, task : async (Job) -> T) -> &Task {
   let job = self.new_job(task)
-  job.set_state(Running) |> ignore
+  job.start()
   job
 }
 
@@ -81,24 +108,13 @@ pub async fn join(self : Context) -> Unit {
 }
 
 ///|
-pub async fn cancel(self : Context) -> Unit {
-  for child in self.children {
-    child.cancel()
-  }
-  for task in self.tasks.values() {
-    task.set_state(Cancelling) |> ignore
-  }
-  self.join() // wait for completion...
-}
-
-///|
 pub fn fork(self : Context) -> Context {
   let ctx = Context::{
     rt: self.rt,
     tasks: {},
     children: [],
     parent: self,
-    closed: false,
+    cancelled: false,
   }
   self.children.push(ctx)
   ctx
@@ -109,7 +125,7 @@ fn[T, E] suspend(f : ((T) -> Unit, (E) -> Unit) -> Unit) = "%async.suspend"
 
 ///|
 async fn _co_yield(self : &Runtime) -> Unit {
-  suspend((r, _) => self.new_task(_ => r(())) |> ignore)
+  suspend((r, _) => self.new_task(_ => r(())).start())
 }
 
 ///|
@@ -124,23 +140,4 @@ extern "C" fn set_current_job(current : Job) = "moonbit_miao_set_current_job"
 pub async fn co_yield() -> Unit {
   current_job().context.rt._co_yield()
   // for main it runs in an anonymosus top context.
-}
-
-///|
-async fn async_main(context : Context) -> Unit {
-  let child = context.fork()
-  // let results = Array::new(0) // or a more robust one, mpsc
-  let task = child.new_job(job => {
-    if 11122 % 232 > 0 {
-      (job.cancel)()
-    }
-    // the returned value may be ignored if the context isn't
-    // interested in the value (otherwise like, a collector context)
-    // results.push(114514)
-    114514
-  })
-  task.set_state(Running)
-  child.cancel()
-  // or ...
-  child.join()
 }

@@ -1,12 +1,8 @@
 ///|
 pub(open) trait Runtime {
   default_file_system(Self) -> &@fs.FileSystem
-  // will not immediately run
+  // will not immediately run until start() is invoked
   new_task(Self, task : async (&Task) -> Unit) -> &Task
-  run_task(Self, task : async (&Task) -> Unit) -> Unit = _
-}
+  async sleep(Self, timeNanos: Int64) -> Unit
 
-///|
-impl Runtime with run_task(self, task) {
-  self.new_task(task).set_state(Running)
 }
