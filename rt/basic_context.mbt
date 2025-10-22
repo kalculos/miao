@@ -130,11 +130,3 @@ pub impl Context for BasicContext with with_context(self, action) -> Unit {
   defer context.cancel_in_bg()
   action(context)
 }
-
-///|
-/// Yields out the execution to another coroutine.
-/// This depends on a installed runtime or may cause undefined behaviour.
-pub async fn co_yield() -> Unit {
-  current_job().context.runtime()._co_yield()
-  // for main it runs in an anonymosus top context.
-}

@@ -10,7 +10,9 @@ async fn _co_yield(self : &Runtime) -> Unit {
 }
 
 ///|
-extern "C" fn current_job() -> Job = "moonbit_miao_current_job" // should implement this by a threadlocal stack
+let default_runtime : Ref[&Runtime?] = Ref::new(None)
 
 ///|
-extern "C" fn set_current_job(current : Job) = "moonbit_miao_set_current_job"
+pub fn get_default_runtime() -> &Runtime? {
+  default_runtime.val
+}

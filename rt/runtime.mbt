@@ -7,7 +7,11 @@ pub(open) trait Runtime {
 }
 
 ///|
-pub fn run_with_runtime(rt : &Runtime, main : Coroutine) -> Unit {
+pub fn run_with_runtime(rt : &Runtime, main : Coroutine) -> Unit raise {
+  guard default_runtime.val is None else {
+    raise fail("A default runtime cannot be initialized twice.")
+  }
+  default_runtime.val = Some(rt)
   let context = BasicContext::new(rt)
   run_async(() => context.job(main).join())
 }
