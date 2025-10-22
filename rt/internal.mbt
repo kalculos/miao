@@ -2,7 +2,7 @@
 async fn[T, E : Error] suspend(f : ((T) -> Unit, (E) -> Unit) -> Unit) -> T raise E = "%async.suspend"
 
 ///|
-fn run_async(f : async () -> Unit) -> Unit = "%async.run"
+fn run_async(f : async () -> Unit noraise) -> Unit = "%async.run"
 
 ///|
 async fn _co_yield(self : &Runtime) -> Unit {

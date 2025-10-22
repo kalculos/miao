@@ -14,7 +14,11 @@ pub fn run_with_runtime(rt : &Runtime, main : Coroutine) -> Unit raise {
   default_runtime.val = Some(rt)
   @fs.set_default_fs(rt.default_file_system())
   let context = BasicContext::new(rt)
-  run_async(() => context.job(main).join())
+  run_async(() => try context.job(main).join() catch {
+    err => {
+      println("Program exited with error: \{err}")
+    }
+  })
 }
 
 ///|
