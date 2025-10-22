@@ -27,9 +27,12 @@ pub trait Task {
   id(Self) -> Int
   state(Self) -> TaskState
   ///| Can only call on TaskState==New.
-  /// The underlying runtime will run this task in background
+  /// The underlying runtime will run this task in _background_.
   start(Self) -> Unit
-  ///| When a task is being cancelled, the user will synchronize with the job (aka waiting for the state transition) so it must be async function.
+  ///| Suspend until this job has been completed.
+  async join(Self) -> Unit
+  ///| Cancel this task. 
+  /// When a task is being cancelled, the user will synchronize with the job
   async cancel(Self) -> Unit
   is_cancelling(Self) -> Bool
 }
@@ -55,7 +58,16 @@ pub fn is_cancelled(self : Context) -> Bool {
   self.cancelled
 }
 
+// A shortcut of cancel, but run in background thus does not require synchronisation.
+
 ///|
+pub fn bg_cancel(self : Context) -> Unit {
+  self.rt.new_task(_ => self.cancel()).start()
+}
+
+///|
+/// Synchronize and cancel all the tasks and childrens.
+/// Errors caused by cancellation will be silently ignored.
 pub async fn cancel(self : Context) -> Unit {
   self.cancelled = true
   for child in self.children {
@@ -77,7 +89,8 @@ pub async fn cancel(self : Context) -> Unit {
 }
 
 ///|
-pub async fn[T] new_job(self : Context, task : async (Job) -> T) -> &Task {
+/// Create a Task associated with this Context.
+pub async fn[T] job(self : Context, task : async (Job) -> T) -> &Task {
   guard !self.cancelled else {
     raise fail("The context is already cancelled! (new_job)")
   }
@@ -91,10 +104,39 @@ pub async fn[T] new_job(self : Context, task : async (Job) -> T) -> &Task {
 }
 
 ///|
-pub async fn[T] run_job(self : Context, task : async (Job) -> T) -> &Task {
-  let job = self.new_job(task)
-  job.start()
-  job
+pub async fn[T] job_timeout(
+  self : Context,
+  timeoutMillis : Int64,
+  task : async (Job) -> T,
+) -> &Task {
+  self.rt.new_task(t => {
+    let mut done = false
+    let timeoutTask = self.job(_ => {
+      self.rt.sleep(timeoutMillis / 1000) catch {
+        _ => () // likely a cancellation
+      }
+      if !done {
+        raise fail("Timeout exceeded for job \{t.id()}")
+      }
+    })
+    timeoutTask.start()
+    self
+    .job(j => {
+        defer (fn() { done = true })()
+        try task(j) catch {
+          err => {
+            timeoutTask.cancel()
+            raise err
+          }
+        } noraise {
+          v => {
+            timeoutTask.cancel()
+            v
+          }
+        }
+      })
+    .start()
+  })
 }
 
 ///|
@@ -118,6 +160,18 @@ pub fn fork(self : Context) -> Context {
   }
   self.children.push(ctx)
   ctx
+}
+
+// shortcut
+
+///|
+pub async fn with_context(
+  self : Context,
+  action : async (Context) -> Unit,
+) -> Unit {
+  let context = self.fork()
+  defer context.bg_cancel()
+  action(context)
 }
 
 ///|
