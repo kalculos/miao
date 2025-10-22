@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "flake.lock": "json",
+        "moonbit.h": "c"
+    }
+}

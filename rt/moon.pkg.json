@@ -2,5 +2,8 @@
   "import": [
     "iceBear67/miao/io",
     "iceBear67/miao/fs"
+  ],
+  "native-stub": [
+    "./thread_local.c"
   ]
 }

@@ -3,6 +3,11 @@ pub(open) trait Runtime {
   default_file_system(Self) -> &@fs.FileSystem
   // will not immediately run until start() is invoked
   new_task(Self, task : async (&Task) -> Unit) -> &Task
-  async sleep(Self, timeNanos: Int64) -> Unit
+  async sleep(Self, timeNanos : Int64) -> Unit
+}
 
+///|
+pub fn run_with_runtime(rt : &Runtime, main : Coroutine) -> Unit {
+  let context = BasicContext::new(rt)
+  run_async(() => context.job(main).join())
 }

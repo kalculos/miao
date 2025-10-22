@@ -1,10 +1,15 @@
-///|
+///| This is a basic implementation of a Context. Most of its members are visible in public to
+/// help you compose a specialized version without reimplementing most of those hassles.
 pub struct BasicContext { // share information in tasks, manage jobs in batch, etc.
   priv mut cancelled : Bool
-  priv rt : &Runtime
-  priv tasks : Map[Int, &Task]
-  priv children : Array[&Context]
-  parent : &Context
+  rt : &Runtime
+  tasks : Map[Int, &Task]
+  children : Array[&Context]
+}
+
+///|
+pub fn BasicContext::new(rt : &Runtime) -> BasicContext {
+  { cancelled: false, rt, tasks: {}, children: [] }
 }
 
 ///|
@@ -12,7 +17,8 @@ pub impl Context for BasicContext with is_cancelled(self) {
   self.cancelled
 }
 
-///| TODO: Considering deprecate this in favor of an internal thread-local variable.
+///|
+/// TODO: Considering deprecate this in favor of an internal thread-local variable.
 pub impl Context for BasicContext with runtime(self) {
   self.rt
 }
@@ -110,7 +116,6 @@ pub impl Context for BasicContext with fork(self) -> &Context {
     rt: self.rt,
     tasks: {},
     children: [],
-    parent: self,
     cancelled: false,
   }
   self.children.push(ctx)
@@ -125,20 +130,6 @@ pub impl Context for BasicContext with with_context(self, action) -> Unit {
   defer context.cancel_in_bg()
   action(context)
 }
-
-///|
-fn[T, E] suspend(f : ((T) -> Unit, (E) -> Unit) -> Unit) = "%async.suspend"
-
-///|
-async fn _co_yield(self : &Runtime) -> Unit {
-  suspend((r, _) => self.new_task(_ => r(())).start())
-}
-
-///|
-extern "C" fn current_job() -> Job = "moonbit_miao_current_job" // should implement this by a threadlocal stack
-
-///|
-extern "C" fn set_current_job(current : Job) = "moonbit_miao_set_current_job"
 
 ///|
 /// Yields out the execution to another coroutine.
