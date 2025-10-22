@@ -1,6 +1,6 @@
 # miao
 
-MIAO~ is a well-designed and general purposed I/O library with portable runtime support. 
+MIAO~ stands for Moonbit Input And Output. It is a well-designed and general purposed I/O library with portable runtime support. 
 
 It consists of `rt` (runtime), `fs` (filesystem) and `codec` (data encoding and decoding, possibly networking clients). We also targets Network I/O but, like other libraries, are under heavy construction and may change rapidly.
 
