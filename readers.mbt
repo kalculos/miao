@@ -10,7 +10,7 @@ pub fn TeeReader::new(reader : &Reader, writer : &Writer) -> TeeReader {
 }
 
 ///|
-impl @io.Reader for TeeReader with read(self, buf : FixedArray[Byte], offset~ : Int = 0, max_len~ : Int = buf.length()) -> Int {
+pub impl @io.Reader for TeeReader with read(self, buf : FixedArray[Byte], offset~ : Int = 0, max_len~ : Int = buf.length()) -> Int {
   let read_bytes = self.reader.read(buf, offset~, max_len~)
   if read_bytes > 0 {
     // Write the read data to the tee writer
@@ -23,22 +23,22 @@ impl @io.Reader for TeeReader with read(self, buf : FixedArray[Byte], offset~ : 
 }
 
 ///|
-impl Reader for TeeReader with read_buffer(self, len : Int) -> &@bytebuf.ByteBuf {
+pub impl Reader for TeeReader with read_buffer(self, len : Int) -> &@bytebuf.ByteBuf {
   self.reader.read_buffer(len)
 }
 
 ///|
-impl Reader for TeeReader with read_buffer_to(self, buf : &@bytebuf.ByteBuf) -> Int {
+pub impl Reader for TeeReader with read_buffer_to(self, buf : &@bytebuf.ByteBuf) -> Int {
   self.reader.read_buffer_to(buf)
 }
 
 ///|
-impl Reader for TeeReader with close(self) -> Unit {
+pub impl Reader for TeeReader with close(self) -> Unit {
   self.reader.close()
 }
 
 ///|
-impl Reader for TeeReader with can_read(self) -> Bool {
+pub impl Reader for TeeReader with can_read(self) -> Bool {
   self.reader.can_read()
 }
 

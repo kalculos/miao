@@ -146,7 +146,7 @@ pub fn ByteBufWriter::new(buf : &@bytebuf.ByteBuf) -> ByteBufWriter {
 }
 
 ///|
-impl @io.Writer for ByteBufWriter with write_once(
+pub impl @io.Writer for ByteBufWriter with write_once(
   self,
   bytes : Bytes,
   offset~ : Int,
@@ -157,7 +157,7 @@ impl @io.Writer for ByteBufWriter with write_once(
 }
 
 ///|
-impl Writer for ByteBufWriter with write_array(
+pub impl Writer for ByteBufWriter with write_array(
   self,
   arr : FixedArray[Byte],
   off : Int,
@@ -168,7 +168,7 @@ impl Writer for ByteBufWriter with write_array(
 }
 
 ///|
-impl Writer for ByteBufWriter with write_buffer(self, buf : &@bytebuf.ByteBuf) -> (
+pub impl Writer for ByteBufWriter with write_buffer(self, buf : &@bytebuf.ByteBuf) -> (
   Int,
   Int,
 ) {
@@ -177,14 +177,14 @@ impl Writer for ByteBufWriter with write_buffer(self, buf : &@bytebuf.ByteBuf) -
 }
 
 ///|
-impl Writer for ByteBufWriter with close(self) -> Unit {
+pub impl Writer for ByteBufWriter with close(self) -> Unit {
   // Nothing to close for a buffer writer
   guard !self.closed
   self.closed = true
 }
 
 ///|
-impl Writer for ByteBufWriter with can_write(self) -> Bool {
+pub impl Writer for ByteBufWriter with can_write(self) -> Bool {
   true
 }
 
@@ -200,7 +200,7 @@ pub fn LimitedWriter::new(writer : &Writer, limit : Int) -> LimitedWriter {
 }
 
 ///|
-impl @io.Writer for LimitedWriter with write_once(
+pub impl @io.Writer for LimitedWriter with write_once(
   self,
   bytes : Bytes,
   offset~ : Int,
@@ -216,7 +216,7 @@ impl @io.Writer for LimitedWriter with write_once(
 }
 
 ///|
-impl Writer for LimitedWriter with write_array(
+pub impl Writer for LimitedWriter with write_array(
   self,
   arr : FixedArray[Byte],
   off : Int,
@@ -232,7 +232,7 @@ impl Writer for LimitedWriter with write_array(
 }
 
 ///|
-impl Writer for LimitedWriter with write_buffer(self, buf : &@bytebuf.ByteBuf) -> (
+pub impl Writer for LimitedWriter with write_buffer(self, buf : &@bytebuf.ByteBuf) -> (
   Int,
   Int,
 ) {
@@ -246,11 +246,11 @@ impl Writer for LimitedWriter with write_buffer(self, buf : &@bytebuf.ByteBuf) -
 }
 
 ///|
-impl Writer for LimitedWriter with close(self) -> Unit {
+pub impl Writer for LimitedWriter with close(self) -> Unit {
   self.inner.close()
 }
 
 ///|
-impl Writer for LimitedWriter with can_write(self) -> Bool {
+pub impl Writer for LimitedWriter with can_write(self) -> Bool {
   self.remaining > 0 && self.inner.can_write()
 }
