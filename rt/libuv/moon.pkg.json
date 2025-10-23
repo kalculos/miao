@@ -3,6 +3,10 @@
       "tonyfettes/uv",
       "iceBear67/miao/io",
       "iceBear67/miao/fs",
+      "iceBear67/miao/rt",
       "moonbitlang/x/encoding"
+    ],
+    "native-stub": [
+      "coroutine.c"
     ]
 }
