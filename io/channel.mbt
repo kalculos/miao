@@ -5,5 +5,5 @@
 /// to users.
 pub(open) trait Channel: Reader + Writer {
   async close(Self) -> Unit
-  async is_closed(Self) -> Unit
+  async is_closed(Self) -> Bool
 }
