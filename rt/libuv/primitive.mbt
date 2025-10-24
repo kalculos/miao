@@ -13,6 +13,21 @@ async fn[T, E : Error] ___suspend(
 typealias () -> Unit raise as UvCancellationToken
 
 ///|
+/// This method is a wrapper of error handling for common libuv operations
+async fn[T] uvrt_op_suspend(
+  f : ((T) -> Unit, (Error) -> Unit, UvTask) -> UvCancellationToken raise @uv.Errno,
+) -> T raise @rt.CoroutineError {
+  uvrt_suspend((resolve, reject, task) => {
+    try f(resolve,reject, task) catch {
+      errno => {
+        reject(errno)
+        () => ()
+      }
+    }
+  })
+}
+
+///|
 /// This method automatically invalidates the uvCancellationToken after coroutine continued to run (or cancelled)
 async fn[T] uvrt_suspend(
   f : ((T) -> Unit, (Error) -> Unit, UvTask) -> UvCancellationToken,
@@ -39,8 +54,7 @@ async fn[T] uvrt_suspend(
     ___suspend((a, b) => {
       let cToken = f(a, b, task)
       task.cancel_handle = () => {
-        // reset to empty
-        task.cancel_handle = () => ()
+        task.cancel_handle = og_cancel_handle
         cToken()
       }
     })
@@ -91,6 +105,6 @@ fn pop_coroutine() -> UvTask? {
 }
 
 ///|
-fn push_coroutine(task : UvTask) -> Unit{
+fn push_coroutine(task : UvTask) -> Unit {
   __push_coroutine_stack(task) |> ignore // it returns itself.
 }

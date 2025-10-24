@@ -5,7 +5,7 @@ pub async fn open(
   mode : OpenFlags,
   permission~ : Int,
 ) -> &FileChannel {
-  path.fs.open_file(path, mode, permission~)
+  path.fs.open_file(path, mode, mode=permission)
 }
 
 ///|

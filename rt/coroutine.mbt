@@ -63,7 +63,7 @@ pub typealias async (Job) -> Unit as Coroutine
 pub(open) trait Context {
   runtime(Self) -> &Runtime
   is_cancelled(Self) -> Bool
-  cancel_in_bg(Self) -> Unit
+  cancel_in_bg(Self) -> Unit raise
   async cancel(Self) -> Unit
   async job(Self, task : Coroutine) -> &Task
   async job_timeout(Self, timeout_millis~ : Int64, task : Coroutine) -> &Task

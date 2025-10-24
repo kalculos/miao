@@ -28,12 +28,12 @@ fn to_uv_flags(self : @fs.OpenFlags) -> @uv.OpenFlags {
 }
 
 ///|
-fn to_file_kind(self : @uv.Stat) -> @fs.FileKind {
-  return if self.is_regular() {
+fn to_file_kind(stat : @uv.Stat) -> @fs.FileKind {
+  return if stat.is_regular() {
     @fs.FileKind::RegularFile
-  } else if self.is_directory() {
+  } else if stat.is_directory() {
     @fs.FileKind::Directory
-  } else if self.is_symlink() {
+  } else if stat.is_symlink() {
     @fs.FileKind::Link
   } else {
     @fs.FileKind::Unknown // todo complete more types
@@ -52,7 +52,7 @@ async fn gather_fattr(rt : LibuvRuntime, fd : @uv.File) -> @fs.FileAttribute {
           creation_time: stat.ctim_sec() * 1000 + stat.ctim_nsec() / 1000,
           permission: stat.mode(), // todo; use uint64
           size: stat.size(), // todo; use uint64
-          kind: stat.to_file_kind(),
+          kind: to_file_kind(stat),
         }
         resolve(fattr)
       },
