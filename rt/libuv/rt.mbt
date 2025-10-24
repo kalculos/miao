@@ -27,7 +27,7 @@ pub impl @rt.Runtime for LibuvRuntime with new_task(self, task) {
   return UvTask::{
     id: self.task_counter,
     cancel_handle: () => (),
-    exit_handler: {},
+    exit_handler: _ => (),
     state: New,
     rt: self,
     task,
@@ -59,7 +59,7 @@ enum ExitType {
 struct UvTask {
   id : Int
   mut cancel_handle : async () -> Unit
-  mut exit_handler : Map[ExitType, () -> Unit]
+  mut exit_handler: (ExitType) -> Unit
   mut state : @rt.TaskState
   task : async (&@rt.Task) -> Unit
   rt : LibuvRuntime
@@ -71,14 +71,11 @@ fn on_exit(self : UvTask, _type : ExitType, handler : () -> Unit) -> () -> Unit 
     handler()
     return () => ()
   }
-  if !self.exit_handler.contains(_type) {
-    self.exit_handler[_type] = () => ()
-  }
-  let og = self.exit_handler[_type]
+  let og = self.exit_handler
   let mut cancel = false
-  self.exit_handler[_type] = () => {
-      defer og()
-      if !cancel {
+  self.exit_handler = type_ => {
+      defer og(type_)
+      if !cancel && type_ == _type{
         handler()
       }
     }
@@ -88,8 +85,7 @@ fn on_exit(self : UvTask, _type : ExitType, handler : () -> Unit) -> () -> Unit 
 ///|
 fn cleanup_exit(self : UvTask, _type : ExitType) -> Unit {
   guard _type != Any
-  self.exit_handler[_type]()
-  self.exit_handler[Any]()
+  (self.exit_handler)(_type)
 }
 
 ///|
