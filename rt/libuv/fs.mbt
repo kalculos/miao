@@ -48,7 +48,10 @@ impl @fs.FileSystem for LibuvFileSystem with attr(self, path, follow_links?) {
     } else {
       uv.fs_lstat(path_bytes, on_stat, err => reject(err))
     }
-    () => handle.cancel()
+    () => {
+        defer reject(@rt.CoroutineError::Cancelled)
+        handle.cancel()
+      }
   })
 }
 
@@ -56,8 +59,32 @@ impl @fs.FileSystem for LibuvFileSystem with attr(self, path, follow_links?) {
 impl @fs.FileSystem for LibuvFileSystem with list_directory(self, path) {
   let path_bytes = path.to_bytes()
   let uv = self.uv()
-  uvrt_op_suspend((resolve, reject, _) => uv.fs_scandir(path_bytes), //todo need a async iterator that utilizes structured concurrency
-  )
+  //todo need a async iterator that utilizes structured concurrency..
+  uvrt_op_suspend((resolve, reject, _) => {
+    let mut cancelled = false
+    let handle = uv.fs_scandir(
+      path_bytes,
+      0,
+      scdir => {
+        let collected : Array[@fs.Path] = []
+        while true {
+          if cancelled {
+            return
+          }
+          let value = scdir.next() catch { _ => break }
+          guard (try? @encoding/utf8.decode(value.name())) is Ok(name)
+          collected.push(path.resolve(name))
+        }
+        resolve(collected)
+      },
+      err => reject(err),
+    )
+    () => {
+        defer reject(@rt.CoroutineError::Cancelled)
+        cancelled = true
+        handle.cancel()
+      }
+  })
 }
 
 ///|
@@ -80,7 +107,10 @@ impl @fs.FileSystem for LibuvFileSystem with can_access(self, path, mode) {
       () => resolve(true),
       _ => resolve(false),
     )
-    () => handle.cancel()
+    () => {
+        defer reject(@rt.CoroutineError::Cancelled)
+        handle.cancel()
+      }
   })
 }
 
@@ -93,7 +123,10 @@ impl @fs.FileSystem for LibuvFileSystem with delete(self, path) {
       () => a(()),
       err => b(err),
     )
-    () => handle.cancel()
+    () => {
+        defer reject(@rt.CoroutineError::Cancelled)
+        handle.cancel()
+      }
   })
 }
 
@@ -115,7 +148,10 @@ impl @fs.FileSystem for LibuvFileSystem with read_symbol_link(self, path) {
         |> resolve,
       err => reject(err),
     )
-    () => handle.cancel()
+    () => {
+        defer reject(@rt.CoroutineError::Cancelled)
+        handle.cancel()
+      }
   })
 }
 
@@ -130,7 +166,10 @@ impl @fs.FileSystem for LibuvFileSystem with move(self, src, dst, copy_attr~) {
       () => resolve(()),
       err => reject(err),
     )
-    () => handle.cancel()
+    () => {
+        defer reject(@rt.CoroutineError::Cancelled)
+        handle.cancel()
+      }
   })
 }
 
@@ -157,6 +196,9 @@ impl @fs.FileSystem for LibuvFileSystem with real_path(self, path) {
       ),
       err => reject(err),
     )
-    () => handle.cancel()
+    () => {
+        defer reject(@rt.CoroutineError::Cancelled)
+        handle.cancel()
+      }
   })
 }

@@ -58,7 +58,10 @@ async fn gather_fattr(rt : LibuvRuntime, fd : @uv.File) -> @fs.FileAttribute {
       },
       err => reject(err),
     )
-    () => handle.cancel()
+    () => {
+        defer reject(@rt.CoroutineError::Cancelled)
+        handle.cancel()
+      }
   })
 }
 
@@ -86,10 +89,7 @@ async fn LibuvFile::new(
     fd,
     closed: false,
     access: flag,
-    info: @fs.FileInfo::{
-      attribute: gather_fattr(rt, fd),
-      path: path
-    },
+    info: @fs.FileInfo::{ attribute: gather_fattr(rt, fd), path },
     uv: rt.uv,
   }
 }
@@ -119,6 +119,7 @@ async fn close(self : LibuvFile) -> Unit {
     () => {
       handle.cancel()
       self.closed = false
+      reject(@rt.CoroutineError::Cancelled)
     }
   })
 }
@@ -142,7 +143,10 @@ impl @io.Writer for LibuvFile with write(self, arr, off, len) {
       written => resolve(written),
       err => reject(err),
     )
-    () => handle.cancel()
+    () => {
+        defer reject(@rt.CoroutineError::Cancelled)
+        handle.cancel()
+      }
   })
 }
 
@@ -165,7 +169,10 @@ impl @io.Reader for LibuvFile with read(self, dst, off, len) {
       read => resolve(read),
       err => reject(err),
     )
-    () => handle.cancel()
+    () => {
+        defer reject(@rt.CoroutineError::Cancelled)
+        handle.cancel()
+      }
   })
 }
 

@@ -14,6 +14,7 @@ typealias () -> Unit raise as UvCancellationToken
 
 ///|
 /// This method is a wrapper of error handling for common libuv operations
+/// NOTE: Its the responsibility of USER to raise a Cancellation in their cancel token.
 async fn[T] uvrt_op_suspend(
   f : ((T) -> Unit, (Error) -> Unit, UvTask) -> UvCancellationToken raise @uv.Errno,
 ) -> T raise @rt.CoroutineError {
