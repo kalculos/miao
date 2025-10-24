@@ -31,7 +31,7 @@ pub(all) struct FileInfo {
 }
 
 ///|
-pub trait FileChannel: @io.Channel {
+pub(open) trait FileChannel: @io.Channel {
   access(Self) -> OpenFlags
   info(Self) -> FileInfo
 }
