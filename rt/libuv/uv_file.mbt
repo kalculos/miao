@@ -1,0 +1,180 @@
+///|
+struct LibuvFile {
+  fd : @uv.File
+  mut closed : Bool
+  access : @fs.OpenFlags
+  info : @fs.FileInfo
+  uv : @uv.Loop
+}
+
+///|
+fn to_uv_flags(self : @fs.OpenFlags) -> @uv.OpenFlags {
+  if self.is_read_only() {
+    return @uv.OpenFlags::read_only()
+  } else if self.is_write_only() {
+    return @uv.OpenFlags::write_only(
+      append=self.is_append(),
+      create=self.is_create(),
+      truncate=self.is_truncate(),
+      exclusive=self.is_exclusive(),
+    )
+  }
+  @uv.OpenFlags::read_write(
+    append=self.is_append(),
+    create=self.is_create(),
+    truncate=self.is_truncate(),
+    exclusive=self.is_exclusive(),
+  )
+}
+
+///|
+fn to_file_kind(self : @uv.Stat) -> @fs.FileKind {
+  return if self.is_regular() {
+    @fs.FileKind::RegularFile
+  } else if self.is_directory() {
+    @fs.FileKind::Directory
+  } else if self.is_symlink() {
+    @fs.FileKind::Link
+  } else {
+    @fs.FileKind::Unknown // todo complete more types
+  }
+}
+
+///|
+async fn gather_fattr(rt : LibuvRuntime, fd : @uv.File) -> @fs.FileAttribute {
+  uvrt_op_suspend((resolve, reject, task) => {
+    let handle = rt.uv.fs_fstat(
+      fd,
+      stat => {
+        let fattr : @fs.FileAttribute = {
+          last_modified_time: stat.mtim_sec() * 1000 + stat.mtim_nsec() / 1000,
+          last_access_time: stat.atim_sec() * 1000 + stat.atim_nsec() / 1000,
+          creation_time: stat.ctim_sec() * 1000 + stat.ctim_nsec() / 1000,
+          permission: stat.mode(), // todo; use uint64
+          size: stat.size(), // todo; use uint64
+          kind: stat.to_file_kind(),
+        }
+        resolve(fattr)
+      },
+      err => reject(err),
+    )
+    () => handle.cancel()
+  })
+}
+
+///|
+///1
+async fn LibuvFile::new(
+  rt~ : LibuvRuntime,
+  path~ : @fs.Path,
+  flag~ : @fs.OpenFlags,
+  mode~ : Int,
+) -> LibuvFile {
+  let uv = rt.uv
+  let path_bytes = @encoding/utf8.encode(path.to_unix_path())
+  let fd = uvrt_op_suspend((resolve, reject, task) => {
+    let handle = uv.fs_open(
+      path_bytes,
+      flag.to_uv_flags(),
+      mode,
+      file => resolve(file),
+      err => reject(err),
+    )
+    () => handle.cancel()
+  })
+  LibuvFile::{
+    fd,
+    closed: false,
+    access: flag,
+    info: @fs.FileInfo::{
+      attribute: gather_fattr(rt, fd),
+      path: path
+    },
+    uv: rt.uv,
+  }
+}
+
+///|
+pub fn fd(self : LibuvFile) -> Int {
+  self.fd.to_int()
+}
+
+///|
+impl @fs.FileChannel for LibuvFile with access(self) {
+  self.access
+}
+
+///|
+impl @fs.FileChannel for LibuvFile with info(self) {
+  self.info
+}
+
+///|
+async fn close(self : LibuvFile) -> Unit {
+  guard !self.closed else {
+    raise fail("File \{self.info.path} (fd: \{self.fd()}) is already closed!")
+  }
+  uvrt_op_suspend((resolve, reject, task) => {
+    let handle = self.uv.fs_close(self.fd, () => resolve(()), err => reject(err))
+    () => {
+      handle.cancel()
+      self.closed = false
+    }
+  })
+}
+
+///|
+impl @io.Channel for LibuvFile with close(self) {
+  self.close()
+}
+
+///|
+impl @io.Channel for LibuvFile with is_closed(self) {
+  self.closed
+}
+
+///|
+impl @io.Writer for LibuvFile with write(self, arr, off, len) {
+  uvrt_op_suspend((resolve, reject, task) => {
+    let handle = self.uv.fs_write(
+      self.fd,
+      [arr.unsafe_reinterpret_as_bytes()[off:off + len]],
+      written => resolve(written),
+      err => reject(err),
+    )
+    () => handle.cancel()
+  })
+}
+
+///|
+impl @io.Writer for LibuvFile with close(self) {
+  self.close()
+}
+
+///|
+impl @io.Writer for LibuvFile with is_closed(self) {
+  self.closed
+}
+
+///|
+impl @io.Reader for LibuvFile with read(self, dst, off, len) {
+  uvrt_op_suspend((resolve, reject, task) => {
+    let handle = self.uv.fs_read(
+      self.fd,
+      [dst.unsafe_reinterpret_as_bytes()[off:off + len]],
+      read => resolve(read),
+      err => reject(err),
+    )
+    () => handle.cancel()
+  })
+}
+
+///|
+impl @io.Reader for LibuvFile with close(self) {
+  self.close()
+}
+
+///|
+impl @io.Reader for LibuvFile with is_closed(self) {
+  self.closed
+}
