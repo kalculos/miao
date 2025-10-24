@@ -2,6 +2,12 @@
 // https://minecraft.wiki/w/Java_Edition_protocol/Packets#Type
 
 ///|
+const SEGMENT_BITS : Byte = 0x7F
+
+///|
+const CONTINUE_BIT : Byte = 0x80
+
+///|
 /// Read a variable-length integer from the buffer.
 /// This is a common pattern in Minecraft protocols.
 pub fn read_varint(buf : &@bytebuf.ByteBuf) -> Int raise {
