@@ -7,14 +7,6 @@ pub(all) enum FileKind {
 } derive(Eq, Hash, Show)
 
 ///|
-/// TODO: append, truncate, etc.
-pub(all) enum AccessMode {
-  ReadOnly = 0
-  WriteOnly
-  ReadWrite
-} derive(Eq, Hash, Show)
-
-///|
 pub(all) struct FileAttribute {
   last_modified_time : Int64 // unix timestamp ( second )
   last_access_time : Int64
@@ -34,14 +26,13 @@ pub suberror FileError { // consider merge them into one IOException
 ///|
 pub(all) struct FileInfo {
   kind : FileKind
-  access : AccessMode
   attribute : FileAttribute
   path : Path
 }
 
 ///|
 pub trait FileChannel: @io.Channel {
-  access(Self) -> AccessMode
+  access(Self) -> OpenFlags
   info(Self) -> FileInfo
 }
 
@@ -51,7 +42,7 @@ pub trait FileChannel: @io.Channel {
 /// any filesystem softwares. For example, the whole accessible local storage is considered as a FileSystem.
 pub(open) trait FileSystem {
   ///| Open a file and return its corresponding FileChannnel
-  async open_file(Self, Path, mode : AccessMode, permission~ : Int) -> &FileChannel
+  async open_file(Self, Path, mode : OpenFlags, permission~ : Int) -> &FileChannel
   ///| Check the size of file, if exists. 
   /// Raises an error if the file is not exist.
   async size(Self, Path) -> Int64 raise FileError
@@ -60,7 +51,7 @@ pub(open) trait FileSystem {
   ///| List the content of the file. Raise if the file is not a directory
   async list_directory(Self, Path) -> ArrayView[Path] raise FileError
   ///| Check if we can access the file. Return false if the file is inaccessible or not exist
-  async can_access(Self, Path, mode~ : AccessMode) -> Bool
+  async can_access(Self, Path, mode~ : OpenFlags) -> Bool
   ///| Delete a file.
   async delete(Self, Path) -> Unit raise FileError
   async exists(Self, Path) -> Bool

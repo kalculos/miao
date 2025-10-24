@@ -2,7 +2,7 @@
 ///|
 pub async fn open(
   path : Path,
-  mode : AccessMode,
+  mode : OpenFlags,
   permission~ : Int,
 ) -> &FileChannel {
   path.fs.open_file(path, mode, permission~)
