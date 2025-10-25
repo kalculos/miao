@@ -5,12 +5,12 @@ pub async fn open(
   mode : OpenFlags,
   permission~ : Int,
 ) -> &FileChannel {
-  path.fs.open_file(path, mode, permission~)
+  path.fs.open_file(path, mode, mode=permission)
 }
 
 ///|
-pub async fn size(path : Path) -> Int64 {
-  path.fs.size(path)
+pub async fn size(path : Path) -> UInt64 {
+  path.fs.attr(path).size
 }
 
 ///|

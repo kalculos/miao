@@ -157,7 +157,8 @@ pub fn to_absolute(self : Path) -> Path {
   if self.absolute {
     self
   } else {
-    self.fs.to_absolute(self)
+    let cwd = self.fs.cwd()
+    cwd.resolve_path(self).clean()
   }
 }
 
