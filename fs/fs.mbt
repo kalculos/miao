@@ -34,13 +34,13 @@ pub(open) trait FileChannel: @io.Channel {
 /// any filesystem softwares. For example, the whole accessible local storage is considered as a FileSystem.
 pub(open) trait FileSystem {
   ///| Open a file and return its corresponding FileChannnel
-  async open_file(Self, Path, flag : OpenFlags, mode~ : Int, follow_links?: Bool) -> &FileChannel
+  async open_file(Self, Path, flag : OpenFlags, mode~ : AccessFlags, follow_links?: Bool) -> &FileChannel
   ///| Get attributes of the file. Raise if the file not exists
   async attr(Self, Path, follow_links? : Bool) -> FileAttribute raise 
   ///| List the content of the file. Raise if the file is not a directory
   async list_directory(Self, Path) -> ArrayView[Path] raise 
   ///| Check if we can access the file. Return false if the file is inaccessible or not exist
-  async can_access(Self, Path, flag : AccessMode) -> Bool
+  async can_access(Self, Path, flag : AccessFlags) -> Bool
   ///| Delete a file.
   async delete(Self, Path) -> Unit raise
   async exists(Self, Path) -> Bool

@@ -71,7 +71,7 @@ async fn LibuvFile::new(
   rt~ : LibuvRuntime,
   path~ : @fs.Path,
   flag~ : @fs.OpenFlags,
-  mode~ : Int,
+  mode~ : @fs.AccessFlags,
 ) -> LibuvFile {
   let uv = rt.uv
   let path_bytes = @encoding/utf8.encode(path.to_unix_path())
@@ -79,7 +79,7 @@ async fn LibuvFile::new(
     let handle = uv.fs_open(
       path_bytes,
       flag.to_uv_flags(),
-      mode,
+      to_uv_access(mode).access_flag_inner(),
       file => resolve(file),
       err => reject(err),
     )

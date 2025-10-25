@@ -88,13 +88,15 @@ impl @fs.FileSystem for LibuvFileSystem with list_directory(self, path) {
 }
 
 ///|
-fn to_uv_access(mode : @fs.AccessMode) -> @uv.AccessFlags {
+fn to_uv_access(mode : @fs.AccessFlags) -> @uv.AccessFlags {
   @uv.AccessFlags::new(
     read=mode.read(),
     write=mode.write(),
     execute=mode.execute(),
   )
 }
+
+fn access_flag_inner(self: @uv.AccessFlags) -> (Int) = "%identity"
 
 ///|
 impl @fs.FileSystem for LibuvFileSystem with can_access(self, path, mode) {
@@ -132,7 +134,7 @@ impl @fs.FileSystem for LibuvFileSystem with delete(self, path) {
 
 ///|
 impl @fs.FileSystem for LibuvFileSystem with exists(self, path) {
-  self.can_access(path, @fs.AccessMode::new())
+  self.can_access(path, @fs.AccessFlags::new())
 }
 
 ///|
