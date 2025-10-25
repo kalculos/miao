@@ -9,8 +9,8 @@ pub async fn open(
 }
 
 ///|
-pub async fn size(path : Path) -> Int64 {
-  path.fs.size(path)
+pub async fn size(path : Path) -> UInt64 {
+  path.fs.attr(path).size
 }
 
 ///|
