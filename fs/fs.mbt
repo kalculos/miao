@@ -48,10 +48,10 @@ pub(open) trait FileSystem {
   async read_symbol_link(Self, Path) -> Path raise 
   ///| Move a file to another path. Raise if the operation is failed.
   async move(Self, src : Path, dst : Path, copy_attr~ : Bool) -> Unit raise
-  ///| The current working directory.
-  async cwd(Self) -> Path
   ///| Returns a path with all symbolic links and path redirections resolved.
   async real_path(Self, path: Path) -> Path
+  ///| The current working directory.
+  cwd(Self) -> Path
   ///| List file roots. An absolute path usually starts with these paths
   system_roots(Self) -> ArrayView[Path]
 }
