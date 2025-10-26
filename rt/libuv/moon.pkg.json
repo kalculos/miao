@@ -4,7 +4,8 @@
       "iceBear67/miao/io",
       "iceBear67/miao/fs",
       "iceBear67/miao/rt",
-      "moonbitlang/x/encoding"
+      "moonbitlang/x/encoding",
+      "iceBear67/time"
     ],
     "native-stub": [
       "coroutine.c"

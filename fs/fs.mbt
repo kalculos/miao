@@ -8,9 +8,9 @@ pub(all) enum FileKind {
 
 ///|
 pub(all) struct FileAttribute {
-  last_modified_time : Int64 // unix timestamp ( millis )
-  last_access_time : Int64
-  creation_time : Int64 //todo Instant
+  last_modified_time : @time.Instant
+  last_access_time : @time.Instant
+  creation_time : @time.Instant 
   permission : UInt64
   size : UInt64
   kind : FileKind

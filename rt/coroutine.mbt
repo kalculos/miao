@@ -14,9 +14,9 @@ pub(all) suberror CoroutineError {
 /// Suspend usually happens at I/O executions, like reading a file, etc. Once the Task reached those operations,
 /// the runtime should collect the context via async primitives and set the Task state to `Suspend`
 /// 
-/// Completed: The Task is terminated and won't be continued to neither run nor cancel.
+/// Completed: The Task has computed its result successfully and won't be continued to neither run nor cancel.
 /// 
-/// Cancelled: The Task is already cancelled.
+/// Cancelled: The Task is already cancelled, caused by cancel() or unhandled exceptions threw in execution.
 /// Whenever a Task is being cancelled,it threw an Interruption error on the state transition.
 pub(all) enum TaskState {
   New

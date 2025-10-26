@@ -47,9 +47,18 @@ async fn gather_fattr(rt : LibuvRuntime, fd : @uv.File) -> @fs.FileAttribute {
       fd,
       stat => {
         let fattr : @fs.FileAttribute = {
-          last_modified_time: stat.mtim_sec() * 1000 + stat.mtim_nsec() / 1000,
-          last_access_time: stat.atim_sec() * 1000 + stat.atim_nsec() / 1000,
-          creation_time: stat.ctim_sec() * 1000 + stat.ctim_nsec() / 1000,
+          last_modified_time: @time.Instant::new(
+            stat.mtim_sec(),
+            (stat.mtim_nsec() % 1000000000).to_int(),
+          ),
+          last_access_time: @time.Instant::new(
+            stat.atim_sec(),
+            (stat.atim_nsec() % 1000000000).to_int(),
+          ),
+          creation_time: @time.Instant::new(
+            stat.ctim_sec(),
+            (stat.ctim_nsec() % 1000000000).to_int(),
+          ),
           permission: stat.mode(), // todo; use uint64
           size: stat.size(), // todo; use uint64
           kind: to_file_kind(stat),

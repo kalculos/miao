@@ -56,6 +56,7 @@ pub impl @rt.Runtime for LibuvRuntime with sleep(self, time_millis) {
 ///|
 enum ExitType {
   Cancelled
+  UnhandledError
   Done
   Any
 } derive(Eq, Hash)
@@ -116,6 +117,10 @@ pub impl @rt.Task for UvTask with start(self) {
           @rt.CoroutineError::Cancelled => {
             self.state = Cancelled
             self.cleanup_exit(ExitType::Cancelled)
+          }
+          _ => {
+            self.state = Cancelled
+            self.cleanup_exit(ExitType::UnhandledError)
           }
         }
     } noraise {
