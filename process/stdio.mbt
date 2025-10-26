@@ -4,10 +4,13 @@ pub enum TtyMode {
   RawInput
 }
 
+pub(open) trait StdinReader : @io.Reader {}
+
+pub(open) trait StdoutWriter : @io.Writer {}
+
 ///|
-pub(open) trait Terminal: @io.Channel {
-  mode(Self) -> TtyMode
-  set_mode(Self, TtyMode) -> Unit
+pub(open) trait Terminal: StdinReader + StdoutWriter {
+  set_mode(Self, TtyMode) -> Unit raise
   reset_mode(Self) -> Unit
   get_window_size(Self) -> (Int, Int)
 }
@@ -21,12 +24,12 @@ pub fn set_terminal(term : &Terminal) -> Unit {
 }
 
 ///|
-pub fn stdout() -> &@io.Writer {
+pub fn stdout() -> &StdoutWriter {
   terminal()
 }
 
 ///|
-pub fn stdin() -> &@io.Reader {
+pub fn stdin() -> &StdinReader {
   terminal()
 }
 
