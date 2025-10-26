@@ -3,7 +3,7 @@
 
 typedef struct tlstack
 {
-    tlstack_t *prev;
+    struct tlstack *prev;
     void *coro_ptr;
 } tlstack_t;
 
@@ -40,10 +40,11 @@ void *moonbit_uvrt_push_coroutine_stack(void *coro)
 MOONBIT_FFI_EXPORT
 void *moonbit_uvrt_pop_coroutine_stack()
 {
-    if(current==NULL) return NULL;
-    tlstack_t* to_be_freed = current;
-    void* coro_ptr = current->coro_ptr;
-    current=to_be_freed->prev;
+    if (current == NULL)
+        return NULL;
+    tlstack_t *to_be_freed = current;
+    void *coro_ptr = current->coro_ptr;
+    current = to_be_freed->prev;
     free(to_be_freed);
     moonbit_decref(coro_ptr);
     return coro_ptr;

@@ -37,7 +37,7 @@ pub impl Context for BasicContext with cancel(self) -> Unit {
   self.cancelled = true
   for child in self.children {
     child.cancel() catch {
-      err => () // logging?
+      _ => () // todo logging?
     }
   }
   let tasks = self.tasks.values().to_array()
@@ -45,7 +45,7 @@ pub impl Context for BasicContext with cancel(self) -> Unit {
     let state = task.state()
     if state != Cancelling && state != Cancelled {
       task.cancel() catch {
-        err => () // logging?
+        _ => () // logging?
       }
     }
   }
