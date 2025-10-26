@@ -8,6 +8,9 @@ pub(open) trait Reader {
   async read_buffer(Self, len : Int) -> &@bytebuf.ByteBuf = _
   /// Read (buf.len - off) bytes at most to the buffer.
   async read_buffer_to(Self, buf : &@bytebuf.ByteBuf) -> Int = _
+  /// Check if there are available bytes. When any bytes available, it returns a positive value. Otherwise, zero or negative is returned.
+  /// It does not guarantee the return value equals to the number of bytes you can read.
+  async available(Self) -> Int = _
   async close(Self) -> Unit
   ///| This also indicates the state of closer
   async is_closed(Self) -> Bool
@@ -26,6 +29,14 @@ pub(open) trait Writer {
   async close(Self) -> Unit
   ///| This also indicates the state of closer
   async is_closed(Self) -> Bool
+}
+
+impl Reader with available(self) {
+  if self.is_closed() {
+    0
+  } else {
+    1
+  }
 }
 
 ///|
