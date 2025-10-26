@@ -16,7 +16,7 @@ let default_uv : Ref[LibuvRuntime?] = Ref::new(None)
 pub fn LibuvRuntime::default() -> LibuvRuntime raise {
   guard default_uv.val is None else { return default_uv.val.unwrap() }
   let uv = @uv.Loop::new()
-  let rt = LibuvRuntime::{ uv, task_counter: 0}
+  let rt = LibuvRuntime::{ uv, task_counter: 0 }
   default_uv.val = Some(rt)
   return rt
 }
@@ -35,10 +35,15 @@ pub impl @rt.Runtime for LibuvRuntime with new_task(self, task) {
 }
 
 ///|
-pub impl @rt.Runtime for LibuvRuntime with sleep(self, timeMillis) {
+pub impl @rt.Runtime for LibuvRuntime with default_file_system(self) {
+  LibuvFileSystem::{ rt: self }
+}
+
+///|
+pub impl @rt.Runtime for LibuvRuntime with sleep(self, time_millis) {
   let timer = @uv.Timer::new(self.uv)
   uvrt_suspend((resolve, reject, _) => {
-    timer.start(timeout=timeMillis, repeat=0, t => t.close(() => resolve(()))) catch {
+    timer.start(timeout=time_millis, repeat=0, t => t.close(() => resolve(()))) catch {
       err => reject(err)
     }
     () => {
@@ -55,11 +60,12 @@ enum ExitType {
   Any
 } derive(Eq, Hash)
 
-///| TODO: it can be even smaller
+///|
+/// TODO: it can be even smaller
 struct UvTask {
   id : Int
   mut cancel_handle : async () -> Unit
-  mut exit_handler: (ExitType) -> Unit
+  mut exit_handler : (ExitType) -> Unit
   mut state : @rt.TaskState
   task : async (&@rt.Task) -> Unit
   rt : LibuvRuntime
@@ -75,7 +81,7 @@ fn on_exit(self : UvTask, _type : ExitType, handler : () -> Unit) -> () -> Unit 
   let mut cancel = false
   self.exit_handler = type_ => {
       defer og(type_)
-      if !cancel && type_ == _type{
+      if !cancel && type_ == _type {
         handler()
       }
     }

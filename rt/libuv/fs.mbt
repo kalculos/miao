@@ -96,7 +96,8 @@ fn to_uv_access(mode : @fs.AccessFlags) -> @uv.AccessFlags {
   )
 }
 
-fn access_flag_inner(self: @uv.AccessFlags) -> (Int) = "%identity"
+///|
+fn access_flag_inner(self : @uv.AccessFlags) -> Int = "%identity"
 
 ///|
 impl @fs.FileSystem for LibuvFileSystem with can_access(self, path, mode) {
@@ -126,7 +127,7 @@ impl @fs.FileSystem for LibuvFileSystem with delete(self, path) {
       err => b(err),
     )
     () => {
-        defer reject(@rt.CoroutineError::Cancelled)
+        defer b(@rt.CoroutineError::Cancelled)
         handle.cancel()
       }
   })
@@ -177,8 +178,12 @@ impl @fs.FileSystem for LibuvFileSystem with move(self, src, dst, copy_attr~) {
 
 ///|
 impl @fs.FileSystem for LibuvFileSystem with cwd(self) {
-  let cwd = @uv.cwd()
-  @fs.path(@encoding/utf8.decode(cwd), using_fs=self)
+  try {
+    let cwd = @uv.cwd()
+    @fs.path(@encoding/utf8.decode(cwd), using_fs=self)
+  } catch {
+    err => panic()
+  }
 }
 
 ///|
