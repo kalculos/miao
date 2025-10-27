@@ -35,8 +35,8 @@ pub impl @rt.Runtime for LibuvRuntime with new_task(self, task) {
 }
 
 ///|
-pub impl @rt.Runtime for LibuvRuntime with default_file_system(self) {
-  LibuvFileSystem::{ rt: self }
+pub impl @rt.Runtime for LibuvRuntime with unsafe_suspend(self, f) {
+  uvrt_suspend((resolve, reject, task) => f(resolve, reject, task))
 }
 
 ///|
@@ -90,7 +90,7 @@ fn on_exit(self : UvTask, _type : ExitType, handler : () -> Unit) -> () -> Unit 
 }
 
 ///|
-fn cleanup_exit(self : UvTask, _type : ExitType) -> Unit {
+fn _cleanup_exit(self : UvTask, _type : ExitType) -> Unit {
   guard _type != Any
   (self.exit_handler)(_type)
 }
@@ -110,23 +110,27 @@ pub impl @rt.Task for UvTask with start(self) {
   let handle = @uv.Async::new(self.rt.uv, _async => ___run_async(() => {
     self.state = Running
     // prevent memory leak
-    defer (fn() { self.cancel_handle = () => () })()
+    push_coroutine(self)
+    defer (fn() {
+      pop_coroutine() |> ignore
+      self.cancel_handle = () => ()
+    })()
     try (self.task)(self) catch {
       e =>
         match e {
           @rt.CoroutineError::Cancelled => {
             self.state = Cancelled
-            self.cleanup_exit(ExitType::Cancelled)
+            self._cleanup_exit(ExitType::Cancelled)
           }
           _ => {
             self.state = Cancelled
-            self.cleanup_exit(ExitType::UnhandledError)
+            self._cleanup_exit(ExitType::UnhandledError)
           }
         }
     } noraise {
       _ => {
         self.state = Completed
-        self.cleanup_exit(ExitType::Done)
+        self._cleanup_exit(ExitType::Done)
       }
     }
   }))
