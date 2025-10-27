@@ -1,10 +1,11 @@
 ///|
 struct BufferedPipe {
-  priv buf : FixedArray[Byte]
-  priv mut len : Int
-  priv mut off : Int
-  priv mut read_waiter : (Bool) -> Unit
-  priv mut write_waiters : (Bool) -> Unit
+  buf : FixedArray[Byte]
+  rt : &@rt.Runtime
+  mut len : Int
+  mut off : Int
+  mut read_waiter : (Bool) -> Unit
+  mut write_waiter : (Bool) -> Unit
 }
 
 ///|
@@ -25,15 +26,17 @@ trait PipeWriter: @io.Writer {
 /// The pair of reader and writer cannot be shared by multiple producer and consumers (in different coroutines),
 /// otherwise it threw a error in previous blocked callsite.
 pub fn BufferedPipe::new(
+  runtime : &@rt.Runtime,
   buffer_size? : Int = 16384,
 ) -> (&@io.Reader, &PipeWriter) {
   guard buffer_size >= 0  // 0 => direct pipe
   let pipe = BufferedPipe::{
     buf: FixedArray::make(buffer_size, 0),
+    rt: runtime,
     len: 0,
-    pos: 0,
-    read_waiters: _ => (),
-    write_waiters: () => (),
+    off: 0,
+    read_waiter: _ => (),
+    write_waiter: _ => (),
   }
   (pipe as &@io.Reader, pipe as &PipeWriter)
 }
@@ -77,8 +80,7 @@ impl @io.Reader for BufferedPipe with read(self, dst, off, len) {
   }
   self.off = self.off + read
   if self.avail() == 0 {
-    // todo: should this be run in a separate coroutine...
-    (self.write_waiters)(true)
+    self.rt.new_task(_ => (self.write_waiter)(true)).start() 
   }
   read
 }
@@ -96,14 +98,14 @@ impl @io.Writer for BufferedPipe with write(self, arr, off, len) {
     self.buf[i] = arr[off + i]
   }
   if written != 0 {
-    (self.read_waiter)(true)
+    self.rt.new_task(_ => (self.read_waiter)(true)).start()
   }
   written
 }
 
 ///|
 async fn block_read(self : BufferedPipe) -> Unit {
-  _pipe_suspend((onResolve, onReject) => {
+  self.rt.suspend((onResolve, onReject, _) => {
     (self.read_waiter)(false)
     self.read_waiter = succ => {
         defer (fn() { self.read_waiter = _ => () })()
@@ -114,15 +116,16 @@ async fn block_read(self : BufferedPipe) -> Unit {
         }
         onResolve(())
       }
+      () => ()
   })
 }
 
 ///|
 async fn block_write(self : BufferedPipe) -> Unit {
-  _pipe_suspend((onResolve, onReject) => {
-    (self.write_waiters)(false)
-    self.write_waiters = succ => {
-        defer (fn() { self.write_waiters = _ => () })()
+  self.rt.suspend((onResolve, onReject, _) => {
+    (self.write_waiter)(false)
+    self.write_waiter = succ => {
+        defer (fn() { self.write_waiter = _ => () })()
         guard succ else {
           onReject(
             Failure("Someone called write() while someone is already waiting!"),
@@ -130,6 +133,7 @@ async fn block_write(self : BufferedPipe) -> Unit {
         }
         onResolve(())
       }
+    () => ()
   })
 }
 
@@ -157,11 +161,3 @@ impl @io.Reader for BufferedPipe with is_closed(self) {
 impl PipeWriter for BufferedPipe with can_write(self) {
   self.avail() == 0 && !self._is_closed()
 }
-
-///|
-async fn[T, E : Error] _pipe_suspend(
-  f : (
-    (T) -> Unit, // onResolve
-    (E) -> Unit, // onReject
-  ) -> Unit, // Thenable
-) -> T raise E = "%async.suspend"
