@@ -37,14 +37,15 @@ pub impl Context for BasicContext with cancel(self) -> Unit {
   self.cancelled = true
   for child in self.children {
     child.cancel() catch {
-      err => () // logging?
+      _ => () // todo logging?
     }
   }
   let tasks = self.tasks.values().to_array()
   for task in tasks {
-    if !task.is_cancelling() {
+    let state = task.state()
+    if state != Cancelling && state != Cancelled {
       task.cancel() catch {
-        err => () // logging?
+        _ => () // logging?
       }
     }
   }
@@ -73,7 +74,7 @@ pub impl Context for BasicContext with job_timeout(self, timeout_millis~, task) 
   self.rt.new_task(t => {
     let mut done = false
     let timeoutTask = self.job(_ => {
-      self.rt.sleep(timeout_millis / 1000) catch {
+      self.rt.sleep(timeout_millis.div(1000).reinterpret_as_uint64()) catch {
         _ => () // likely a cancellation
       }
       if !done {
@@ -127,6 +128,6 @@ pub impl Context for BasicContext with fork(self) -> &Context {
 ///|
 pub impl Context for BasicContext with with_context(self, action) -> Unit {
   let context = self.fork()
-  defer context.cancel_in_bg()
   action(context)
+  context.cancel()
 }

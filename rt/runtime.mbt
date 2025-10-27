@@ -1,27 +1,31 @@
 ///|
+pub typealias () -> Unit raise as CancellationToken
+
+///|
+type ResolvedToken
+
+///|
 pub(open) trait Runtime {
-  default_file_system(Self) -> &@fs.FileSystem
-  // will not immediately run until start() is invoked
+  async unsafe_suspend(
+    Self,
+    ((ResolvedToken) -> Unit, (Error) -> Unit, &Task) -> CancellationToken,
+  ) -> ResolvedToken
   new_task(Self, task : async (&Task) -> Unit) -> &Task
-  async sleep(Self, timeNanos : Int64) -> Unit
+  async sleep(Self, time_millis : UInt64) -> Unit
 }
 
 ///|
-pub fn run_with_runtime(rt : &Runtime, main : Coroutine) -> Unit raise {
-  guard default_runtime.val is None else {
-    raise fail("A default runtime cannot be initialized twice.")
-  }
-  default_runtime.val = Some(rt)
-  @fs.set_default_fs(rt.default_file_system())
-  let context = BasicContext::new(rt)
-  run_async(() => try context.job(main).join() catch {
-    err => {
-      println("Program exited with error: \{err}")
-    }
-  })
+pub async fn[T] suspend(
+  self : &Runtime,
+  f : ((T) -> Unit, (Error) -> Unit, &Task) -> CancellationToken,
+) -> T {
+  self.unsafe_suspend((resolve, reject, task) => f(
+    result => resolve(anycast(result)),
+    err => reject(err),
+    task,
+  ))
+  |> anycast
 }
 
 ///|
-pub fn get_default_runtime() -> &Runtime? {
-  default_runtime.val
-}
+fn[I, T] anycast(input : I) -> T = "%identity"

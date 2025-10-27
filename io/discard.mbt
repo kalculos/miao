@@ -7,15 +7,15 @@ pub fn DiscardWriter::new() -> DiscardWriter {
 }
 
 ///|
-impl Writer for DiscardWriter with write(self, arr, off, len) {
+impl Writer for DiscardWriter with write(_, _, _, len) {
   len
 }
 
-impl Writer for DiscardWriter with close(self) {
+impl Writer for DiscardWriter with close(_) {
 
 }
 
-impl Writer for DiscardWriter with is_closed(self) {
+impl Writer for DiscardWriter with is_closed(_) {
   false
 }
 

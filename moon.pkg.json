@@ -1,7 +1,3 @@
 {
-  "import": [
-    "moonbitlang/async/io",
-    "iceBear67/bytebuf",
-    "moonbitlang/async/socket"
-  ]
+  "import": []
 }
