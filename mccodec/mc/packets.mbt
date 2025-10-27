@@ -22,4 +22,8 @@ struct MinecraftClient { // states
   ///  zlib compression is enabled for all following packets. The format of a packet changes slightly
   ///  to include the size of the uncompressed packet.
   priv mut compression : Bool
+  
+  /// The threshold value for compression.
+  /// Set by the Set Compression packet.
+  priv mut threshold : Int
 }
