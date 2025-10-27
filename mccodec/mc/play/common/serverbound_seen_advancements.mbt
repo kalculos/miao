@@ -1,0 +1,31 @@
+///|
+/// Seen Advancements packet (0x31)
+/// Updates seen advancement tabs
+struct SeenAdvancementsC2S {
+  action : Int // Action (0=opened_tab, 1=closed_screen)
+  tab_id : String? // Tab identifier (for opened_tab), TODO: Identifier type
+}
+
+///|
+impl @mc.Packet for SeenAdvancementsC2S with clientbound(self) {
+  false
+}
+
+///|
+impl @mc.Packet for SeenAdvancementsC2S with serialize(
+  self,
+  buf : &@bytebuf.ByteBuf,
+) {
+  @types.write_varint(buf, self.action)
+  @types.write_optional(buf, self.tab_id, @types.write_string)
+}
+
+///|
+impl @mc.Packet for SeenAdvancementsC2S with deserialize(
+  buf : &@bytebuf.ByteBuf,
+) {
+  let action = @types.read_varint(buf)
+  let tab_id = @types.read_optional(buf, @types.read_string)
+  { action, tab_id }
+}
+
