@@ -3,6 +3,7 @@
     "iceBear67/miao/mccodec/mc",
     "iceBear67/bytebuf",
     "iceBear67/miao/mccodec/mc/types",
-    "moonbitlang/x/uuid"
+    "moonbitlang/x/uuid",
+    "iceBear67/mnbt/nbt"
   ]
 }
