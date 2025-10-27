@@ -1,6 +1,5 @@
 {
   "import": [
-    "iceBear67/bytebuf",
-    "iceBear67/mnbt/nbt"
+    "iceBear67/bytebuf"
   ]
 }

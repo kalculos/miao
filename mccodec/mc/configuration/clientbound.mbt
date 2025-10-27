@@ -2,12 +2,27 @@
 /// Cookie Request (configuration) packet (0x00)
 /// Requests a cookie that was previously stored
 struct CookieRequestConfigS2C {
-  key : String // Identifier of the cookie
+  key : String // Identifier of the cookie, TODO: Identifier type
 }
 
 ///|
 impl @mc.Packet for CookieRequestConfigS2C with clientbound(self) {
   true
+}
+
+///|
+impl @mc.Packet for CookieRequestConfigS2C with serialize(
+  self,
+  buf : &@bytebuf.ByteBuf,
+) {
+  @types.write_string(buf, self.key)
+}
+
+///|
+impl @mc.Packet for CookieRequestConfigS2C with deserialize(
+  buf : &@bytebuf.ByteBuf,
+) {
+  { key: @types.read_string(buf) }
 }
 
 ///|
@@ -24,15 +39,48 @@ impl @mc.Packet for ClientboundPluginMessageConfigS2C with clientbound(self) {
 }
 
 ///|
+impl @mc.Packet for ClientboundPluginMessageConfigS2C with serialize(
+  self,
+  buf : &@bytebuf.ByteBuf,
+) {
+  @types.write_string(buf, self.channel)
+  buf.write_bytes(Bytes::from_array(self.data))
+}
+
+///|
+impl @mc.Packet for ClientboundPluginMessageConfigS2C with deserialize(
+  buf : &@bytebuf.ByteBuf,
+) {
+  let channel = @types.read_string(buf)
+  let data = buf.read_bytes(buf.remaining()).unwrap().to_array()
+  { channel, data }
+}
+
+///|
 /// Disconnect (configuration) packet (0x02)
 /// Sent when disconnecting during configuration
 struct DisconnectConfigS2C {
-  reason : String // Text Component - reason for disconnection
+  reason : String // Text Component - reason for disconnection, TODO: Component type
 }
 
 ///|
 impl @mc.Packet for DisconnectConfigS2C with clientbound(self) {
   true
+}
+
+///|
+impl @mc.Packet for DisconnectConfigS2C with serialize(
+  self,
+  buf : &@bytebuf.ByteBuf,
+) {
+  @types.write_string(buf, self.reason)
+}
+
+///|
+impl @mc.Packet for DisconnectConfigS2C with deserialize(
+  buf : &@bytebuf.ByteBuf,
+) {
+  { reason: @types.read_string(buf) }
 }
 
 ///|
@@ -43,6 +91,21 @@ struct FinishConfigurationS2C {}
 ///|
 impl @mc.Packet for FinishConfigurationS2C with clientbound(self) {
   true
+}
+
+///|
+impl @mc.Packet for FinishConfigurationS2C with serialize(
+  self,
+  buf : &@bytebuf.ByteBuf,
+) {
+  // No fields to serialize
+}
+
+///|
+impl @mc.Packet for FinishConfigurationS2C with deserialize(
+  buf : &@bytebuf.ByteBuf,
+) {
+  FinishConfigurationS2C::{  }
 }
 
 ///|
@@ -58,6 +121,21 @@ impl @mc.Packet for ClientboundKeepAliveConfigS2C with clientbound(self) {
 }
 
 ///|
+impl @mc.Packet for ClientboundKeepAliveConfigS2C with serialize(
+  self,
+  buf : &@bytebuf.ByteBuf,
+) {
+  buf.write_int64(self.keep_alive_id)
+}
+
+///|
+impl @mc.Packet for ClientboundKeepAliveConfigS2C with deserialize(
+  buf : &@bytebuf.ByteBuf,
+) {
+  { keep_alive_id: buf.read_int64().unwrap() }
+}
+
+///|
 /// Ping (configuration) packet (0x05)
 /// Server ping packet (not used by vanilla server)
 struct PingConfigS2C {
@@ -67,6 +145,16 @@ struct PingConfigS2C {
 ///|
 impl @mc.Packet for PingConfigS2C with clientbound(self) {
   true
+}
+
+///|
+impl @mc.Packet for PingConfigS2C with serialize(self, buf : &@bytebuf.ByteBuf) {
+  buf.write_int(self.id)
+}
+
+///|
+impl @mc.Packet for PingConfigS2C with deserialize(buf : &@bytebuf.ByteBuf) {
+  { id: buf.read_int().unwrap() }
 }
 
 ///|
@@ -80,11 +168,22 @@ impl @mc.Packet for ResetChatS2C with clientbound(self) {
 }
 
 ///|
+impl @mc.Packet for ResetChatS2C with serialize(self, buf : &@bytebuf.ByteBuf) {
+  // No fields to serialize
+}
+
+///|
+impl @mc.Packet for ResetChatS2C with deserialize(buf : &@bytebuf.ByteBuf) {
+  ResetChatS2C::{  }
+}
+
+///|
+/// TODO: Definition of entries
 /// Registry Data packet (0x07)
 /// Represents registries sent from server to client
 struct RegistryDataS2C {
-  registry_id : String // Registry identifier
-  entries : Array[(String, String)] // Entry ID and NBT data pairs
+  registry_id : String // Registry identifier, TODO: Identifier type
+  entries : FixedArray[(String, String)] // Entry ID and NBT data pairs
 }
 
 ///|
@@ -93,10 +192,33 @@ impl @mc.Packet for RegistryDataS2C with clientbound(self) {
 }
 
 ///|
+impl @mc.Packet for RegistryDataS2C with serialize(
+  self,
+  buf : &@bytebuf.ByteBuf,
+) {
+  @types.write_string(buf, self.registry_id)
+  @types.write_prefix_array(buf, self.entries, (b, entry) => {
+    @types.write_string(b, entry.0)
+    @types.write_string(b, entry.1)
+  })
+}
+
+///|
+impl @mc.Packet for RegistryDataS2C with deserialize(buf : &@bytebuf.ByteBuf) {
+  let registry_id = @types.read_string(buf)
+  let entries = @types.read_prefix_array(buf, b => {
+    let entry_id = @types.read_string(b)
+    let nbt_data = @types.read_string(b)
+    (entry_id, nbt_data)
+  })
+  { registry_id, entries }
+}
+
+///|
 /// Remove Resource Pack (configuration) packet (0x08)
 /// Removes a resource pack from client
 struct RemoveResourcePackConfigS2C {
-  uuid : String? // UUID of resource pack to remove (if None, removes all)
+  uuid : @uuid.UUID? // UUID of resource pack to remove (if None, removes all)
 }
 
 ///|
@@ -105,14 +227,29 @@ impl @mc.Packet for RemoveResourcePackConfigS2C with clientbound(self) {
 }
 
 ///|
+impl @mc.Packet for RemoveResourcePackConfigS2C with serialize(
+  self,
+  buf : &@bytebuf.ByteBuf,
+) {
+  @types.write_optional(buf, self.uuid, @types.write_uuid)
+}
+
+///|
+impl @mc.Packet for RemoveResourcePackConfigS2C with deserialize(
+  buf : &@bytebuf.ByteBuf,
+) {
+  { uuid: @types.read_optional(buf, @types.read_uuid) }
+}
+
+///|
 /// Add Resource Pack (configuration) packet (0x09)
 /// Adds a resource pack to client
 struct AddResourcePackConfigS2C {
-  uuid : String // Unique identifier of resource pack
+  uuid : @uuid.UUID // Unique identifier of resource pack
   url : String // URL to the resource pack
   hash : String // SHA-1 hash (40 chars)
   forced : Bool // Whether client must use the pack
-  prompt_message : String? // Prompt message (if present)
+  prompt_message : String? // Prompt message (if present), TODO: Text Component type
 }
 
 ///|
@@ -121,16 +258,58 @@ impl @mc.Packet for AddResourcePackConfigS2C with clientbound(self) {
 }
 
 ///|
+impl @mc.Packet for AddResourcePackConfigS2C with serialize(
+  self,
+  buf : &@bytebuf.ByteBuf,
+) {
+  @types.write_uuid(buf, self.uuid)
+  @types.write_string(buf, self.url)
+  @types.write_string(buf, self.hash)
+  @types.write_bool(buf, self.forced)
+  @types.write_optional(buf, self.prompt_message, @types.write_string)
+}
+
+///|
+impl @mc.Packet for AddResourcePackConfigS2C with deserialize(
+  buf : &@bytebuf.ByteBuf,
+) {
+  let uuid = @types.read_uuid(buf)
+  let url = @types.read_string(buf)
+  let hash = @types.read_string(buf)
+  let forced = @types.read_bool(buf)
+  let prompt_message = @types.read_optional(buf, @types.read_string)
+  { uuid, url, hash, forced, prompt_message }
+}
+
+///|
 /// Store Cookie (configuration) packet (0x0A)
 /// Stores arbitrary data on client
 struct StoreCookieConfigS2C {
-  key : String // Cookie identifier
-  payload : Array[Byte] // Cookie data (up to 5 kiB)
+  key : String // Cookie identifier, TODO: Identifier type
+  payload : FixedArray[Byte] // Cookie data (up to 5 kiB)
 }
 
 ///|
 impl @mc.Packet for StoreCookieConfigS2C with clientbound(self) {
   true
+}
+
+///|
+impl @mc.Packet for StoreCookieConfigS2C with serialize(
+  self,
+  buf : &@bytebuf.ByteBuf,
+) {
+  @types.write_string(buf, self.key)
+  @types.write_prefix_array(buf, self.payload, @bytebuf.ByteWriter::write_byte)
+}
+
+///|
+impl @mc.Packet for StoreCookieConfigS2C with deserialize(
+  buf : &@bytebuf.ByteBuf,
+) {
+  let key = @types.read_string(buf)
+  let payload = @types.read_prefix_array(buf, b => b.read_byte().unwrap_or(0))
+  { key, payload }
 }
 
 ///|
@@ -147,10 +326,26 @@ impl @mc.Packet for TransferConfigS2C with clientbound(self) {
 }
 
 ///|
+impl @mc.Packet for TransferConfigS2C with serialize(
+  self,
+  buf : &@bytebuf.ByteBuf,
+) {
+  @types.write_string(buf, self.host)
+  @types.write_varint(buf, self.port)
+}
+
+///|
+impl @mc.Packet for TransferConfigS2C with deserialize(buf : &@bytebuf.ByteBuf) {
+  let host = @types.read_string(buf)
+  let port = @types.read_varint(buf)
+  { host, port }
+}
+
+///|
 /// Feature Flags packet (0x0C)
 /// Enables and disables features on client
 struct FeatureFlagsS2C {
-  feature_flags : Array[String] // Array of feature flag identifiers
+  feature_flags : FixedArray[String] // Array of feature flag identifiers, TODO: Identifier type
 }
 
 ///|
@@ -159,10 +354,25 @@ impl @mc.Packet for FeatureFlagsS2C with clientbound(self) {
 }
 
 ///|
+impl @mc.Packet for FeatureFlagsS2C with serialize(
+  self,
+  buf : &@bytebuf.ByteBuf,
+) {
+  @types.write_prefix_array(buf, self.feature_flags, @types.write_string)
+}
+
+///|
+impl @mc.Packet for FeatureFlagsS2C with deserialize(buf : &@bytebuf.ByteBuf) {
+  let feature_flags = @types.read_prefix_array(buf, @types.read_string)
+  { feature_flags, }
+}
+
+///|
 /// Update Tags (configuration) packet (0x0D)
 /// Updates tags on client
 struct UpdateTagsConfigS2C {
-  tags : Array[(String, Array[(String, Array[Int])])] // Registry -> (Tag name -> Entry IDs)
+  // Registry -> (Tag name -> Entry IDs), TODO: Identifier type, prehaps we should add a type for tag
+  tags : FixedArray[(String, FixedArray[(String, FixedArray[Int])])]
 }
 
 ///|
@@ -171,10 +381,40 @@ impl @mc.Packet for UpdateTagsConfigS2C with clientbound(self) {
 }
 
 ///|
+impl @mc.Packet for UpdateTagsConfigS2C with serialize(
+  self,
+  buf : &@bytebuf.ByteBuf,
+) {
+  @types.write_prefix_array(buf, self.tags, (b, t) => {
+    @types.write_string(b, t.0)
+    @types.write_prefix_array(b, t.1, (by, ta) => {
+      @types.write_string(by, ta.0)
+      @types.write_prefix_array(by, ta.1, @types.write_varint)
+    })
+  })
+}
+
+///|
+impl @mc.Packet for UpdateTagsConfigS2C with deserialize(
+  buf : &@bytebuf.ByteBuf,
+) {
+  let tags = @types.read_prefix_array(buf, b => {
+    let registry_name = @types.read_string(b)
+    let tag_entries = @types.read_prefix_array(b, tb => {
+      let tag_name = @types.read_string(tb)
+      let ids = @types.read_prefix_array(tb, @types.read_varint)
+      (tag_name, ids)
+    })
+    (registry_name, tag_entries)
+  })
+  { tags, }
+}
+
+///|
 /// Clientbound Known Packs packet (0x0E)
 /// Informs client of which data packs are present
 struct ClientboundKnownPacksS2C {
-  known_packs : Array[(String, String, String)] // (Namespace, ID, Version) tuples
+  known_packs : FixedArray[(String, String, String)] // (Namespace, ID, Version) tuples, prehaps we should add a type for Known Pack
 }
 
 ///|
@@ -183,10 +423,35 @@ impl @mc.Packet for ClientboundKnownPacksS2C with clientbound(self) {
 }
 
 ///|
+impl @mc.Packet for ClientboundKnownPacksS2C with serialize(
+  self,
+  buf : &@bytebuf.ByteBuf,
+) {
+  @types.write_prefix_array(buf, self.known_packs, (b, pack) => {
+    @types.write_string(b, pack.0)
+    @types.write_string(b, pack.1)
+    @types.write_string(b, pack.2)
+  })
+}
+
+///|
+impl @mc.Packet for ClientboundKnownPacksS2C with deserialize(
+  buf : &@bytebuf.ByteBuf,
+) {
+  let known_packs = @types.read_prefix_array(buf, b => {
+    let ns = @types.read_string(b)
+    let id = @types.read_string(b)
+    let version = @types.read_string(b)
+    (ns, id, version)
+  })
+  { known_packs, }
+}
+
+///|
 /// Custom Report Details (configuration) packet (0x0F)
 /// Contains crash/disconnection report details
 struct CustomReportDetailsConfigS2C {
-  details : Array[(String, String)] // (Title, Description) pairs (max 32 entries)
+  details : FixedArray[(String, String)] // (Title, Description) pairs (max 32 entries), prehaps we should add a type for Report Detail
 }
 
 ///|
@@ -195,15 +460,127 @@ impl @mc.Packet for CustomReportDetailsConfigS2C with clientbound(self) {
 }
 
 ///|
+impl @mc.Packet for CustomReportDetailsConfigS2C with serialize(
+  self,
+  buf : &@bytebuf.ByteBuf,
+) {
+  @types.write_prefix_array(buf, self.details, (b, detail) => {
+    @types.write_string(b, detail.0)
+    @types.write_string(b, detail.1)
+  })
+}
+
+///|
+impl @mc.Packet for CustomReportDetailsConfigS2C with deserialize(
+  buf : &@bytebuf.ByteBuf,
+) {
+  let details = @types.read_prefix_array(buf, b => {
+    let title = @types.read_string(b)
+    let description = @types.read_string(b)
+    (title, description)
+  })
+  { details, }
+}
+
+///|
+enum ServerLinkType {
+  BugReport
+  CommunityGuidelines
+  Support
+  Status
+  Feedback
+  Community
+  Website
+  Forums
+  News
+  Announcements
+}
+
+///|
+pub fn ServerLinkType::from_int(val : Int) -> ServerLinkType {
+  match val {
+    0 => ServerLinkType::BugReport
+    1 => ServerLinkType::CommunityGuidelines
+    2 => ServerLinkType::Support
+    3 => ServerLinkType::Status
+    4 => ServerLinkType::Feedback
+    5 => ServerLinkType::Community
+    6 => ServerLinkType::Website
+    7 => ServerLinkType::Forums
+    8 => ServerLinkType::News
+    9 => ServerLinkType::Announcements
+    _ => panic()
+  }
+}
+
+///|
+pub fn ServerLinkType::to_int(self : ServerLinkType) -> Int {
+  match self {
+    ServerLinkType::BugReport => 0
+    ServerLinkType::CommunityGuidelines => 1
+    ServerLinkType::Support => 2
+    ServerLinkType::Status => 3
+    ServerLinkType::Feedback => 4
+    ServerLinkType::Community => 5
+    ServerLinkType::Website => 6
+    ServerLinkType::Forums => 7
+    ServerLinkType::News => 8
+    ServerLinkType::Announcements => 9
+  }
+}
+
+///|
+struct ServerLink {
+  knownType : ServerLinkType?
+  unknownType : String? // TODO: Text Component type
+  url : String
+}
+
+///|
 /// Server Links (configuration) packet (0x10)
 /// Contains server links for pause menu
 struct ServerLinksConfigS2C {
-  links : Array[(String, String)] // (Label, URL) pairs
+  links : FixedArray[ServerLink]
 }
 
 ///|
 impl @mc.Packet for ServerLinksConfigS2C with clientbound(self) {
   true
+}
+
+///|
+impl @mc.Packet for ServerLinksConfigS2C with serialize(
+  self,
+  buf : &@bytebuf.ByteBuf,
+) {
+  @types.write_prefix_array(buf, self.links, (b, link) => {
+    if link.knownType is Some(knownType) {
+      @types.write_bool(b, true)
+      @types.write_varint(b, knownType.to_int())
+    } else if link.unknownType is Some(unknownType) {
+      @types.write_bool(b, false)
+      @types.write_string(b, unknownType)
+    }
+    @types.write_string(b, link.url)
+  })
+}
+
+///|
+impl @mc.Packet for ServerLinksConfigS2C with deserialize(
+  buf : &@bytebuf.ByteBuf,
+) {
+  let links = @types.read_prefix_array(buf, b => {
+    let mut knownType : ServerLinkType? = None
+    let mut unknownType : String? = None
+    if @types.read_bool(buf) {
+      knownType = Some(ServerLinkType::from_int(@types.read_varint(buf)))
+    } else {
+      unknownType = Some(@types.read_string(buf))
+    }
+    let url = @types.read_string(b)
+    ServerLink::{ knownType, unknownType, url }
+  })
+  { links, }
 }
 
 ///|
@@ -217,13 +594,45 @@ impl @mc.Packet for ClearDialogConfigS2C with clientbound(self) {
 }
 
 ///|
+impl @mc.Packet for ClearDialogConfigS2C with serialize(
+  self,
+  buf : &@bytebuf.ByteBuf,
+) {
+  // No fields to serialize
+}
+
+///|
+impl @mc.Packet for ClearDialogConfigS2C with deserialize(
+  buf : &@bytebuf.ByteBuf,
+) {
+  ClearDialogConfigS2C::{  }
+}
+
+///|
 /// Show Dialog (configuration) packet (0x12)
 /// Shows custom dialog screen to client
 struct ShowDialogConfigS2C {
-  dialog : String // NBT data for dialog definition
+  dialog : @nbt.NBTTag // NBT data for dialog definition
 }
 
 ///|
 impl @mc.Packet for ShowDialogConfigS2C with clientbound(self) {
   true
+}
+
+///|
+impl @mc.Packet for ShowDialogConfigS2C with serialize(
+  self,
+  buf : &@bytebuf.ByteBuf,
+) {
+  // TODO: Implement NBT writing
+  panic()
+}
+
+///|
+impl @mc.Packet for ShowDialogConfigS2C with deserialize(
+  buf : &@bytebuf.ByteBuf,
+) {
+  // TODO: Implement NBT reading
+  panic()
 }

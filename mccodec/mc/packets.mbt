@@ -1,11 +1,25 @@
+///|
 pub(open) trait Packet {
   clientbound(Self) -> Bool
+  serialize(Self, &@bytebuf.ByteBuf) -> Unit = _
+  deserialize(&@bytebuf.ByteBuf) -> Self raise = _
 }
 
+///|
+impl Packet with serialize(self, buf : &@bytebuf.ByteBuf) {
+  // Default implementation does nothing
+}
+
+///|
+impl Packet with deserialize(buf : &@bytebuf.ByteBuf) {
+   // Default implementation does nothing
+   raise fail("Deserialize not implemented for this packet")
+}
+
+///|
 struct MinecraftClient { // states
-///Once a Set Compression packet (with a non-negative threshold) is sent,
-///  zlib compression is enabled for all following packets. The format of a packet changes slightly
-///  to include the size of the uncompressed packet.
-  priv mut compression: Bool
-  
+  ///Once a Set Compression packet (with a non-negative threshold) is sent,
+  ///  zlib compression is enabled for all following packets. The format of a packet changes slightly
+  ///  to include the size of the uncompressed packet.
+  priv mut compression : Bool
 }
