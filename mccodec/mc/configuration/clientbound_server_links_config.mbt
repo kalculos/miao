@@ -13,19 +13,19 @@ enum ServerLinkType {
 }
 
 ///|
-pub fn ServerLinkType::from_int(val : Int) -> ServerLinkType {
+pub fn ServerLinkType::from_int(val : Int) -> ServerLinkType? {
   match val {
-    0 => ServerLinkType::BugReport
-    1 => ServerLinkType::CommunityGuidelines
-    2 => ServerLinkType::Support
-    3 => ServerLinkType::Status
-    4 => ServerLinkType::Feedback
-    5 => ServerLinkType::Community
-    6 => ServerLinkType::Website
-    7 => ServerLinkType::Forums
-    8 => ServerLinkType::News
-    9 => ServerLinkType::Announcements
-    _ => panic()
+    0 => Some(ServerLinkType::BugReport)
+    1 => Some(ServerLinkType::CommunityGuidelines)
+    2 => Some(ServerLinkType::Support)
+    3 => Some(ServerLinkType::Status)
+    4 => Some(ServerLinkType::Feedback)
+    5 => Some(ServerLinkType::Community)
+    6 => Some(ServerLinkType::Website)
+    7 => Some(ServerLinkType::Forums)
+    8 => Some(ServerLinkType::News)
+    9 => Some(ServerLinkType::Announcements)
+    _ => None
   }
 }
 
@@ -89,7 +89,7 @@ impl @mc.Packet for ServerLinksConfigS2C with deserialize(
     let mut knownType : ServerLinkType? = None
     let mut unknownType : String? = None
     if @types.read_bool(buf) {
-      knownType = Some(ServerLinkType::from_int(@types.read_varint(buf)))
+      knownType = ServerLinkType::from_int(@types.read_varint(buf))
     } else {
       unknownType = Some(@types.read_string(buf))
     }
