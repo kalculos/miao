@@ -1,38 +1,44 @@
 ///|
-pub enum TtyMode {
-  Normal
-  RawInput
-}
-
-pub(open) trait StdinReader : @io.Reader {}
-
-pub(open) trait StdoutWriter : @io.Writer {}
+let _stdin : Ref[&@io.Reader] = Ref::new(
+  @io.EmptyClosedReader::new() as &@io.Reader,
+)
 
 ///|
-pub(open) trait Terminal: StdinReader + StdoutWriter {
-  set_mode(Self, TtyMode) -> Unit raise
-  reset_mode(Self) -> Unit
-  get_window_size(Self) -> (Int, Int)
-}
+let _stdout : Ref[&@io.Writer] = Ref::new(
+  @io.DiscardWriter::new() as &@io.Writer,
+)
 
 ///|
-let _terminal : Ref[&Terminal?] = Ref::new(None)
-
-///|
-pub fn set_terminal(term : &Terminal) -> Unit {
-  _terminal.val = Some(term)
+/// win_size() -> (width, height)
+pub(open) trait Terminal {
+  win_size(Self) -> (Int, Int)
 }
 
 ///|
-pub fn stdout() -> &StdoutWriter {
-  terminal()
+let _pty : Ref[&Terminal?] = Ref::new(None)
+
+///|
+pub fn stdout() -> &@io.Writer {
+  _stdout.val
 }
 
 ///|
-pub fn stdin() -> &StdinReader {
-  terminal()
+pub fn stdin() -> &@io.Reader {
+  _stdin.val
 }
 
-pub fn terminal() -> &Terminal {
-  _terminal.val.unwrap()
+///|
+pub fn set_stdio(stdout : &@io.Writer, stdin : &@io.Reader) -> Unit {
+  _stdin.val = stdin
+  _stdout.val = stdout
+}
+
+///|
+pub fn set_terminal(terminal : &Terminal) -> Unit {
+  _pty.val = Some(terminal)
+}
+
+///|
+pub fn terminal() -> &Terminal? {
+  _pty.val
 }
