@@ -3,7 +3,7 @@
 /// Updates seen advancement tabs
 struct SeenAdvancementsC2S {
   action : Int // Action (0=opened_tab, 1=closed_screen)
-  tab_id : String? // Tab identifier (for opened_tab), TODO: Identifier type
+  tab_id : @types.Identifier? // Tab identifier (for opened_tab)
 }
 
 ///|
@@ -17,7 +17,7 @@ impl @mc.Packet for SeenAdvancementsC2S with serialize(
   buf : &@bytebuf.ByteBuf,
 ) {
   @types.write_varint(buf, self.action)
-  @types.write_optional(buf, self.tab_id, @types.write_string)
+  @types.write_optional(buf, self.tab_id, @types.write_identifier)
 }
 
 ///|
@@ -25,7 +25,7 @@ impl @mc.Packet for SeenAdvancementsC2S with deserialize(
   buf : &@bytebuf.ByteBuf,
 ) {
   let action = @types.read_varint(buf)
-  let tab_id = @types.read_optional(buf, @types.read_string)
+  let tab_id = @types.read_optional(buf, @types.read_identifier)
   { action, tab_id }
 }
 

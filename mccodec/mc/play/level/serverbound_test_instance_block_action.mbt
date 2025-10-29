@@ -4,7 +4,7 @@
 struct TestInstanceBlockActionC2S {
   location : @types.Position // Block position
   action : Int // Test action type enum(0=init, 1=query, 2=set, 3=reset, 4=save, 5=export, 6=run)
-  test_id: String // Test identifier, TODO: Identifier type
+  test_id: @types.Identifier // Test identifier
   size_x : Int // Test size X
   size_y : Int // Test size Y
   size_z : Int // Test size Z
@@ -27,7 +27,7 @@ impl @mc.Packet for TestInstanceBlockActionC2S with serialize(
   // Position as 3 separate ints
   @types.write_position(buf, self.location)
   @types.write_varint(buf, self.action)
-  @types.write_string(buf, self.test_id)
+  @types.write_identifier(buf, self.test_id)
   @types.write_varint(buf, self.size_x)
   @types.write_varint(buf, self.size_y)
   @types.write_varint(buf, self.size_z)
@@ -43,7 +43,7 @@ impl @mc.Packet for TestInstanceBlockActionC2S with deserialize(
 ) {
   let location = @types.read_position(buf)
   let action = @types.read_varint(buf)
-  let test_id = @types.read_string(buf)
+  let test_id = @types.read_identifier(buf)
   let size_x = @types.read_varint(buf)
   let size_y = @types.read_varint(buf)
   let size_z = @types.read_varint(buf)

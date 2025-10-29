@@ -3,9 +3,9 @@
 /// Programs jigsaw block
 struct ProgramJigsawBlockC2S {
   location : @types.Position // Jigsaw position
-  name : String // Jigsaw name, TODO: Identifier type
-  target : String // Target name, TODO: Identifier type
-  pool : String // Template pool, TODO: Identifier type
+  name : @types.Identifier // Jigsaw name
+  target : @types.Identifier // Target name
+  pool : @types.Identifier // Template pool
   final_state : String // Final state
   joint_type : String // Joint type
   selection_priority : Int // Selection priority
@@ -23,9 +23,9 @@ impl @mc.Packet for ProgramJigsawBlockC2S with serialize(
   buf : &@bytebuf.ByteBuf,
 ) {
   @types.write_position(buf, self.location)
-  @types.write_string(buf, self.name)
-  @types.write_string(buf, self.target)
-  @types.write_string(buf, self.pool)
+  @types.write_identifier(buf, self.name)
+  @types.write_identifier(buf, self.target)
+  @types.write_identifier(buf, self.pool)
   @types.write_string(buf, self.final_state)
   @types.write_string(buf, self.joint_type)
   @types.write_varint(buf, self.selection_priority)
@@ -37,9 +37,9 @@ impl @mc.Packet for ProgramJigsawBlockC2S with deserialize(
   buf : &@bytebuf.ByteBuf,
 ) {
   let location = @types.read_position(buf)
-  let name = @types.read_string(buf)
-  let target = @types.read_string(buf)
-  let pool = @types.read_string(buf)
+  let name = @types.read_identifier(buf)
+  let target = @types.read_identifier(buf)
+  let pool = @types.read_identifier(buf)
   let final_state = @types.read_string(buf)
   let joint_type = @types.read_string(buf)
   let selection_priority = @types.read_varint(buf)

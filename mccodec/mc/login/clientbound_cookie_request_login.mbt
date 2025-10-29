@@ -2,7 +2,7 @@
 /// Cookie Request (login) packet (0x05)
 /// Requests a previously stored cookie
 struct CookieRequestLoginS2C {
-  key : String // Identifier of the cookie, TODO: Identifier type
+  key : @types.Identifier // Identifier of the cookie
 }
 
 ///|
@@ -15,13 +15,13 @@ impl @mc.Packet for CookieRequestLoginS2C with serialize(
   self,
   buf : &@bytebuf.ByteBuf,
 ) {
-  @types.write_string(buf, self.key)
+  @types.write_identifier(buf, self.key)
 }
 
 ///|
 impl @mc.Packet for CookieRequestLoginS2C with deserialize(
   buf : &@bytebuf.ByteBuf,
 ) {
-  let key = @types.read_string(buf)
+  let key = @types.read_identifier(buf)
   { key, }
 }
