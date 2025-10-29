@@ -1,4 +1,9 @@
 {
+	"link": {
+		"native": {
+			"gcc-flags": "--std=gnu23"
+		}
+	},
     "import": [
       "tonyfettes/uv",
       "iceBear67/miao/io",
