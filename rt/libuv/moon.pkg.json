@@ -1,13 +1,16 @@
 {
-    "import": [
-      "tonyfettes/uv",
-      "iceBear67/miao/io",
-      "iceBear67/miao/fs",
-      "iceBear67/miao/rt",
-      "moonbitlang/x/encoding",
-      "iceBear67/time"
-    ],
-    "native-stub": [
-      "coroutine.c"
-    ]
+  "link": {
+    "native": {
+      "stub-cc-flags": "--std=gnu23"
+    }
+  },
+  "import": [
+    "tonyfettes/uv",
+    "iceBear67/miao/io",
+    "iceBear67/miao/fs",
+    "iceBear67/miao/rt",
+    "moonbitlang/x/encoding",
+    "iceBear67/time"
+  ],
+  "native-stub": ["coroutine.c"]
 }
