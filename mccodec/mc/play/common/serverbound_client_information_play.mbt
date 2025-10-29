@@ -6,7 +6,7 @@ struct ClientInformationPlayC2S {
   view_distance : Byte // Render distance
   chat_mode : Int // Chat visibility enum(0=enabled, 1=commands_only, 2=hidden)
   chat_colors : Bool // Chat colors enabled
-  displayed_skin_parts : Byte // Skin part flags, unsign, TODO: mask
+  displayed_skin_parts : Array[@types.SkinPart] // Skin parts displayed
   main_hand : Int // Main hand enum(0=left, 1=right)
   enable_text_filtering : Bool // Text filtering
   allow_server_listings : Bool // Server listings
@@ -27,7 +27,7 @@ impl @mc.Packet for ClientInformationPlayC2S with serialize(
   buf.write_byte(self.view_distance)
   @types.write_varint(buf, self.chat_mode)
   @types.write_bool(buf, self.chat_colors)
-  buf.write_byte(self.displayed_skin_parts)
+  buf.write_byte(@types.SkinPart::to_bitmask(self.displayed_skin_parts))
   @types.write_varint(buf, self.main_hand)
   @types.write_bool(buf, self.enable_text_filtering)
   @types.write_bool(buf, self.allow_server_listings)
@@ -42,7 +42,9 @@ impl @mc.Packet for ClientInformationPlayC2S with deserialize(
   let view_distance = buf.read_byte().unwrap_or(0)
   let chat_mode = @types.read_varint(buf)
   let chat_colors = @types.read_bool(buf)
-  let displayed_skin_parts = buf.read_byte().unwrap_or(0)
+  let displayed_skin_parts = @types.SkinPart::from_bitmask(
+    buf.read_byte().unwrap_or(0),
+  )
   let main_hand = @types.read_varint(buf)
   let enable_text_filtering = @types.read_bool(buf)
   let allow_server_listings = @types.read_bool(buf)
@@ -59,4 +61,3 @@ impl @mc.Packet for ClientInformationPlayC2S with deserialize(
     particle_status,
   }
 }
-
