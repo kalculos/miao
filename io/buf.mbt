@@ -10,7 +10,7 @@ pub fn ByteBufReader::new(buf : &@bytebuf.ByteBuf) -> ByteBufReader {
 }
 
 ///|
-impl Reader for ByteBufReader with read(self, dst : FixedArray[Byte], off : Int, len : Int) -> Int {
+pub impl Reader for ByteBufReader with read(self, dst : FixedArray[Byte], off : Int, len : Int) -> Int {
   if self.closed {
     return 0
   }
@@ -24,12 +24,12 @@ impl Reader for ByteBufReader with read(self, dst : FixedArray[Byte], off : Int,
 }
 
 ///|
-impl Reader for ByteBufReader with close(self) -> Unit {
+pub impl Reader for ByteBufReader with close(self) -> Unit {
   self.closed = true
 }
 
 ///|
-impl Reader for ByteBufReader with is_closed(self) -> Bool {
+pub impl Reader for ByteBufReader with is_closed(self) -> Bool {
   self.closed
 }
 
@@ -45,7 +45,7 @@ pub fn ByteBufWriter::new(buf : &@bytebuf.ByteBuf) -> ByteBufWriter {
 }
 
 ///|
-impl Writer for ByteBufWriter with write(self, arr : FixedArray[Byte], off : Int, len : Int) -> Int {
+pub impl Writer for ByteBufWriter with write(self, arr : FixedArray[Byte], off : Int, len : Int) -> Int {
   if self.closed {
     return 0
   }
@@ -59,11 +59,11 @@ impl Writer for ByteBufWriter with write(self, arr : FixedArray[Byte], off : Int
 }
 
 ///|
-impl Writer for ByteBufWriter with close(self) -> Unit {
+pub impl Writer for ByteBufWriter with close(self) -> Unit {
   self.closed = true
 }
 
 ///|
-impl Writer for ByteBufWriter with is_closed(self) -> Bool {
+pub impl Writer for ByteBufWriter with is_closed(self) -> Bool {
   self.closed
 }

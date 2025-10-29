@@ -10,7 +10,7 @@ pub fn TeeReader::new(reader : &Reader, writer : &Writer) -> TeeReader {
 }
 
 ///|
-impl Reader for TeeReader with read(self, dst : FixedArray[Byte], off : Int, len : Int) -> Int {
+pub impl Reader for TeeReader with read(self, dst : FixedArray[Byte], off : Int, len : Int) -> Int {
   let bytes_read = self.reader.read(dst, off, len)
   if bytes_read > 0 {
     // Write the same data to the writer
@@ -22,13 +22,13 @@ impl Reader for TeeReader with read(self, dst : FixedArray[Byte], off : Int, len
 }
 
 ///|
-impl Reader for TeeReader with close(self) -> Unit {
+pub impl Reader for TeeReader with close(self) -> Unit {
   self.reader.close()
   self.writer.close()
 }
 
 ///|
-impl Reader for TeeReader with is_closed(self) -> Bool {
+pub impl Reader for TeeReader with is_closed(self) -> Bool {
   self.reader.is_closed() && self.writer.is_closed()
 }
 
@@ -45,7 +45,7 @@ pub fn DuplexWriter::new(writer1 : &Writer, writer2 : &Writer) -> DuplexWriter {
 }
 
 ///|
-impl Writer for DuplexWriter with write(self, arr : FixedArray[Byte], off : Int, len : Int) -> Int {
+pub impl Writer for DuplexWriter with write(self, arr : FixedArray[Byte], off : Int, len : Int) -> Int {
   let bytes_written1 = self.writer1.write(arr, off, len)
   let bytes_written2 = self.writer2.write(arr, off, len)
   // Return the minimum to ensure we don't claim more bytes were written than actually written to both
@@ -53,12 +53,12 @@ impl Writer for DuplexWriter with write(self, arr : FixedArray[Byte], off : Int,
 }
 
 ///|
-impl Writer for DuplexWriter with close(self) -> Unit {
+pub impl Writer for DuplexWriter with close(self) -> Unit {
   self.writer1.close()
   self.writer2.close()
 }
 
 ///|
-impl Writer for DuplexWriter with is_closed(self) -> Bool {
+pub impl Writer for DuplexWriter with is_closed(self) -> Bool {
   self.writer1.is_closed() && self.writer2.is_closed()
 }
