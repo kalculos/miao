@@ -1,9 +1,11 @@
 ///|
 struct BufferedPipe {
-  buf : FixedArray[Byte]
   rt : &@rt.Runtime
-  mut len : Int
-  mut off : Int
+  // Buffer fields
+  buf : FixedArray[Byte]
+  mut ridx : Int
+  mut widx : Int
+  // Lock fields
   mut read_waiting : Bool
   mut read_waiter : () -> Unit
   mut write_waiting : Bool
@@ -12,7 +14,7 @@ struct BufferedPipe {
 
 ///|
 pub trait PipeWriter: @io.Writer {
-  can_write(Self) -> Bool
+  can_write(Self, amount : Int) -> Bool
 }
 
 ///|
@@ -25,18 +27,20 @@ pub trait PipeWriter: @io.Writer {
 /// you may check PipeWriter#can_write() to avoid blocking or doing something else, like 
 /// unregistering your callback until next write.
 /// 
-/// The pair of reader and writer cannot be shared by multiple producer and consumers (in different coroutines),
+/// The pair of reader and writer cannot be shared by multiple producer and consumers (multiple coroutines),
 /// otherwise it threw a error in previous blocked callsite.
+/// 
+/// The implementation only supports single-threaded concurrency model.
 pub fn BufferedPipe::new(
   runtime? : &@rt.Runtime = @rt.current_runtime(),
   buffer_size? : Int = 16384,
 ) -> (&@io.Reader, &PipeWriter) {
   guard buffer_size >= 0  // 0 => direct pipe
   let pipe = BufferedPipe::{
-    buf: FixedArray::make(buffer_size, 0),
     rt: runtime,
-    len: 0,
-    off: 0,
+    buf: FixedArray::make(buffer_size, 0),
+    ridx: 0,
+    widx: 0,
     read_waiting: false,
     read_waiter: () => (),
     write_waiting: false,
@@ -47,18 +51,20 @@ pub fn BufferedPipe::new(
 
 ///|
 fn avail(self : BufferedPipe) -> Int {
-  self.len - self.off
+  let val = self.widx - self.ridx
+  guard val >= 0 else { return self.buf.length() - self.ridx + self.widx }
+  val
 }
 
 ///|
 fn _is_closed(self : BufferedPipe) -> Bool {
-  self.len == -1
+  self.widx == -1
 }
 
 ///|
 fn _close(self : BufferedPipe) -> Unit {
   guard !self._is_closed()
-  self.len = -1
+  self.widx = -1
 }
 
 ///|
@@ -70,6 +76,20 @@ pub impl @io.Reader for BufferedPipe with available(self) {
 }
 
 ///|
+fn gandi_ridx(self : BufferedPipe) -> Int {
+  let v = self.ridx
+  self.ridx = (self.ridx + 1) % self.buf.length()
+  v
+}
+
+///|
+fn gandi_widx(self : BufferedPipe) -> Int {
+  let v = self.widx
+  self.widx = (self.widx + 1) % self.buf.length()
+  v
+}
+
+///|
 pub impl @io.Reader for BufferedPipe with read(self, dst, off, len) {
   if self._is_closed() {
     return 0
@@ -77,13 +97,16 @@ pub impl @io.Reader for BufferedPipe with read(self, dst, off, len) {
   if self.avail() == 0 {
     // go to wait
     self.block_read()
+    if self._is_closed() {
+      return 0
+    }
   }
   let read = @cmp.minimum(len, self.avail())
+  let len = self.buf.length()
   for i = 0; i < read; i = i + 1 {
-    dst[off + i] = self.buf[self.off + i]
+    dst[off + i] = self.buf[self.gandi_ridx() % len]
   }
-  self.off = self.off + read
-  if self.avail() == 0 && self.write_waiting {
+  if self.write_waiting {
     self.rt.new_task(_ => (self.write_waiter)()).start()
   }
   read
@@ -94,12 +117,15 @@ pub impl @io.Writer for BufferedPipe with write(self, arr, off, len) {
   if self._is_closed() {
     return 0
   }
-  if !self.can_write() {
+  if !self.can_write(len) {
     self.block_write()
+    if self._is_closed() {
+      return 0
+    }
   }
   let written = @cmp.minimum(len, self.buf.length())
   for i = 0; i < written; i = i + 1 {
-    self.buf[i] = arr[off + i]
+    self.buf[self.gandi_widx() % self.buf.length()] = arr[off + i]
   }
   if written != 0 && self.read_waiting {
     self.rt.new_task(_ => (self.read_waiter)()).start()
@@ -160,6 +186,6 @@ pub impl @io.Reader for BufferedPipe with is_closed(self) {
 }
 
 ///|
-pub impl PipeWriter for BufferedPipe with can_write(self) {
-  self.avail() == 0 && !self._is_closed()
+pub impl PipeWriter for BufferedPipe with can_write(self, amount) {
+  !self._is_closed() && self.buf.length() - self.avail() >= amount
 }
