@@ -53,7 +53,7 @@ test "test default read/write operations" {
   )
   assert_eq(
     buf.read_uint_le(),
-    Some(uint_data[0].data),
+    uint_data[0].data,
     msg="read_uint_le failed",
   )
   buf.clear()
@@ -63,7 +63,7 @@ test "test default read/write operations" {
   buf.write_uint(uint_data[1].data)
   assert_true(buf.has_remaining(), msg="buf should have remaining data")
   assert_eq(buf.to_bytes(), uint_data[1].byte_expect, msg="write_uint failed")
-  assert_eq(buf.read_uint(), Some(uint_data[1].data), msg="read_uint_be failed")
+  assert_eq(buf.read_uint(), uint_data[1].data, msg="read_uint_be failed")
   buf.clear()
 
   // uint16_le
@@ -75,7 +75,7 @@ test "test default read/write operations" {
   )
   assert_eq(
     buf.read_uint16_le(),
-    Some(uint16_data[0].data),
+    uint16_data[0].data,
     msg="write_uint16_le failed",
   )
   buf.clear()
@@ -88,7 +88,7 @@ test "test default read/write operations" {
   )
   assert_eq(
     buf.read_uint16(),
-    Some(uint16_data[1].data),
+    uint16_data[1].data,
     msg="write_uint16 failed",
   )
   buf.clear()
@@ -101,7 +101,7 @@ test "test default read/write operations" {
   )
   assert_eq(
     buf.read_uint64_le(),
-    Some(uint64_data[0].data),
+    uint64_data[0].data,
     msg="write_uint64_le failed",
   )
   buf.clear()
@@ -114,7 +114,7 @@ test "test default read/write operations" {
   )
   assert_eq(
     buf.read_uint64(),
-    Some(uint64_data[1].data),
+    uint64_data[1].data,
     msg="write_uint64 failed",
   )
   buf.clear()
@@ -123,7 +123,7 @@ test "test default read/write operations" {
   assert_eq(buf.to_bytes(), int_data[0].byte_expect, msg="write_int_le failed")
   assert_eq(
     buf.read_int_le(),
-    Some(int_data[0].data),
+    int_data[0].data,
     msg="write_int_le failed",
   )
   buf.clear()
@@ -137,7 +137,7 @@ test "test default read/write operations" {
   )
   assert_eq(
     buf.read_float_le(),
-    Some(int_data[0].data.reinterpret_as_float()),
+    int_data[0].data.reinterpret_as_float(),
     msg="write_float_le failed",
   )
   buf.clear()
@@ -145,7 +145,7 @@ test "test default read/write operations" {
   // int_be
   buf.write_int(int_data[1].data)
   assert_eq(buf.to_bytes(), int_data[1].byte_expect, msg="write_int failed")
-  assert_eq(buf.read_int(), Some(int_data[1].data), msg="write_int failed")
+  assert_eq(buf.read_int(), int_data[1].data, msg="write_int failed")
   buf.clear()
 
   // float_be
@@ -153,7 +153,7 @@ test "test default read/write operations" {
   assert_eq(buf.to_bytes(), int_data[1].byte_expect, msg="write_float failed")
   assert_eq(
     buf.read_float(),
-    Some(int_data[1].data.reinterpret_as_float()),
+    int_data[1].data.reinterpret_as_float(),
     msg="write_float failed",
   )
   buf.clear()
@@ -167,7 +167,7 @@ test "test default read/write operations" {
   )
   assert_eq(
     buf.read_int16_le(),
-    Some(int16_data[0].data),
+    int16_data[0].data,
     msg="read_uint_le failed",
   )
   buf.clear()
@@ -176,7 +176,7 @@ test "test default read/write operations" {
   assert_eq(buf.to_bytes(), int16_data[1].byte_expect, msg="write_int16 failed")
   assert_eq(
     buf.read_int16(),
-    Some(int16_data[1].data),
+    int16_data[1].data,
     msg="write_int16 failed",
   )
   buf.clear()
@@ -189,7 +189,7 @@ test "test default read/write operations" {
   )
   assert_eq(
     buf.read_int64_le(),
-    Some(int64_data[1].data),
+    int64_data[1].data,
     msg="write_int64_le failed",
   )
   buf.clear()
@@ -203,7 +203,7 @@ test "test default read/write operations" {
   )
   assert_eq(
     buf.read_double_le(),
-    Some(int64_data[0].data.reinterpret_as_double()),
+    int64_data[0].data.reinterpret_as_double(),
     msg="write_double_le failed",
   )
   buf.clear()
@@ -212,7 +212,7 @@ test "test default read/write operations" {
   assert_eq(buf.to_bytes(), int64_data[1].byte_expect, msg="write_int64 failed")
   assert_eq(
     buf.read_int64(),
-    Some(int64_data[1].data),
+    int64_data[1].data,
     msg="write_int64 failed",
   )
   buf.clear()
@@ -221,7 +221,7 @@ test "test default read/write operations" {
   assert_eq(buf.to_bytes(), int64_data[1].byte_expect, msg="write_double failed")
   assert_eq(
     buf.read_double(),
-    Some(int64_data[1].data.reinterpret_as_double()),
+    int64_data[1].data.reinterpret_as_double(),
     msg="write_int_le failed",
   )
   buf.clear()

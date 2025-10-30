@@ -1,70 +1,7 @@
-///|
-/// A trait that allows us to read data sequentially.
-/// The reader does not allow backward reading operations. By default, the trait returns
-/// numbers in big endian (the network order).
-/// Operations are expanded by endianness with the hope of inlining.
-pub(open) trait ByteReader {
-  remaining(Self) -> Int
-  has_remaining(Self) -> Bool = _
-  /// This method returns None if we cannot read exactly %len bytes.
-  read_bytes(Self, len : Int) -> Bytes?
-  /// This method returns an empty Bytes if had no remaining bytes. 
-  /// Otherwise, try to read bytes as much as possible but not greater than len
-  read_bytes_most(Self, len: Int) -> Bytes = _
-  /// Returns the number of bytes read. -1 if cannot read to dst
-  read(Self, dst: FixedArray[Byte], off: Int, len: Int) -> Int = _
-  read_int(Self) -> Int? = _
-  read_int_le(Self) -> Int? = _
-  read_int16(Self) -> Int16? = _
-  read_int16_le(Self) -> Int16? = _
-  read_int64(Self) -> Int64? = _
-  read_int64_le(Self) -> Int64? = _
-  read_byte(Self) -> Byte? = _
-  read_uint(Self) -> UInt? = _
-  read_uint_le(Self) -> UInt? = _
-  read_uint16(Self) -> UInt16? = _
-  read_uint16_le(Self) -> UInt16? = _
-  read_uint64(Self) -> UInt64? = _
-  read_uint64_le(Self) -> UInt64? = _
-  read_float(Self) -> Float? = _ 
-  read_float_le(Self) -> Float? = _
-  read_double(Self) -> Double? = _
-  read_double_le(Self) -> Double? = _
-}
-
-///|
-pub(open) trait ByteWriter {
-  ///| Remaining spaces we can write without resizing the underlying structure.
-  capacity(Self) -> Int
-
-  ///| Write some bytes into the destination.
-  /// The buffer will increase its capacity if needed.
-  write_bytes(Self, Bytes) -> Unit
-  ///| Write bytes from a fixed array.
-  write_array(Self, FixedArray[Byte], off: Int, len: Int) -> Unit = _
-  write_byte(Self, Byte) -> Unit
-  write_int(Self, Int) -> Unit = _
-  write_int16(Self, Int16) -> Unit = _
-  write_int64(Self, Int64) -> Unit = _
-  write_uint(Self, UInt) -> Unit = _
-  write_uint16(Self, UInt16) -> Unit = _
-  write_uint64(Self, UInt64) -> Unit = _
-  write_int_le(Self, Int) -> Unit = _
-  write_int16_le(Self, Int16) -> Unit = _
-  write_int64_le(Self, Int64) -> Unit = _
-  write_uint_le(Self, UInt) -> Unit = _
-  write_uint16_le(Self, UInt16) -> Unit = _
-  write_uint64_le(Self, UInt64) -> Unit = _
-  write_float(Self, Float) -> Unit = _
-  write_float_le(Self, Float) -> Unit = _
-  write_double(Self, Double) -> Unit = _
-  write_double_le(Self, Double) -> Unit = _
-}
-
 ///| A bytebuf has a known size and growing capacity as needed. It guarantees random accesses and seeking is always available, 
 /// and may accept advice from discard_read_bytes() and shrink(). It can be backed by alternatives to byte arrays, like Arena or 
 /// multiple bytebufs that act as a composition.
-pub(open) trait ByteBuf: ByteReader + ByteWriter {
+pub(open) trait ByteBuf {
   len(Self) -> Int
   is_empty(Self) -> Bool = _
   to_bytes(Self) -> Bytes
@@ -101,4 +38,58 @@ pub(open) trait ByteBuf: ByteReader + ByteWriter {
   /// This also increases reader index.
   /// Returns actually copied bytes. -1 if *this* bytebuf is at EOF
   transfer_to(Self, dst: &ByteBuf, length: Int) -> Int
+  /// -- WRITER --
+    ///| Remaining spaces we can write without resizing the underlying structure.
+  capacity(Self) -> Int
+
+  ///| Write some bytes into the destination.
+  /// The buffer will increase its capacity if needed.
+  write_bytes(Self, Bytes) -> Unit
+  ///| Write bytes from a fixed array.
+  write_array(Self, FixedArray[Byte], off: Int, len: Int) -> Unit = _
+  write_byte(Self, Byte) -> Unit
+  write_int(Self, Int) -> Unit = _
+  write_int16(Self, Int16) -> Unit = _
+  write_int64(Self, Int64) -> Unit = _
+  write_uint(Self, UInt) -> Unit = _
+  write_uint16(Self, UInt16) -> Unit = _
+  write_uint64(Self, UInt64) -> Unit = _
+  write_int_le(Self, Int) -> Unit = _
+  write_int16_le(Self, Int16) -> Unit = _
+  write_int64_le(Self, Int64) -> Unit = _
+  write_uint_le(Self, UInt) -> Unit = _
+  write_uint16_le(Self, UInt16) -> Unit = _
+  write_uint64_le(Self, UInt64) -> Unit = _
+  write_float(Self, Float) -> Unit = _
+  write_float_le(Self, Float) -> Unit = _
+  write_double(Self, Double) -> Unit = _
+  write_double_le(Self, Double) -> Unit = _
+
+  /// -- READER --
+  remaining(Self) -> Int
+  has_remaining(Self) -> Bool = _
+  /// This method raises if we cannot read exactly %len bytes.
+  read_bytes(Self, len : Int) -> Bytes raise
+  /// This method returns an empty Bytes if had no remaining bytes. 
+  /// Otherwise, try to read bytes as much as possible but not greater than len
+  read_bytes_most(Self, len: Int) -> Bytes = _
+  /// Returns the number of bytes read. -1 if cannot read to dst
+  read(Self, dst: FixedArray[Byte], off: Int, len: Int) -> Int = _
+  read_int(Self) -> Int raise = _
+  read_int_le(Self) -> Int raise = _
+  read_int16(Self) -> Int16 raise = _
+  read_int16_le(Self) -> Int16 raise = _
+  read_int64(Self) -> Int64 raise = _
+  read_int64_le(Self) -> Int64 raise = _
+  read_byte(Self) -> Byte raise = _
+  read_uint(Self) -> UInt raise = _
+  read_uint_le(Self) -> UInt raise = _
+  read_uint16(Self) -> UInt16 raise = _
+  read_uint16_le(Self) -> UInt16 raise = _
+  read_uint64(Self) -> UInt64 raise = _
+  read_uint64_le(Self) -> UInt64 raise = _
+  read_float(Self) -> Float raise = _ 
+  read_float_le(Self) -> Float raise = _
+  read_double(Self) -> Double raise = _
+  read_double_le(Self) -> Double raise = _
 }

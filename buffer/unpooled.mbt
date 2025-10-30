@@ -83,12 +83,12 @@ impl ByteBuf for HeapByteBuf with slice(self, start : Int, length : Int) -> &Byt
 }
 
 ///|
-impl ByteWriter for HeapByteBuf with capacity(self) -> Int {
+impl ByteBuf for HeapByteBuf with capacity(self) -> Int {
   return self.bytes.val.length() - self.writerIndex - self.startIndex
 }
 
 ///|
-impl ByteWriter for HeapByteBuf with write_bytes(self, data : Bytes) -> Unit {
+impl ByteBuf for HeapByteBuf with write_bytes(self, data : Bytes) -> Unit {
   if self.capacity() < data.length() {
     let new_capacity = self.bytes.val.length() +
       (data.length() - self.capacity())
@@ -108,27 +108,25 @@ impl ByteWriter for HeapByteBuf with write_bytes(self, data : Bytes) -> Unit {
 }
 
 ///|
-impl ByteWriter for HeapByteBuf with write_byte(self, data : Byte) -> Unit {
+impl ByteBuf for HeapByteBuf with write_byte(self, data : Byte) -> Unit {
   self.write_bytes(Bytes::make(1, data))
 }
 
 ///|
-impl ByteReader for HeapByteBuf with remaining(self) -> Int {
+impl ByteBuf for HeapByteBuf with remaining(self) -> Int {
   return self.writerIndex - self.readerIndex
 }
 
 ///|
-impl ByteReader for HeapByteBuf with read_bytes(self, amount : Int) -> Bytes? {
+impl ByteBuf for HeapByteBuf with read_bytes(self, amount : Int) -> Bytes {
   if self.remaining() < amount {
-    return None
+    raise fail("The bytebuf has been drained")
   }
   self.readerIndex += amount
-  return Some(
-    Bytes::makei(amount, i => self.bytes.val[self.startIndex +
-      self.readerIndex -
-      amount +
-      i]),
-  )
+  Bytes::makei(amount, i => self.bytes.val[self.startIndex +
+    self.readerIndex -
+    amount +
+    i])
 }
 
 ///|
@@ -137,8 +135,12 @@ impl ByteBuf for HeapByteBuf with transfer_to(self, another, len) -> Int {
     return -1
   }
   let amount = @cmp.minimum(len, self.len())
-  for i = 0; i < amount; i = i + 1 {
-      another.write_byte(self.read_byte().unwrap())
+  try {
+    for i = 0; i < amount; i = i + 1 {
+      another.write_byte(self.read_byte())
+    }
+  } catch {
+    _ => panic()
   }
   return amount
 }
