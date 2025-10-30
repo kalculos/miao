@@ -4,11 +4,11 @@
 const THRESH : Int = 4 * 1024 * 1024
 
 ///|
-let _EMPTY : FixedArray[Byte] = [0]
+let _EMPTY : FixedArray[Byte] = []
 
 ///|
 pub struct HeapByteBuf {
-  priv mut array : Ref[FixedArray[Byte]]
+  priv mut array : FixedArray[Byte]
   priv mut ridx: Int
   priv mut widx: Int
 }
