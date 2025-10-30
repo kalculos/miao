@@ -1,7 +1,8 @@
+///|
 test "bit_reader: read_bits basic LSB-first correctness" {
   let br = bit_reader()
   // feed one byte: 0b1010_1100
-  let _ = br.feed(Bytes::from_array([0b1010_1100.to_byte()]))
+  let _ = br.feed(Bytes::from_array([(0b1010_1100).to_byte()]))
 
   // Read 4 bits: should read lowest 4 bits (LSB-first) -> 0b1100 = 12
   let v1 = br.read_bits(4U).unwrap()
@@ -15,10 +16,13 @@ test "bit_reader: read_bits basic LSB-first correctness" {
   assert_true(!br.can_read())
 }
 
+///|
 test "bit_reader: read_bits spanning multiple bytes" {
   let br = bit_reader()
   // bytes: [0b11110000, 0b00001111]
-  let _ = br.feed(Bytes::from_array([0b1111_0000.to_byte(), 0b0000_1111.to_byte()]))
+  let _ = br.feed(
+    Bytes::from_array([(0b1111_0000).to_byte(), (0b0000_1111).to_byte()]),
+  )
 
   // Read 12 bits total -> should read low 8 (from first) + low 4 (from second)
   let val = br.read_bits(12U).unwrap()
@@ -28,11 +32,12 @@ test "bit_reader: read_bits spanning multiple bytes" {
   assert_eq(val, 0xFF0U)
 }
 
+///|
 test "bit_reader: read_bit sequentially" {
   let br = bit_reader()
-  let _ = br.feed(Bytes::from_array([0b0101_0101.to_byte()])) // LSB-first pattern 10101010 reversed
+  let _ = br.feed(Bytes::from_array([(0b0101_0101).to_byte()])) // LSB-first pattern 10101010 reversed
   // Read 8 bits one by one
-  let bits: Array[Int] = Array::new()
+  let bits : Array[Int] = Array::new()
   let mut i = 0
   while i < 8 {
     let b = br.read_bit().unwrap()
@@ -40,14 +45,15 @@ test "bit_reader: read_bit sequentially" {
     i = i + 1
   }
   // LSB-first sequence: [1,0,1,0,1,0,1,0]
-  assert_eq(bits, [1,0,1,0,1,0,1,0])
+  assert_eq(bits, [1, 0, 1, 0, 1, 0, 1, 0])
   assert_true(!br.can_read())
 }
 
+///|
 test "bit_reader: align_to_byte discards remainder bits" {
   let br = bit_reader()
   // feed one byte 0b1111_0000
-  let _ = br.feed(Bytes::from_array([0b1111_0000.to_byte()]))
+  let _ = br.feed(Bytes::from_array([(0b1111_0000).to_byte()]))
   // read 3 bits first
   let _ = br.read_bits(3U)
   assert_true(br.can_read())
@@ -57,19 +63,23 @@ test "bit_reader: align_to_byte discards remainder bits" {
   assert_true(!br.can_read())
 }
 
+///|
 test "bit_reader: read_bits insufficient returns None" {
   let br = bit_reader()
   // feed one byte only
-  let _ = br.feed(Bytes::from_array([0b1111_0000.to_byte()]))
+  let _ = br.feed(Bytes::from_array([(0b1111_0000).to_byte()]))
   // Try reading 16 bits -> not enough
   let val = br.read_bits(16U)
   assert_true(val is None)
 }
 
+///|
 test "bit_reader: take_bytes works correctly" {
   let br = bit_reader()
   let _ = br.feed(Bytes::from_array([1, 2, 3, 4]))
   let part = br.take_bytes(3).unwrap()
+
+  //
   assert_eq(part.length(), 3)
   assert_eq(part[0], 1)
   assert_eq(part[1], 2)
@@ -77,6 +87,7 @@ test "bit_reader: take_bytes works correctly" {
   assert_eq(br.byte_available(), 1)
 }
 
+///|
 test "bit_reader: can_read reacts to bits and fifo" {
   let br = bit_reader()
   assert_true(!br.can_read())

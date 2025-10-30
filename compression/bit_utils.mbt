@@ -8,16 +8,17 @@ pub fn revbits(v : UInt, n : UInt) -> UInt {
   let mut i : UInt = 0U
   while i < n {
     // Extract bit i from v
-    let bit : UInt = (v >> i.to_int64().to_int()) & 1U
+    let bit : UInt = (v >> i.reinterpret_as_int()) & 1U
     // Place it in reversed position
     result = result |
-      (bit << (n.to_int64().to_int() - 1 - i.to_int64().to_int()))
+      (bit << (n.reinterpret_as_int() - 1 - i.reinterpret_as_int()))
     i = i + 1
   }
   result
 }
 
-///| Packs a sequence of bits (`0` or `1`) into a byte array using LSB-first order.
+///|
+/// Packs a sequence of bits (`0` or `1`) into a byte array using LSB-first order.
 ///
 /// Each group of up to 8 bits is collected into one output byte,  
 /// where the first bit in the input** becomes the **least significant bit (bit 0)* 

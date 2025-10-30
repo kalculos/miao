@@ -3,7 +3,7 @@ fn mask_n(n : UInt) -> UInt {
   if n == 0U {
     0U
   } else {
-    (1U << n.to_int64().to_int()) - 1U
+    (1U << n.reinterpret_as_int()) - 1U
   }
 }
 
@@ -48,9 +48,9 @@ test "power-of-two position symmetry: revbits(1<<k, n) == 1<<(n-1-k)" {
   let n : UInt = 8U
   let mut k : UInt = 0U
   while k < n {
-    let v = 1U << k.to_int64().to_int()
+    let v = 1U << k.reinterpret_as_int()
     let got = revbits(v, n)
-    let expect = 1U << (n.to_int64().to_int() - 1 - k.to_int64().to_int())
+    let expect = 1U << (n.reinterpret_as_int() - 1 - k.reinterpret_as_int())
     assert_eq(got, expect)
     k = k + 1U
   }
@@ -88,59 +88,65 @@ test "revbits only depends on low-n bits" {
   assert_eq(revbits(v, n), revbits(v & mask_n(n), n))
 }
 
+///|
 test "pack_bits_lsb: exactly 8 bits (LSB-first)" {
   // bits: [1,0,1,0,0,1,0,1]
   // LSB-first means b0=1 is least significant bit.
   // => binary 0b10100101 = 0xA5
-  let bits = [1,0,1,0,0,1,0,1]
+  let bits = [1, 0, 1, 0, 0, 1, 0, 1]
   let packed = pack_bits_lsb(bits)
   assert_eq(packed.length(), 1)
   assert_eq(packed[0], 0xA5)
 }
 
+///|
 test "pack_bits_lsb: fewer than 8 bits" {
   // bits: [1,0,1]
   // => binary 0b00000101 = 5
-  let bits = [1,0,1]
+  let bits = [1, 0, 1]
   let packed = pack_bits_lsb(bits)
   assert_eq(packed.length(), 1)
   assert_eq(packed[0], 0x05)
 }
 
+///|
 test "pack_bits_lsb: multiple full bytes" {
   // first 8 bits [1,0,0,0,0,0,0,0] -> 0b00000001 = 0x01
   // next 8 bits [1,1,1,1,1,1,1,1] -> 0xFF
-  let bits = [1,0,0,0,0,0,0,0, 1,1,1,1,1,1,1,1]
+  let bits = [1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1]
   let packed = pack_bits_lsb(bits)
   assert_eq(packed.length(), 2)
   assert_eq(packed[0], 0x01)
   assert_eq(packed[1], 0xFF)
 }
 
+///|
 test "pack_bits_lsb: ends with partial byte" {
   // total 12 bits, all 1
   // low 8 bits -> 0xFF
   // remaining 4 bits -> 0b00001111 = 0x0F
-  let bits = [1,1,1,1,1,1,1,1, 1,1,1,1]
+  let bits = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
   let packed = pack_bits_lsb(bits)
   assert_eq(packed.length(), 2)
   assert_eq(packed[0], 0xFF)
   assert_eq(packed[1], 0x0F)
 }
 
+///|
 test "pack_bits_lsb: all zeros" {
   // all bits zero should produce zeroed bytes
-  let bits = [0,0,0,0,0,0,0,0, 0,0,0]
+  let bits = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
   let packed = pack_bits_lsb(bits)
-  assert_eq(packed.length(), 2)   // 11 bits -> two bytes
+  assert_eq(packed.length(), 2) // 11 bits -> two bytes
   assert_eq(packed[0], 0x00)
   assert_eq(packed[1], 0x00)
 }
 
+///|
 test "pack_bits_lsb: alternating bits 0,1,0,1,... (16 bits)" {
   // low byte  -> 0b10101010 = 0xAA
   // high byte -> 0b10101010 = 0xAA
-  let bits = [0,1,0,1,0,1,0,1, 0,1,0,1,0,1,0,1]
+  let bits = [0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1]
   let packed = pack_bits_lsb(bits)
   assert_eq(packed.length(), 2)
   assert_eq(packed[0], 0xAA)

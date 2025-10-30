@@ -10,12 +10,15 @@ pub struct Huffman {
   fast : Array[Int]
 }
 
+///|
 /// Construct a table from the code length (canonical definition in MSB space).
 /// Internally we reverse the MSB codewords to LSB-first before entering tables.
 /// Used for lit/len and dist of dynamic blocks.
-pub fn from_code_lengths(lengths: Array[Byte]) -> Huffman raise CompressionError {
+pub fn from_code_lengths(
+  lengths : Array[Byte],
+) -> Huffman raise CompressionError {
   // Calculate the length of each code (1..15) and perform a validity check.
-  let bl_count = Array::make(16, 0)  // index = bits, value = count
+  let bl_count = Array::make(16, 0) // index = bits, value = count
   for l in lengths {
     if l > 0 {
       if l > 15 {
@@ -35,14 +38,13 @@ pub fn from_code_lengths(lengths: Array[Byte]) -> Huffman raise CompressionError
   }
 
   // Assign an MSB codeword to each symbol -> reverse to LSB-first -> collect into the slow table
-  let slow: Array[(UInt16, Byte, UInt16)] = Array::new()
+  let slow : Array[(UInt16, Byte, UInt16)] = Array::new()
   for sym, len in lengths.iter() {
     if len != 0 {
       let b = len.to_int()
       let c = next_code[b]
       next_code[b] = c + 1
-
-      let rc_u: UInt16 = revbits(c.reinterpret_as_uint(), len.to_uint()).to_uint16()
+      let rc_u : UInt16 = revbits(c.reinterpret_as_uint(), len.to_uint()).to_uint16()
       slow.push((rc_u, len, sym.to_uint16()))
     }
   }
@@ -52,7 +54,7 @@ pub fn from_code_lengths(lengths: Array[Byte]) -> Huffman raise CompressionError
 
   // To avoid aliasing issues, manually push new arrays during bucketing.
   let max_fast_len = if FAST_BITS < 15 { FAST_BITS } else { 15 }
-  let buckets: Array[Array[(UInt16, Byte, UInt16)]] = Array::new()
+  let buckets : Array[Array[(UInt16, Byte, UInt16)]] = Array::new()
   let mut i = 0
   while i <= max_fast_len {
     buckets.push(Array::new())
@@ -62,7 +64,7 @@ pub fn from_code_lengths(lengths: Array[Byte]) -> Huffman raise CompressionError
   // Place the slow items into their respective buckets by length (only care about items <= FAST_BITS).
   let mut sidx = 0
   while sidx < slow.length() {
-    let t = slow[sidx]  // (rc, len, sym)
+    let t = slow[sidx] // (rc, len, sym)
     let l = t.1.to_int()
     if l <= max_fast_len {
       buckets[l].push(t)
@@ -82,8 +84,7 @@ pub fn from_code_lengths(lengths: Array[Byte]) -> Huffman raise CompressionError
       let sym_tag = t.2.to_int()
       let fill = 1 << (FAST_BITS - l)
       let base = rc << (FAST_BITS - l)
-      let tag  = (l << 16) | sym_tag
-
+      let tag = (l << 16) | sym_tag
       let mut k = 0
       while k < fill {
         fast[base + k] = tag
@@ -98,12 +99,12 @@ pub fn from_code_lengths(lengths: Array[Byte]) -> Huffman raise CompressionError
   Huffman::{ slow, fast }
 }
 
-
+///|
 pub fn from_explicit_codes(
-  codes_lsb: Array[UInt16],
-  lens: Array[Byte],
+  codes_lsb : Array[UInt16],
+  lens : Array[Byte],
 ) -> Huffman {
-  let slow: Array[(UInt16, Byte, UInt16)] = Array::new()
+  let slow : Array[(UInt16, Byte, UInt16)] = Array::new()
   let total = codes_lsb.length()
   let mut s = 0
   while s < total {
@@ -113,7 +114,6 @@ pub fn from_explicit_codes(
     }
     s = s + 1
   }
-
   let fast = Array::make(FAST_SIZE, 0)
   for t in slow {
     let rc = t.0
@@ -130,15 +130,15 @@ pub fn from_explicit_codes(
       }
     }
   }
-
   Huffman::{ slow, fast }
 }
 
+///|
 pub fn from_explicit_codes_dist(
-  codes_lsb: Array[UInt16],
-  lens: Array[Byte],
+  codes_lsb : Array[UInt16],
+  lens : Array[Byte],
 ) -> Huffman {
-  let slow: Array[(UInt16, Byte, UInt16)] = Array::new()
+  let slow : Array[(UInt16, Byte, UInt16)] = Array::new()
   let total = codes_lsb.length()
   let mut s = 0
   while s < total {
@@ -148,7 +148,6 @@ pub fn from_explicit_codes_dist(
     }
     s = s + 1
   }
-
   let fast = Array::make(FAST_SIZE, 0)
   for t in slow {
     let rc = t.0
@@ -165,13 +164,16 @@ pub fn from_explicit_codes_dist(
       }
     }
   }
-
   Huffman::{ slow, fast }
 }
 
-pub fn decode(self: Huffman, br: BitReaderStream) -> Option[UInt16] raise CompressionError {
-  let mut acc: UInt = 0U
-  let mut len: Int = 0
+///|
+pub fn decode(
+  self : Huffman,
+  br : BitReaderStream,
+) -> UInt16? raise CompressionError {
+  let mut acc : UInt = 0U
+  let mut len : Int = 0
   while len < 15 {
     match br.read_bits(1) {
       Some(b) => {
@@ -184,7 +186,7 @@ pub fn decode(self: Huffman, br: BitReaderStream) -> Option[UInt16] raise Compre
     //
     if len <= FAST_BITS {
       let mask = (1 << len) - 1
-      let idx = ((acc.reinterpret_as_int() & mask) << (FAST_BITS - len))
+      let idx = (acc.reinterpret_as_int() & mask) << (FAST_BITS - len)
       let entry = self.fast[idx]
       if entry != 0 && ((entry >> 16) & 0xFF) == len {
         return Some((entry & 0xFFFF).to_uint16())
@@ -198,6 +200,5 @@ pub fn decode(self: Huffman, br: BitReaderStream) -> Option[UInt16] raise Compre
       }
     }
   }
-
   raise CompressionError::InvalidHuffman
 }
