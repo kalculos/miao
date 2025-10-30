@@ -76,16 +76,16 @@ pub impl @io.Reader for BufferedPipe with available(self) {
 }
 
 ///|
-fn gandi_ridx(self : BufferedPipe) -> Int {
+fn advance_reader_idx(self : BufferedPipe, delta? : Int = 1) -> Int {
   let v = self.ridx
-  self.ridx = (self.ridx + 1) % self.buf.length()
+  self.ridx = (self.ridx + delta) % self.buf.length()
   v
 }
 
 ///|
-fn gandi_widx(self : BufferedPipe) -> Int {
+fn advance_writer_idx(self : BufferedPipe, delta? : Int = 1) -> Int {
   let v = self.widx
-  self.widx = (self.widx + 1) % self.buf.length()
+  self.widx = (self.widx + delta) % self.buf.length()
   v
 }
 
@@ -103,8 +103,18 @@ pub impl @io.Reader for BufferedPipe with read(self, dst, off, len) {
   }
   let read = @cmp.minimum(len, self.avail())
   let len = self.buf.length()
+  if self.ridx + read > len {
+    let copied = len - self.ridx
+    self.buf.blit_to(
+      dst,
+      len=copied,
+      src_offset=self.advance_reader_idx(delta=read),
+      dst_offset=off,
+    )
+    self.buf.blit_to(dst, len=self.ridx, src_offset=0, dst_offset=copied)
+  }
   for i = 0; i < read; i = i + 1 {
-    dst[off + i] = self.buf[self.gandi_ridx() % len]
+    dst[off + i] = self.buf[self.advance_reader_idx() % len]
   }
   if self.write_waiting {
     self.rt.new_task(_ => (self.write_waiter)()).start()
@@ -123,9 +133,28 @@ pub impl @io.Writer for BufferedPipe with write(self, arr, off, len) {
       return 0
     }
   }
-  let written = @cmp.minimum(len, self.buf.length())
-  for i = 0; i < written; i = i + 1 {
-    self.buf[self.gandi_widx() % self.buf.length()] = arr[off + i]
+  let written = @cmp.minimum(len, self.avail())
+  if self.widx + written > self.buf.length() {
+    let copied = self.buf.length() - self.widx
+    arr.blit_to(
+      self.buf,
+      len=copied,
+      src_offset=off,
+      dst_offset=self.advance_writer_idx(delta=written),
+    )
+    arr.blit_to(
+      self.buf,
+      len=len - copied,
+      src_offset=off + copied,
+      dst_offset=0,
+    )
+  } else {
+    arr.blit_to(
+      self.buf,
+      len=written,
+      src_offset=off,
+      dst_offset=self.advance_writer_idx(delta=written),
+    )
   }
   if written != 0 && self.read_waiting {
     self.rt.new_task(_ => (self.read_waiter)()).start()
