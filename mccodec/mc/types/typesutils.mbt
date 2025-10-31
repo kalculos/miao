@@ -133,8 +133,8 @@ pub fn[T] read_prefix_array(
 pub fn[T] write_prefix_array(
   buf : &@buffer.Buffer,
   arr : FixedArray[T],
-  writer : (&@buffer.Buffer, T) -> Unit,
-) -> Unit {
+  writer : (&@buffer.Buffer, T) -> Unit raise,
+) -> Unit raise{
   write_varint(buf, arr.length())
   for item in arr {
     writer(buf, item)
