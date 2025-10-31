@@ -30,7 +30,7 @@ impl @mc.Packet for PlayerActionC2S with deserialize(
 ) {
   let status = @types.read_varint(buf)
   let location = @types.read_position(buf)
-  let face = buf.read_byte().unwrap()
+  let face = buf.read_byte()
   let sequence = @types.read_varint(buf)
   { status, location, face, sequence }
 }

@@ -17,6 +17,6 @@ impl @mc.Packet for PongConfigC2S with serialize(self, buf : &@buffer.Buffer) {
 
 ///|
 impl @mc.Packet for PongConfigC2S with deserialize(buf : &@buffer.Buffer) {
-  { id: buf.read_int().unwrap() }
+  { id: buf.read_int() }
 }
 

@@ -30,8 +30,8 @@ impl @mc.Packet for UseItemC2S with deserialize(
 ) {
   let hand = @types.read_varint(buf)
   let sequence = @types.read_varint(buf)
-  let yaw = buf.read_float() |> Option::unwrap
-  let pitch = buf.read_float() |> Option::unwrap
+  let yaw = buf.read_float()
+  let pitch = buf.read_float()
   { hand, sequence, yaw, pitch }
 }
 

@@ -22,6 +22,6 @@ impl @mc.Packet for ServerboundKeepAliveConfigC2S with serialize(
 impl @mc.Packet for ServerboundKeepAliveConfigC2S with deserialize(
   buf : &@buffer.Buffer,
 ) {
-  { keep_alive_id: buf.read_int64().unwrap() }
+  { keep_alive_id: buf.read_int64() }
 }
 

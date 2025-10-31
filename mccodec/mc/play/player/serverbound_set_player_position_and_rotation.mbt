@@ -32,12 +32,12 @@ impl @mc.Packet for SetPlayerPositionAndRotationC2S with serialize(
 impl @mc.Packet for SetPlayerPositionAndRotationC2S with deserialize(
   buf : &@buffer.Buffer,
 ) {
-  let x = buf.read_double().unwrap()
-  let feet_y = buf.read_double().unwrap()
-  let z = buf.read_double().unwrap()
-  let yaw = buf.read_float().unwrap()
-  let pitch = buf.read_float().unwrap()
-  let on_ground = buf.read_byte().unwrap()
+  let x = buf.read_double()
+  let feet_y = buf.read_double()
+  let z = buf.read_double()
+  let yaw = buf.read_float()
+  let pitch = buf.read_float()
+  let on_ground = buf.read_byte()
   { x, feet_y, z, yaw, pitch, on_ground }
 }
 

@@ -22,6 +22,6 @@ impl @mc.Packet for PlayerAbilitiesC2S with serialize(
 impl @mc.Packet for PlayerAbilitiesC2S with deserialize(
   buf : &@buffer.Buffer,
 ) {
-  { flags: buf.read_byte().unwrap() }
+  { flags: buf.read_byte() }
 }
 

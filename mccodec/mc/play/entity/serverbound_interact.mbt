@@ -40,9 +40,9 @@ impl @mc.Packet for InteractC2S with deserialize(
   let interaction_type = @types.read_varint(buf)
   let (target_x, target_y, target_z) = if interaction_type == 2 {
     (
-      Some(buf.read_float().unwrap()),
-      Some(buf.read_float().unwrap()),
-      Some(buf.read_float().unwrap()),
+      Some(buf.read_float()),
+      Some(buf.read_float()),
+      Some(buf.read_float()),
     )
   } else {
     (None, None, None)

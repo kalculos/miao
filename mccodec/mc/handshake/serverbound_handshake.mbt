@@ -44,7 +44,7 @@ impl @mc.Packet for HandshakeC2S with deserialize(buf : &@buffer.Buffer) {
   {
     protocol_version: @types.read_varint(buf),
     server_address: @types.read_string(buf),
-    server_port: buf.read_uint16().unwrap(),
+    server_port: buf.read_uint16(),
     intent: match @types.read_varint(buf) {
       1 => Status
       2 => Login

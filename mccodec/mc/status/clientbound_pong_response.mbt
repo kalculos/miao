@@ -20,5 +20,5 @@ impl @mc.Packet for PongResponseS2C with serialize(
 
 ///|
 impl @mc.Packet for PongResponseS2C with deserialize(buf : &@buffer.Buffer) {
-  { timestamp: buf.read_int64().unwrap() }
+  { timestamp: buf.read_int64() }
 }

@@ -22,6 +22,6 @@ impl @mc.Packet for PingRequestPlayC2S with serialize(
 impl @mc.Packet for PingRequestPlayC2S with deserialize(
   buf : &@buffer.Buffer,
 ) {
-  { payload: buf.read_int64().unwrap() }
+  { payload: buf.read_int64() }
 }
 

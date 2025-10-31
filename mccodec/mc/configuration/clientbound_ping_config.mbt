@@ -17,6 +17,6 @@ impl @mc.Packet for PingConfigS2C with serialize(self, buf : &@buffer.Buffer) {
 
 ///|
 impl @mc.Packet for PingConfigS2C with deserialize(buf : &@buffer.Buffer) {
-  { id: buf.read_int().unwrap() }
+  { id: buf.read_int() }
 }
 

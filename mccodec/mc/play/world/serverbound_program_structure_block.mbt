@@ -56,18 +56,18 @@ impl @mc.Packet for ProgramStructureBlockC2S with deserialize(
   let action = @types.read_varint(buf)
   let mode = @types.read_varint(buf)
   let name = @types.read_string(buf)
-  let offset_x = buf.read_byte().unwrap()
-  let offset_y = buf.read_byte().unwrap()
-  let offset_z = buf.read_byte().unwrap()
-  let size_x = buf.read_byte().unwrap()
-  let size_y = buf.read_byte().unwrap()
-  let size_z = buf.read_byte().unwrap()
+  let offset_x = buf.read_byte()
+  let offset_y = buf.read_byte()
+  let offset_z = buf.read_byte()
+  let size_x = buf.read_byte()
+  let size_y = buf.read_byte()
+  let size_z = buf.read_byte()
   let mirror = @types.read_varint(buf)
   let rotation = @types.read_varint(buf)
   let metadata = @types.read_string(buf)
-  let integrity = buf.read_float().unwrap()
+  let integrity = buf.read_float()
   let seed = @types.read_varlong(buf)
-  let flags = buf.read_byte().unwrap();
+  let flags = buf.read_byte();
   { location, action, mode, name, offset_x, offset_y, offset_z, size_x, size_y, size_z, mirror, rotation, metadata, integrity, seed, flags }
 }
 

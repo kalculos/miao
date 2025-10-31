@@ -41,9 +41,9 @@ impl @mc.Packet for UseItemOnC2S with deserialize(
   let hand = @types.read_varint(buf)
   let location = @types.read_position(buf)
   let direction = @types.read_varint(buf)
-  let cursor_position_x = buf.read_float() |> Option::unwrap
-  let cursor_position_y = buf.read_float() |> Option::unwrap
-  let cursor_position_z = buf.read_float() |> Option::unwrap
+  let cursor_position_x = buf.read_float()
+  let cursor_position_y = buf.read_float()
+  let cursor_position_z = buf.read_float()
   let inside_block = @types.read_bool(buf)
   let world_border_hit = @types.read_bool(buf)
   let sequence = @types.read_varint(buf)

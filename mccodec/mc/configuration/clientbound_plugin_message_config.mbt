@@ -3,7 +3,7 @@
 /// Mods and plugins can use this to send data
 struct ClientboundPluginMessageConfigS2C {
   channel : String // Plugin channel identifier
-  data : Array[Byte] // Plugin data (max 1048576 bytes)
+  data : FixedArray[Byte] // Plugin data (max 1048576 bytes)
 }
 
 ///|
@@ -17,7 +17,7 @@ impl @mc.Packet for ClientboundPluginMessageConfigS2C with serialize(
   buf : &@buffer.Buffer,
 ) {
   @types.write_string(buf, self.channel)
-  buf.write_bytes(Bytes::from_array(self.data))
+  buf.write(self.data, 0, self.data.length()) |> ignore
 }
 
 ///|
@@ -25,6 +25,6 @@ impl @mc.Packet for ClientboundPluginMessageConfigS2C with deserialize(
   buf : &@buffer.Buffer,
 ) {
   let channel = @types.read_string(buf)
-  let data = buf.read_bytes(buf.remaining()).unwrap().to_array()
+  let data = buf.read_bytes(buf.readable_bytes()).to_fixedarray()
   { channel, data }
 }

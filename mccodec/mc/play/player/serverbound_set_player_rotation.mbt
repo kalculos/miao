@@ -26,9 +26,9 @@ impl @mc.Packet for SetPlayerRotationC2S with serialize(
 impl @mc.Packet for SetPlayerRotationC2S with deserialize(
   buf : &@buffer.Buffer,
 ) {
-  let yaw = buf.read_float().unwrap()
-  let pitch = buf.read_float().unwrap()
-  let on_ground = buf.read_byte().unwrap()
+  let yaw = buf.read_float()
+  let pitch = buf.read_float()
+  let on_ground = buf.read_byte()
   { yaw, pitch, on_ground }
 }
 

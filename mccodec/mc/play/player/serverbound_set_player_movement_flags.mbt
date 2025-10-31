@@ -22,6 +22,6 @@ impl @mc.Packet for SetPlayerMovementFlagsC2S with serialize(
 impl @mc.Packet for SetPlayerMovementFlagsC2S with deserialize(
   buf : &@buffer.Buffer,
 ) {
-  { on_ground: buf.read_byte().unwrap() }
+  { on_ground: buf.read_byte() }
 }
 

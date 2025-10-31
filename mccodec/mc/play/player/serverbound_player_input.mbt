@@ -22,7 +22,7 @@ impl @mc.Packet for PlayerInputC2S with serialize(
 impl @mc.Packet for PlayerInputC2S with deserialize(
   buf : &@buffer.Buffer,
 ) {
-  let flags = buf.read_byte().unwrap()
+  let flags = buf.read_byte()
   {  flags, }
 }
 

@@ -39,11 +39,11 @@ impl @mc.Packet for ClientInformationPlayC2S with deserialize(
   buf : &@buffer.Buffer,
 ) {
   let locale = @types.read_string(buf)
-  let view_distance = buf.read_byte().unwrap_or(0)
+  let view_distance = buf.read_byte()
   let chat_mode = @types.read_varint(buf)
   let chat_colors = @types.read_bool(buf)
   let displayed_skin_parts = @types.SkinPart::from_bitmask(
-    buf.read_byte().unwrap_or(0),
+    buf.read_byte(),
   )
   let main_hand = @types.read_varint(buf)
   let enable_text_filtering = @types.read_bool(buf)

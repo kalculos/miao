@@ -20,6 +20,6 @@ impl @mc.Packet for ChunkBatchReceivedC2S with serialize(
 impl @mc.Packet for ChunkBatchReceivedC2S with deserialize(
   buf : &@buffer.Buffer,
 ) {
-  { chunks_per_tick: buf.read_float().unwrap() }
+  { chunks_per_tick: buf.read_float() }
 }
 

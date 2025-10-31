@@ -31,7 +31,7 @@ impl @mc.Packet for ProgramCommandBlockC2S with deserialize(
   let location = @types.read_position(buf)
   let command = @types.read_string(buf)
   let mode = @types.read_varint(buf)
-  let flags = buf.read_byte() |> Option::unwrap
+  let flags = buf.read_byte()
   { location, command, mode, flags }
 }
 

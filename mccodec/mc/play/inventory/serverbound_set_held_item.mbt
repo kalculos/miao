@@ -22,6 +22,6 @@ impl @mc.Packet for SetHeldItemC2S with serialize(
 impl @mc.Packet for SetHeldItemC2S with deserialize(
   buf : &@buffer.Buffer,
 ) {
-  { slot: buf.read_int16() |> Option::unwrap }
+  { slot: buf.read_int16() }
 }
 

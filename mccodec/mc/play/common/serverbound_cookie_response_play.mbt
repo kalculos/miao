@@ -20,7 +20,7 @@ impl @mc.Packet for CookieResponsePlayC2S with serialize(
   @types.write_optional(buf, self.payload, (b, p) => @types.write_prefix_array(
     b,
     p,
-    @bytebuf.ByteWriter::write_byte,
+    @buffer.ByteSlice::write_byte,
   ))
 }
 
@@ -30,7 +30,7 @@ impl @mc.Packet for CookieResponsePlayC2S with deserialize(
 ) {
   let key = @types.read_identifier(buf)
   let payload = @types.read_optional(buf, b => {
-    @types.read_prefix_array(b, by => by.read_byte().unwrap_or(0))
+    @types.read_prefix_array(b, by => by.read_byte())
   })
   { key, payload }
 }

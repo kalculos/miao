@@ -17,5 +17,5 @@ impl @mc.Packet for PingRequestC2S with serialize(self, buf : &@buffer.Buffer) {
 
 ///|
 impl @mc.Packet for PingRequestC2S with deserialize(buf : &@buffer.Buffer) {
-  { timestamp: buf.read_int64().unwrap() }
+  { timestamp: buf.read_int64() }
 }

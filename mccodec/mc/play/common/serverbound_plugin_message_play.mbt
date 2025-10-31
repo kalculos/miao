@@ -3,7 +3,7 @@
 /// Plugin message to server
 struct ServerboundPluginMessagePlayC2S {
   channel : @types.Identifier // Plugin channel
-  data : Array[Byte] // Plugin data
+  data : FixedArray[Byte] // Plugin data
 }
 
 ///|
@@ -17,7 +17,7 @@ impl @mc.Packet for ServerboundPluginMessagePlayC2S with serialize(
   buf : &@buffer.Buffer,
 ) {
   @types.write_identifier(buf, self.channel)
-  buf.write_bytes(Bytes::from_array(self.data))
+  buf.write(self.data, 0, self.data.length()) |> ignore
 }
 
 ///|
@@ -25,7 +25,7 @@ impl @mc.Packet for ServerboundPluginMessagePlayC2S with deserialize(
   buf : &@buffer.Buffer,
 ) {
   let channel = @types.read_identifier(buf)
-  let data = buf.read_bytes(buf.remaining()).unwrap().to_array()
+  let data = buf.read_bytes(buf.readable_bytes()).to_fixedarray()
   { channel, data }
 }
 
