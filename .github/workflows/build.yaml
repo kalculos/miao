@@ -1,0 +1,36 @@
+name: Moon Linter
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+  pull_request:
+
+jobs:
+  check:
+    strategy:
+      matrix:
+        version: [stable]
+        os:
+          - name: ubuntu-latest
+            triple: x86_64-linux-gnu
+          - name: macos-latest
+            triple: arm64-apple-darwin
+          - name: windows-latest
+            triple: x86_64-w64-mingw32        
+      fail-fast: false
+    runs-on: ${{ matrix.os.name }}
+    continue-on-error: false
+    steps:
+      - uses: actions/checkout@v4
+      - uses: illusory0x0/setup-moonbit@v0.1.0
+        with: 
+          version: ${{ matrix.version }}
+      - name: Install Dependencies
+        run: |
+          moon update
+          moon Install
+      - name: Moon check
+        run: |
+          moon check
