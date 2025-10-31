@@ -32,7 +32,7 @@ pub(open) trait DatagramSocket: Socket {
     &DatagramConnection,
     NetworkError,
   ]
-  async send(Self, dst : SockAddr, opt : UdpOption) -> Result[
+  async send(Self, dst : SockAddr, buffer : &@buffer.Buffer, opt : UdpOption) -> Result[
     Unit,
     NetworkError,
   ]
