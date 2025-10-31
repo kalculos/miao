@@ -1,6 +1,6 @@
 {
     "import": [
       "moonbitlang/x/uuid",
-      "kalculos/buffer"
+      "iceBear67/miao/buffer"
     ]
 }
