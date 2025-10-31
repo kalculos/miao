@@ -19,8 +19,8 @@ pub fn[T] read_holder(
 pub fn[T] write_holder(
   buf : &@buffer.Buffer,
   holder : Holder[T],
-  write_value : (&@buffer.Buffer, T) -> Unit raise,
-) -> Unit raise {
+  write_value : (&@buffer.Buffer, T) -> Unit,
+) -> Unit {
   write_varint(buf, holder.id)
   if holder.id != 0 {
     write_value(buf, holder.value.unwrap())

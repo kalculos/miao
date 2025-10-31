@@ -67,11 +67,11 @@ pub fn read_slot(buf : &@buffer.Buffer) -> Slot raise {
 
 ///|
 /// Write a slot to the buffer
-pub fn write_slot(buf : &@buffer.Buffer, slot : Slot) -> Unit raise {
+pub fn write_slot(buf : &@buffer.Buffer, slot : Slot) -> Unit {
   write_varint(buf, slot.item_count)
   if slot.item_count > 0 {
     guard slot.item_id is Some(id) else {
-      raise fail("Slot has items but no item_id")
+      abort("Slot has items but no item_id")
     }
     write_varint(buf, id)
     let mut length_to_add = 0

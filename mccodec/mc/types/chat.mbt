@@ -19,7 +19,7 @@ pub fn read_chat_type_decoration(
 pub fn write_chat_type_decoration(
   buf : &@buffer.Buffer,
   decoration : ChatTypeDecoration,
-) -> Unit raise {
+) -> Unit {
   write_string(buf, decoration.translation_key)
   write_prefix_array(buf, decoration.parameters, write_varint)
   write_nbt(buf, decoration.style)
@@ -39,10 +39,7 @@ pub fn read_chat_type(buf : &@buffer.Buffer) -> ChatType raise {
 }
 
 ///|
-pub fn write_chat_type(
-  buf : &@buffer.Buffer,
-  chat_type : ChatType,
-) -> Unit raise {
+pub fn write_chat_type(buf : &@buffer.Buffer, chat_type : ChatType) -> Unit {
   write_chat_type_decoration(buf, chat_type.chat)
   write_chat_type_decoration(buf, chat_type.narration)
 }

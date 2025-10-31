@@ -133,8 +133,8 @@ pub fn[T] read_prefix_array(
 pub fn[T] write_prefix_array(
   buf : &@buffer.Buffer,
   arr : FixedArray[T],
-  writer : (&@buffer.Buffer, T) -> Unit raise,
-) -> Unit raise{
+  writer : (&@buffer.Buffer, T) -> Unit,
+) -> Unit {
   write_varint(buf, arr.length())
   for item in arr {
     writer(buf, item)
@@ -226,9 +226,11 @@ pub fn read_nbt(buf : &@buffer.Buffer) -> @nbt.NBTTag raise {
 }
 
 ///|
-pub fn write_nbt(buf : &@buffer.Buffer, nbt : @nbt.NBTTag) -> Unit raise {
+pub fn write_nbt(buf : &@buffer.Buffer, nbt : @nbt.NBTTag) -> Unit {
   let core_buf = @moonbitlang/core/buffer.new()
-  @bnbt.write_uncompressed(nbt, core_buf)
+  @bnbt.write_uncompressed(nbt, core_buf) catch {
+    e => abort(e.to_string()) // TODO: proper error handling, M2
+  }
   let arr = bytes_to_array(core_buf.to_bytes())
   guard buf.write(arr, 0, arr.length()) == arr.length()
 }
