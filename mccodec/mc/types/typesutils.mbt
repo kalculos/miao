@@ -214,138 +214,15 @@ pub fn write_uuid(buf : &@bytebuf.ByteBuf, uuid : @uuid.UUID) -> Unit {
   buf.write_bytes(bytes)
 }
 
-/// below are NOT finished yet
-
-// ///|
-// /// Read an unsigned short (2 bytes) from the buffer.
-// pub fn read_ushort(buf : &@bytebuf.ByteBuf) -> Int {
-//   let byte1 = buf.read_byte().unwrap_or(0).to_int()
-//   let byte2 = buf.read_byte().unwrap_or(0).to_int()
-//   (byte1 << 8) | byte2
-// }
-
-// ///|
-// /// Write an unsigned short (2 bytes) to the buffer.
-// pub fn write_ushort(buf : &@bytebuf.ByteBuf, value : Int) -> Unit {
-//   buf.write_byte((value >> 8).to_byte())
-//   buf.write_byte(value.to_byte())
-// }
-
-// ///|
-// /// Read a signed short (2 bytes) from the buffer.
-// pub fn read_short(buf : &@bytebuf.ByteBuf) -> Int {
-//   let unsigned = read_ushort(buf)
-//   if unsigned >= 0x8000 {
-//     unsigned - 0x10000
-//   } else {
-//     unsigned
-//   }
-// }
-
-// ///|
-// /// Write a signed short (2 bytes) to the buffer.
-// pub fn write_short(buf : &@bytebuf.ByteBuf, value : Int) -> Unit {
-//   let unsigned = if value < 0 { value + 0x10000 } else { value }
-//   write_ushort(buf, unsigned)
-// }
-
-// ///|
-// /// Read an unsigned int (4 bytes) from the buffer.
-// pub fn read_uint(buf : &@bytebuf.ByteBuf) -> Int64 {
-//   let byte1 = buf.read_byte().unwrap_or(0).to_int64()
-//   let byte2 = buf.read_byte().unwrap_or(0).to_int64()
-//   let byte3 = buf.read_byte().unwrap_or(0).to_int64()
-//   let byte4 = buf.read_byte().unwrap_or(0).to_int64()
-//   (byte1 << 24) | (byte2 << 16) | (byte3 << 8) | byte4
-// }
-
-// ///|
-// /// Write an unsigned int (4 bytes) to the buffer.
-// pub fn write_uint(buf : &@bytebuf.ByteBuf, value : Int64) -> Unit {
-//   buf.write_byte((value >> 24).to_byte())
-//   buf.write_byte((value >> 16).to_byte())
-//   buf.write_byte((value >> 8).to_byte())
-//   buf.write_byte(value.to_byte())
-// }
-
-// ///|
-// /// Read a signed int (4 bytes) from the buffer.
-// pub fn read_int(buf : &@bytebuf.ByteBuf) -> Int {
-//   let byte1 = buf.read_byte().unwrap_or(0).to_int()
-//   let byte2 = buf.read_byte().unwrap_or(0).to_int()
-//   let byte3 = buf.read_byte().unwrap_or(0).to_int()
-//   let byte4 = buf.read_byte().unwrap_or(0).to_int()
-//   (byte1 << 24) | (byte2 << 16) | (byte3 << 8) | byte4
-// }
-
-// ///|
-// /// Write a signed int (4 bytes) to the buffer.
-// pub fn write_int(buf : &@bytebuf.ByteBuf, value : Int) -> Unit {
-//   buf.write_byte((value >> 24).to_byte())
-//   buf.write_byte((value >> 16).to_byte())
-//   buf.write_byte((value >> 8).to_byte())
-//   buf.write_byte(value.to_byte())
-// }
-
-// ///|
-// /// Read a long (8 bytes) from the buffer.
-// pub fn read_long(buf : &@bytebuf.ByteBuf) -> Int64 {
-//   let mut result : Int64 = 0L
-//   for i = 0; i < 8; i = i + 1 {
-//     let byte_val = buf.read_byte().unwrap_or(0).to_int64()
-//     result = (result << 8) | byte_val
-//   }
-//   result
-// }
-
-// ///|
-// /// Write a long (8 bytes) to the buffer.
-// pub fn write_long(buf : &@bytebuf.ByteBuf, value : Int64) -> Unit {
-//   for i = 7; i >= 0; i = i - 1 {
-//     buf.write_byte((value >> (i * 8)).to_byte())
-//   }
-// }
-
-// ///|
-// /// Read a float (4 bytes) from the buffer.
-// pub fn read_float(buf : &@bytebuf.ByteBuf) -> Float {
-//   let _int_value = read_int(buf)
-//   // TODO: Implement proper float conversion
-//   0.0
-// }
-
-// ///|
-// /// Write a float (4 bytes) to the buffer.
-// pub fn write_float(buf : &@bytebuf.ByteBuf, _value : Float) -> Unit {
-//   // TODO: Implement proper float conversion
-//   write_int(buf, 0)
-// }
-
-// ///|
-// /// Read a double (8 bytes) from the buffer.
-// pub fn read_double(buf : &@bytebuf.ByteBuf) -> Double {
-//   let _long_value = read_long(buf)
-//   // TODO: Implement proper double conversion
-//   0.0
-// }
-
-// ///|
-// /// Write a double (8 bytes) to the buffer.
-// pub fn write_double(buf : &@bytebuf.ByteBuf, _value : Double) -> Unit {
-//   // TODO: Implement proper double conversion
-//   write_long(buf, 0L)
-// }
+///|
+pub fn read_nbt(buf : &@bytebuf.ByteBuf) -> @nbt.NBTTag raise {
+  let safe_buf = @safenbt.read_nbt_buf(buf)
+  @bnbt.parse_auto(safe_buf.read_bytes(safe_buf.remaining()).unwrap())
+}
 
 ///|
-// /// Read NBT data from the buffer.
-// pub fn read_nbt(_buf : &@bytebuf.ByteBuf) -> @nbt.NBTTag raise {
-//   // TODO: Implement NBT reading
-//   raise fail("NBT reading not implemented yet")
-// }
-
-// ///|
-// /// Write NBT data to the buffer.
-// pub fn write_nbt(_buf : &@bytebuf.ByteBuf, _nbt : @nbt.NBTTag) -> Unit raise {
-//   // TODO: Implement NBT writing
-//   raise fail("NBT writing not implemented yet")
-// }
+pub fn write_nbt(buf : &@bytebuf.ByteBuf, nbt : @nbt.NBTTag) -> Unit raise {
+  let core_buf = @buffer.new()
+  @bnbt.write_uncompressed(nbt, core_buf)
+  buf.write_bytes(core_buf.to_bytes())
+}
