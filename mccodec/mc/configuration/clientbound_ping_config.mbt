@@ -11,12 +11,12 @@ impl @mc.Packet for PingConfigS2C with clientbound(self) {
 }
 
 ///|
-impl @mc.Packet for PingConfigS2C with serialize(self, buf : &@bytebuf.ByteBuf) {
+impl @mc.Packet for PingConfigS2C with serialize(self, buf : &@buffer.Buffer) {
   buf.write_int(self.id)
 }
 
 ///|
-impl @mc.Packet for PingConfigS2C with deserialize(buf : &@bytebuf.ByteBuf) {
+impl @mc.Packet for PingConfigS2C with deserialize(buf : &@buffer.Buffer) {
   { id: buf.read_int().unwrap() }
 }
 

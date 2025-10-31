@@ -13,14 +13,14 @@ impl @mc.Packet for RenameItemC2S with clientbound(self) {
 ///|
 impl @mc.Packet for RenameItemC2S with serialize(
   self,
-  buf : &@bytebuf.ByteBuf,
+  buf : &@buffer.Buffer,
 ) {
   @types.write_string(buf, self.item_name)
 }
 
 ///|
 impl @mc.Packet for RenameItemC2S with deserialize(
-  buf : &@bytebuf.ByteBuf,
+  buf : &@buffer.Buffer,
 ) {
   { item_name: @types.read_string(buf) }
 }

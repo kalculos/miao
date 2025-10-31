@@ -24,7 +24,7 @@ impl @mc.Packet for SignedChatCommandC2S with clientbound(self) {
 
 impl @mc.Packet for SignedChatCommandC2S with serialize(
   self,
-  buf : &@bytebuf.ByteBuf,
+  buf : &@buffer.Buffer,
 ) {
   @types.write_string(buf, self.command)
   buf.write_int64(self.timestamp)
@@ -39,7 +39,7 @@ impl @mc.Packet for SignedChatCommandC2S with serialize(
 }
 
 impl @mc.Packet for SignedChatCommandC2S with deserialize(
-  buf : &@bytebuf.ByteBuf,
+  buf : &@buffer.Buffer,
 ) {
   let command = @types.read_string(buf)
   let timestamp = buf.read_int64().unwrap()

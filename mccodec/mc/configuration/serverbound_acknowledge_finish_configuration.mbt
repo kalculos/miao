@@ -11,14 +11,14 @@ impl @mc.Packet for AcknowledgeFinishConfigurationC2S with clientbound(self) {
 ///|
 impl @mc.Packet for AcknowledgeFinishConfigurationC2S with serialize(
   self,
-  buf : &@bytebuf.ByteBuf,
+  buf : &@buffer.Buffer,
 ) {
   // No fields to serialize
 }
 
 ///|
 impl @mc.Packet for AcknowledgeFinishConfigurationC2S with deserialize(
-  buf : &@bytebuf.ByteBuf,
+  buf : &@buffer.Buffer,
 ) {
   AcknowledgeFinishConfigurationC2S::{  }
 }

@@ -13,14 +13,14 @@ impl @mc.Packet for ChangeGameModeC2S with clientbound(self) {
 ///|
 impl @mc.Packet for ChangeGameModeC2S with serialize(
   self,
-  buf : &@bytebuf.ByteBuf,
+  buf : &@buffer.Buffer,
 ) {
   @types.write_varint(buf, self.game_mode)
 }
 
 ///|
 impl @mc.Packet for ChangeGameModeC2S with deserialize(
-  buf : &@bytebuf.ByteBuf,
+  buf : &@buffer.Buffer,
 ) {
   { game_mode: @types.read_varint(buf) }
 }

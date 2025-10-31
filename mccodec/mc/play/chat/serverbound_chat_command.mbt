@@ -12,13 +12,13 @@ impl @mc.Packet for ChatCommandC2S with clientbound(self) {
 
 impl @mc.Packet for ChatCommandC2S with serialize(
   self,
-  buf : &@bytebuf.ByteBuf,
+  buf : &@buffer.Buffer,
 ) {
   @types.write_string(buf, self.command)
 }
 
 impl @mc.Packet for ChatCommandC2S with deserialize(
-  buf : &@bytebuf.ByteBuf,
+  buf : &@buffer.Buffer,
 ) {
   let command = @types.read_string(buf)
   { command, }

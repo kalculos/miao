@@ -18,7 +18,7 @@ impl @mc.Packet for MoveVehicleC2S with clientbound(self) {
 ///|
 impl @mc.Packet for MoveVehicleC2S with serialize(
   self,
-  buf : &@bytebuf.ByteBuf,
+  buf : &@buffer.Buffer,
 ) {
   buf.write_double(self.x)
   buf.write_double(self.y)
@@ -30,7 +30,7 @@ impl @mc.Packet for MoveVehicleC2S with serialize(
 
 ///|
 impl @mc.Packet for MoveVehicleC2S with deserialize(
-  buf : &@bytebuf.ByteBuf,
+  buf : &@buffer.Buffer,
 ) {
   let x = buf.read_double().unwrap()
   let y = buf.read_double().unwrap()

@@ -13,14 +13,14 @@ impl @mc.Packet for CustomReportDetailsConfigS2C with clientbound(self) {
 ///|
 impl @mc.Packet for CustomReportDetailsConfigS2C with serialize(
   self,
-  buf : &@bytebuf.ByteBuf,
+  buf : &@buffer.Buffer,
 ) {
   @types.write_map(buf, self.details, @types.write_string, @types.write_string)
 }
 
 ///|
 impl @mc.Packet for CustomReportDetailsConfigS2C with deserialize(
-  buf : &@bytebuf.ByteBuf,
+  buf : &@buffer.Buffer,
 ) {
   let details = @types.read_map(buf, @types.read_string, @types.read_string)
   { details, }

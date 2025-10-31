@@ -12,18 +12,18 @@ pub fn BitSet::new() -> BitSet {
 
 ///|
 /// Read a BitSet from ByteBuf (for Minecraft protocol)
-pub fn read_bitset(buf : &@bytebuf.ByteBuf) -> BitSet raise {
+pub fn read_bitset(buf : &@buffer.ByteSlice) -> BitSet raise {
   let length = read_varint(buf)
   let words = Array::make(length, 0UL)
   for i = 0; i < length; i = i + 1 {
-    words[i] = buf.read_uint64().unwrap_or(0UL)
+    words[i] = buf.read_uint64()
   }
   BitSet::{ words }
 }
 
 ///|
 /// Write BitSet to ByteBuf (for Minecraft protocol)  
-pub fn write_bitset(buf : &@bytebuf.ByteBuf, bitset : BitSet) -> Unit {
+pub fn write_bitset(buf : &@buffer.ByteSlice, bitset : BitSet) -> Unit raise {
   write_varint(buf, bitset.words.length())
   for i = 0; i < bitset.words.length(); i = i + 1 {
     buf.write_uint64(bitset.words[i])
@@ -33,14 +33,14 @@ pub fn write_bitset(buf : &@bytebuf.ByteBuf, bitset : BitSet) -> Unit {
 ///|
 /// Read Fixed BitSet from ByteBuf (for Minecraft protocol)
 /// Fixed BitSet uses byte array encoding, not long array
-pub fn read_fixed_bitset(buf : &@bytebuf.ByteBuf, num_bits : Int) -> BitSet {
+pub fn read_fixed_bitset(buf : &@buffer.ByteSlice, num_bits : Int) -> BitSet raise {
   let num_bytes = (num_bits + 7) / 8  // ceil(num_bits / 8)
   let num_words = (num_bits + 63) / 64 // Convert to words for internal storage
   let words = Array::make(num_words, 0UL)
   
   // Read bytes and convert to BitSet format
   for byte_idx = 0; byte_idx < num_bytes; byte_idx = byte_idx + 1 {
-    let byte_val = buf.read_byte().unwrap()
+    let byte_val = buf.read_byte()
     
     // Convert each bit in the byte to BitSet format
     for bit_in_byte = 0; bit_in_byte < 8; bit_in_byte = bit_in_byte + 1 {
@@ -62,7 +62,7 @@ pub fn read_fixed_bitset(buf : &@bytebuf.ByteBuf, num_bits : Int) -> BitSet {
 ///|
 /// Write Fixed BitSet to ByteBuf (for Minecraft protocol)
 /// Converts BitSet to byte array format as specified by Minecraft protocol
-pub fn write_fixed_bitset(buf : &@bytebuf.ByteBuf, bitset : BitSet, num_bits : Int) -> Unit {
+pub fn write_fixed_bitset(buf : &@buffer.ByteSlice, bitset : BitSet, num_bits : Int) -> Unit raise {
   let num_bytes = (num_bits + 7) / 8  // ceil(num_bits / 8)
   
   // Convert BitSet to byte array format

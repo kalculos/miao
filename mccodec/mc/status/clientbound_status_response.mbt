@@ -13,13 +13,13 @@ impl @mc.Packet for StatusResponseS2C with clientbound(self) {
 ///|
 impl @mc.Packet for StatusResponseS2C with serialize(
   self,
-  buf : &@bytebuf.ByteBuf,
+  buf : &@buffer.Buffer,
 ) {
   @types.write_string(buf, self.json_response.to_string())
 }
 
 ///|
-impl @mc.Packet for StatusResponseS2C with deserialize(buf : &@bytebuf.ByteBuf) {
+impl @mc.Packet for StatusResponseS2C with deserialize(buf : &@buffer.Buffer) {
   let json_str = @types.read_string(buf)
   { json_response: @json.parse(json_str) }
 }

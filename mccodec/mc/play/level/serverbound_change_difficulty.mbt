@@ -13,14 +13,14 @@ impl @mc.Packet for ChangeDifficultyC2S with clientbound(self) {
 ///|
 impl @mc.Packet for ChangeDifficultyC2S with serialize(
   self,
-  buf : &@bytebuf.ByteBuf,
+  buf : &@buffer.Buffer,
 ) {
   @types.write_varint(buf, self.new_difficulty)
 }
 
 ///|
 impl @mc.Packet for ChangeDifficultyC2S with deserialize(
-  buf : &@bytebuf.ByteBuf,
+  buf : &@buffer.Buffer,
 ) {
   { new_difficulty: @types.read_varint(buf) }
 }

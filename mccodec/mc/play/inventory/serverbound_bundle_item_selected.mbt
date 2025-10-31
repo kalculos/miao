@@ -14,7 +14,7 @@ impl @mc.Packet for BundleItemSelectedC2S with clientbound(self) {
 ///|
 impl @mc.Packet for BundleItemSelectedC2S with serialize(
   self,
-  buf : &@bytebuf.ByteBuf,
+  buf : &@buffer.Buffer,
 ) {
   @types.write_varint(buf, self.slot_id)
   @types.write_varint(buf, self.selected_item_index)
@@ -22,7 +22,7 @@ impl @mc.Packet for BundleItemSelectedC2S with serialize(
 
 ///|
 impl @mc.Packet for BundleItemSelectedC2S with deserialize(
-  buf : &@bytebuf.ByteBuf,
+  buf : &@buffer.Buffer,
 ) {
   let slot_id = @types.read_varint(buf)
   let selected_item_index = @types.read_varint(buf)

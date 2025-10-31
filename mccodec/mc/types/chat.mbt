@@ -7,7 +7,7 @@ struct ChatTypeDecoration {
 
 ///|
 pub fn read_chat_type_decoration(
-  buf : &@bytebuf.ByteBuf,
+  buf : &@buffer.ByteSlice,
 ) -> ChatTypeDecoration raise {
   let translation_key = read_string(buf)
   let parameters = read_prefix_array(buf, read_varint)
@@ -17,7 +17,7 @@ pub fn read_chat_type_decoration(
 
 ///|
 pub fn write_chat_type_decoration(
-  buf : &@bytebuf.ByteBuf,
+  buf : &@buffer.ByteSlice,
   decoration : ChatTypeDecoration,
 ) -> Unit raise {
   write_string(buf, decoration.translation_key)
@@ -32,7 +32,7 @@ struct ChatType {
 }
 
 ///|
-pub fn read_chat_type(buf : &@bytebuf.ByteBuf) -> ChatType raise {
+pub fn read_chat_type(buf : &@buffer.ByteSlice) -> ChatType raise {
   let chat = read_chat_type_decoration(buf)
   let narration = read_chat_type_decoration(buf)
   { chat, narration }
@@ -40,7 +40,7 @@ pub fn read_chat_type(buf : &@bytebuf.ByteBuf) -> ChatType raise {
 
 ///|
 pub fn write_chat_type(
-  buf : &@bytebuf.ByteBuf,
+  buf : &@buffer.ByteSlice,
   chat_type : ChatType,
 ) -> Unit raise {
   write_chat_type_decoration(buf, chat_type.chat)

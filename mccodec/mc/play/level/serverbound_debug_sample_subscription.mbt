@@ -13,14 +13,14 @@ impl @mc.Packet for DebugSampleSubscriptionC2S with clientbound(self) {
 ///|
 impl @mc.Packet for DebugSampleSubscriptionC2S with serialize(
   self,
-  buf : &@bytebuf.ByteBuf,
+  buf : &@buffer.Buffer,
 ) {
   @types.write_varint(buf, self.sample_type)
 }
 
 ///|
 impl @mc.Packet for DebugSampleSubscriptionC2S with deserialize(
-  buf : &@bytebuf.ByteBuf,
+  buf : &@buffer.Buffer,
 ) {
   { sample_type: @types.read_varint(buf) }
 }

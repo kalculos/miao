@@ -13,14 +13,14 @@ impl @mc.Packet for PlayerAbilitiesC2S with clientbound(self) {
 ///|
 impl @mc.Packet for PlayerAbilitiesC2S with serialize(
   self,
-  buf : &@bytebuf.ByteBuf,
+  buf : &@buffer.Buffer,
 ) {
   buf.write_byte(self.flags)
 }
 
 ///|
 impl @mc.Packet for PlayerAbilitiesC2S with deserialize(
-  buf : &@bytebuf.ByteBuf,
+  buf : &@buffer.Buffer,
 ) {
   { flags: buf.read_byte().unwrap() }
 }

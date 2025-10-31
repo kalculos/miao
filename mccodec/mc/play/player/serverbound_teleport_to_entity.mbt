@@ -13,14 +13,14 @@ impl @mc.Packet for TeleportToEntityC2S with clientbound(self) {
 ///|
 impl @mc.Packet for TeleportToEntityC2S with serialize(
   self,
-  buf : &@bytebuf.ByteBuf,
+  buf : &@buffer.Buffer,
 ) {
   @types.write_uuid(buf, self.target_player)
 }
 
 ///|
 impl @mc.Packet for TeleportToEntityC2S with deserialize(
-  buf : &@bytebuf.ByteBuf,
+  buf : &@buffer.Buffer,
 ) {
   { target_player: @types.read_uuid(buf) }
 }

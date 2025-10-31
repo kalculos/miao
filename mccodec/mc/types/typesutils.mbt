@@ -10,12 +10,12 @@ const CONTINUE_BIT : Byte = 0x80
 ///|
 /// Read a variable-length integer from the buffer.
 /// This is a common pattern in Minecraft protocols.
-pub fn read_varint(buf : &@bytebuf.ByteBuf) -> Int raise {
+pub fn read_varint(buf : &@buffer.ByteSlice) -> Int raise {
   let mut value : Int = 0
   let mut position = 0
   let mut byte : Byte = 0
   while true {
-    byte = buf.read_byte().unwrap_or(0)
+    byte = buf.read_byte()
     value = value | ((byte & SEGMENT_BITS).to_int() << position)
     position = position + 7
     if (byte & CONTINUE_BIT) == 0 {
@@ -30,7 +30,7 @@ pub fn read_varint(buf : &@bytebuf.ByteBuf) -> Int raise {
 
 ///|
 /// Write a variable-length integer to the buffer.
-pub fn write_varint(buf : &@bytebuf.ByteBuf, value : Int) -> Unit {
+pub fn write_varint(buf : &@buffer.ByteSlice, value : Int) -> Unit raise {
   let mut v = value
   while true {
     if (v & 0xFFFFFF80) == 0 {
@@ -44,12 +44,12 @@ pub fn write_varint(buf : &@bytebuf.ByteBuf, value : Int) -> Unit {
 
 ///|
 /// Read a variable-length long integer from the buffer.
-pub fn read_varlong(buf : &@bytebuf.ByteBuf) -> Int64 raise {
+pub fn read_varlong(buf : &@buffer.ByteSlice) -> Int64 raise {
   let mut value : Int64 = 0L
   let mut position = 0
   let mut byte : Byte = 0
   while true {
-    byte = buf.read_byte().unwrap_or(0)
+    byte = buf.read_byte()
     value = value | ((byte & SEGMENT_BITS).to_int64() << position)
     position = position + 7
     if (byte & CONTINUE_BIT) == 0 {
@@ -64,7 +64,7 @@ pub fn read_varlong(buf : &@bytebuf.ByteBuf) -> Int64 raise {
 
 ///|
 /// Write a variable-length long integer to the buffer.
-pub fn write_varlong(buf : &@bytebuf.ByteBuf, value : Int64) -> Unit {
+pub fn write_varlong(buf : &@buffer.ByteSlice, value : Int64) -> Unit raise {
   let mut v = value
   while true {
     if (v & 0xFFFFFFFFFFFFFF80L) == 0L {
@@ -78,25 +78,25 @@ pub fn write_varlong(buf : &@bytebuf.ByteBuf, value : Int64) -> Unit {
 
 ///|
 /// Read a boolean from the buffer.
-pub fn read_bool(buf : &@bytebuf.ByteBuf) -> Bool {
-  let byte_val = buf.read_byte().unwrap_or(0)
+pub fn read_bool(buf : &@buffer.ByteSlice) -> Bool raise {
+  let byte_val = buf.read_byte()
   byte_val != 0
 }
 
 ///|
 /// Write a boolean to the buffer.
-pub fn write_bool(buf : &@bytebuf.ByteBuf, value : Bool) -> Unit {
+pub fn write_bool(buf : &@buffer.ByteSlice, value : Bool) -> Unit raise {
   buf.write_byte(if value { 1 } else { 0 })
 }
 
 ///|
 /// Read a length-prefixed UTF-8 string from the buffer.
-pub fn read_string(buf : &@bytebuf.ByteBuf) -> String raise {
+pub fn read_string(buf : &@buffer.ByteSlice) -> String raise {
   let length = read_varint(buf)
   if length < 0 {
     raise fail("String length is negative")
   }
-  let bytes = buf.read_bytes(length).unwrap_or(Bytes::make(0, 0))
+  let bytes = buf.read_bytes(length)
   if bytes.length() != length {
     raise fail("Not enough bytes to read the string")
   }
@@ -104,18 +104,27 @@ pub fn read_string(buf : &@bytebuf.ByteBuf) -> String raise {
 }
 
 ///|
+fn &@buffer.ByteSlice::write_bytes(self : &@buffer.ByteSlice, b : Bytes) -> Int {
+  let arr = cast_to_farr(b)
+  self.write(arr, 0, arr.length())
+}
+
+///|
+fn cast_to_farr(b : Bytes) -> FixedArray[Byte] = "%identity"
+
+///|
 /// Write a length-prefixed UTF-8 string to the buffer.
-pub fn write_string(buf : &@bytebuf.ByteBuf, str : String) -> Unit {
+pub fn write_string(buf : &@buffer.ByteSlice, str : String) -> Unit raise {
   let bytes = @encoding/utf8.encode(str)
   write_varint(buf, bytes.length())
-  buf.write_bytes(bytes)
+  guard buf.write_bytes(bytes) == bytes.length()
 }
 
 ///|
 /// Read a length-prefixed array from the buffer.
 pub fn[T] read_prefix_array(
-  buf : &@bytebuf.ByteBuf,
-  reader : (&@bytebuf.ByteBuf) -> T raise,
+  buf : &@buffer.ByteSlice,
+  reader : (&@buffer.ByteSlice) -> T raise,
 ) -> FixedArray[T] raise {
   let length = read_varint(buf)
   if length < 0 {
@@ -127,10 +136,10 @@ pub fn[T] read_prefix_array(
 ///|
 /// Write a length-prefixed array to the buffer.
 pub fn[T] write_prefix_array(
-  buf : &@bytebuf.ByteBuf,
+  buf : &@buffer.ByteSlice,
   arr : FixedArray[T],
-  writer : (&@bytebuf.ByteBuf, T) -> Unit,
-) -> Unit {
+  writer : (&@buffer.ByteSlice, T) -> Unit raise,
+) -> Unit raise {
   write_varint(buf, arr.length())
   for item in arr {
     writer(buf, item)
@@ -139,9 +148,9 @@ pub fn[T] write_prefix_array(
 
 ///|
 pub fn[T : Eq + Hash, U] read_map(
-  buf : &@bytebuf.ByteBuf,
-  key_reader : (&@bytebuf.ByteBuf) -> T raise,
-  value_reader : (&@bytebuf.ByteBuf) -> U raise,
+  buf : &@buffer.ByteSlice,
+  key_reader : (&@buffer.ByteSlice) -> T raise,
+  value_reader : (&@buffer.ByteSlice) -> U raise,
 ) -> Map[T, U] raise {
   let length = read_varint(buf)
   if length < 0 {
@@ -158,12 +167,12 @@ pub fn[T : Eq + Hash, U] read_map(
 
 ///|
 pub fn[T : Eq + Hash, U] write_map(
-  buf : &@bytebuf.ByteBuf,
+  buf : &@buffer.ByteSlice,
   map : Map[T, U],
-  key_writer : (&@bytebuf.ByteBuf, T) -> Unit,
-  value_writer : (&@bytebuf.ByteBuf, U) -> Unit,
-) -> Unit {
-  write_varint(buf, map.size())
+  key_writer : (&@buffer.ByteSlice, T) -> Unit,
+  value_writer : (&@buffer.ByteSlice, U) -> Unit,
+) -> Unit raise {
+  write_varint(buf, map.length())
   map.each((key, value) => {
     key_writer(buf, key)
     value_writer(buf, value)
@@ -173,8 +182,8 @@ pub fn[T : Eq + Hash, U] write_map(
 ///|
 /// Read an optional value from the buffer.
 pub fn[T] read_optional(
-  buf : &@bytebuf.ByteBuf,
-  reader : (&@bytebuf.ByteBuf) -> T raise,
+  buf : &@buffer.ByteSlice,
+  reader : (&@buffer.ByteSlice) -> T raise,
 ) -> T? raise {
   let present = read_bool(buf)
   if present {
@@ -187,10 +196,10 @@ pub fn[T] read_optional(
 ///|
 /// Write an optional value to the buffer.
 pub fn[T] write_optional(
-  buf : &@bytebuf.ByteBuf,
+  buf : &@buffer.ByteSlice,
   value : T?,
-  writer : (&@bytebuf.ByteBuf, T) -> Unit,
-) -> Unit {
+  writer : (&@buffer.ByteSlice, T) -> Unit raise,
+) -> Unit raise {
   match value {
     None => write_bool(buf, false)
     Some(v) => {
@@ -202,27 +211,27 @@ pub fn[T] write_optional(
 
 ///|
 /// Read a UUID (16 bytes) from the buffer.
-pub fn read_uuid(buf : &@bytebuf.ByteBuf) -> @uuid.UUID raise {
-  let bytes = buf.read_bytes(16).unwrap_or(Bytes::make(0, 0))
+pub fn read_uuid(buf : &@buffer.ByteSlice) -> @uuid.UUID raise {
+  let bytes = buf.read_bytes(16)
   @uuid.from_bytes(bytes)
 }
 
 ///|
 /// Write a UUID (16 bytes) to the buffer.
-pub fn write_uuid(buf : &@bytebuf.ByteBuf, uuid : @uuid.UUID) -> Unit {
+pub fn write_uuid(buf : &@buffer.ByteSlice, uuid : @uuid.UUID) -> Unit {
   let bytes = uuid.to_bytes()
-  buf.write_bytes(bytes)
+  guard buf.write_bytes(bytes) == bytes.length()
 }
 
 ///|
-pub fn read_nbt(buf : &@bytebuf.ByteBuf) -> @nbt.NBTTag raise {
+pub fn read_nbt(buf : &@buffer.ByteSlice) -> @nbt.NBTTag raise {
   let safe_buf = @safenbt.read_nbt_buf(buf)
-  @bnbt.parse_uncompressed(safe_buf.read_bytes(safe_buf.remaining()).unwrap())
+  @bnbt.parse_uncompressed(safe_buf.read_bytes(safe_buf.readable_bytes()))
 }
 
 ///|
-pub fn write_nbt(buf : &@bytebuf.ByteBuf, nbt : @nbt.NBTTag) -> Unit raise {
-  let core_buf = @buffer.new()
+pub fn write_nbt(buf : &@buffer.ByteSlice, nbt : @nbt.NBTTag) -> Unit raise {
+  let core_buf = @moonbitlang/core/buffer.new()
   @bnbt.write_uncompressed(nbt, core_buf)
-  buf.write_bytes(core_buf.to_bytes())
+  buf.write_bytes(core_buf.to_bytes()) |> ignore
 }

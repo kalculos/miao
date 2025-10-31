@@ -17,7 +17,7 @@ impl @mc.Packet for AddResourcePackConfigS2C with clientbound(self) {
 ///|
 impl @mc.Packet for AddResourcePackConfigS2C with serialize(
   self,
-  buf : &@bytebuf.ByteBuf,
+  buf : &@buffer.Buffer,
 ) {
   @types.write_uuid(buf, self.uuid)
   @types.write_string(buf, self.url)
@@ -28,7 +28,7 @@ impl @mc.Packet for AddResourcePackConfigS2C with serialize(
 
 ///|
 impl @mc.Packet for AddResourcePackConfigS2C with deserialize(
-  buf : &@bytebuf.ByteBuf,
+  buf : &@buffer.Buffer,
 ) {
   let uuid = @types.read_uuid(buf)
   let url = @types.read_string(buf)
