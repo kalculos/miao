@@ -45,7 +45,7 @@ impl Reader with available(self) {
 ///|
 impl Reader with read_all(self) {
   let buffer = @buffer.HeapByteBuf::new(default_buffer_size)
-  // 需要 ensure capacity 以及合理扩容策略
+  // Buffer will expand capacity automatically
   let array : FixedArray[Byte] = FixedArray::make(default_buffer_size, 0)
   let mut read = 1
   while read > 0 {
@@ -106,5 +106,4 @@ impl Writer with write_buffer(self, buf) {
       }
   }
   totalWritten
-
 }
