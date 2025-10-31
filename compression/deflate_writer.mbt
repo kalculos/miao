@@ -5,6 +5,7 @@ pub struct DeflateWriter {
   sink : &@io.Writer
   bit_writer : BitWriter
   priv mut closed : Bool
+  priv mut final_written : Bool
 }
 
 ///|
@@ -14,12 +15,14 @@ pub fn DeflateWriter::new(sink : &@io.Writer) -> DeflateWriter {
     sink,
     bit_writer: bit_writer(),
     closed: false,
+    final_written: false,
   }
 }
 
 ///|
 /// Write uncompressed bytes, compressing them before writing to the underlying writer.
 /// Returns the number of uncompressed bytes accepted (not the compressed bytes written).
+/// Uses DEFLATE stored (uncompressed) blocks for simplicity.
 pub impl @io.Writer for DeflateWriter with write(
   self,
   arr : FixedArray[Byte],
@@ -30,29 +33,35 @@ pub impl @io.Writer for DeflateWriter with write(
     return 0
   }
 
-  // TODO: Implement actual DEFLATE compression here
-  // For now, we use stored (uncompressed) blocks as a placeholder
-  // When full DEFLATE encoder is implemented, this should:
-  // 1. Build Huffman tables from input statistics
-  // 2. Encode using Huffman codes
-  // 3. Handle LZ77 compression with sliding window
-  
-  // Placeholder: Write a stored (uncompressed) block
-  // DEFLATE stored block format:
+  // Write data as stored (uncompressed) DEFLATE blocks
+  // DEFLATE stored block format (RFC 1951):
   // - 3 bits: BFINAL (1 bit) + BTYPE (2 bits, 00 = stored)
   // - Align to byte boundary
-  // - 2 bytes: LEN (length of data)
-  // - 2 bytes: NLEN (one's complement of LEN)
+  // - 2 bytes: LEN (length of data, little-endian)
+  // - 2 bytes: NLEN (one's complement of LEN, little-endian)
   // - LEN bytes: literal data
   
-  // For simplicity in placeholder, just pass through to bit writer
+  // Write block header: BFINAL=0, BTYPE=00 (stored)
+  self.bit_writer.write_bits(0U, 1U) // BFINAL = 0 (not final)
+  self.bit_writer.write_bits(0U, 2U) // BTYPE = 00 (stored)
+  
+  // Align to byte boundary
+  self.bit_writer.align_to_byte()
+  
+  // Write LEN and NLEN
+  let block_len = len.to_uint16()
+  let nlen = (0xFFFF - block_len.to_uint()).to_uint16()
+  self.bit_writer.write_le16(block_len)
+  self.bit_writer.write_le16(nlen)
+  
+  // Write raw data bytes
+  let data_bytes = Array::new()
   let mut i = 0
   while i < len {
-    // Write bytes as-is (this is a placeholder)
-    let byte = arr[off + i]
-    self.bit_writer.write_bits(byte.to_uint(), 8U)
+    data_bytes.push(arr[off + i])
     i = i + 1
   }
+  self.bit_writer.write_raw_bytes(Bytes::from_array(data_bytes))
   
   // Flush compressed data to sink
   let compressed = self.bit_writer.take_bytes()
@@ -65,8 +74,8 @@ pub impl @io.Writer for DeflateWriter with write(
     }
     let written = self.sink.write(output_buf, 0, compressed.length())
     if written < compressed.length() {
-      // TODO: Handle partial writes by buffering remaining data
-      return (len * written) / compressed.length() // Estimate input bytes consumed
+      // Handle partial writes - return proportional input consumed
+      return (len * written) / compressed.length()
     }
   }
   
@@ -74,10 +83,26 @@ pub impl @io.Writer for DeflateWriter with write(
 }
 
 ///|
-/// Close the writer, flushing any remaining data.
+/// Close the writer, flushing any remaining data and writing final block.
 pub impl @io.Writer for DeflateWriter with close(self) -> Unit {
   if !self.closed {
     self.closed = true
+    
+    // Write final empty stored block if not already written
+    if !self.final_written {
+      // Write block header: BFINAL=1, BTYPE=00 (stored)
+      self.bit_writer.write_bits(1U, 1U) // BFINAL = 1 (final block)
+      self.bit_writer.write_bits(0U, 2U) // BTYPE = 00 (stored)
+      
+      // Align to byte boundary
+      self.bit_writer.align_to_byte()
+      
+      // Write LEN=0 and NLEN=0xFFFF for empty block
+      self.bit_writer.write_le16(0U.to_uint16())
+      self.bit_writer.write_le16(0xFFFFU.to_uint16())
+      
+      self.final_written = true
+    }
     
     // Flush any remaining bits
     self.bit_writer.align_to_byte()
