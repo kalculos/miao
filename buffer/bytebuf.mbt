@@ -4,7 +4,7 @@ pub(open) trait ByteSlice {
   read(Self, dst : FixedArray[Byte], off : Int, len : Int) -> Int
   read_byte(Self) -> Byte raise
   write(Self, src : FixedArray[Byte], off : Int, len : Int) -> Int
-  write_byte(Self, Byte) -> Unit raise
+  write_byte(Self, Byte) -> Unit
   ridx(Self) -> Int
   widx(Self) -> Int
   readable_bytes(Self) -> Int
