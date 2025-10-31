@@ -86,6 +86,7 @@ extern "C" fn __current_coroutine() -> UvTask = "moonbit_uvrt_current_coroutine"
 
 ///|
 /// this function returns its identity.
+#owned(task)
 extern "C" fn __push_coroutine_stack(task : UvTask) -> UvTask = "moonbit_uvrt_push_coroutine_stack"
 
 ///|

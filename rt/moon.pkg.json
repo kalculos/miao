@@ -3,9 +3,5 @@
 	  "native": {
 		  "gcc-flags": "--std=gnu23"
 	  }
-  },
-  "import": [
-    "iceBear67/miao/fs",
-    "iceBear67/miao/process"
-  ]
+  }
 }

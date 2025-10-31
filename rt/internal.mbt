@@ -4,7 +4,7 @@ async fn[T, E : Error] suspend(
 ) -> T raise E = "%async.suspend"
 
 ///|
-async fn _co_yield(self : &Runtime) -> Unit {
+async fn &Runtime::_co_yield(self: &Runtime) -> Unit {
   suspend((r, _) => self.new_task(_ => r(())).start() catch {
     err => println("Failed to submit task for _co_yield: \{err}")
   })

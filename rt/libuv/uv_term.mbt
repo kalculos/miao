@@ -1,5 +1,5 @@
 ///|
-fn init_uv_term(self : LibuvRuntime) -> Unit raise {
+fn LibuvRuntime::init_uv_term(self: LibuvRuntime) -> Unit raise {
   let stdin = @uv.Tty::new(self.uv, @uv.stdin())
   let stdout = @uv.Tty::new(self.uv, @uv.stdout())
   @process.set_stdio(
@@ -10,7 +10,7 @@ fn init_uv_term(self : LibuvRuntime) -> Unit raise {
 }
 
 ///|
-struct UvTerminal {
+pub struct UvTerminal {
   stdout : @uv.Tty
 }
 

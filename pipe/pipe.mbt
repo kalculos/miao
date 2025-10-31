@@ -50,19 +50,19 @@ pub fn BufferedPipe::new(
 }
 
 ///|
-fn avail(self : BufferedPipe) -> Int {
+fn BufferedPipe::avail(self: BufferedPipe) -> Int {
   let val = self.widx - self.ridx
   guard val >= 0 else { return self.buf.length() - self.ridx + self.widx }
   val
 }
 
 ///|
-fn _is_closed(self : BufferedPipe) -> Bool {
+fn BufferedPipe::_is_closed(self: BufferedPipe) -> Bool {
   self.widx == -1
 }
 
 ///|
-fn _close(self : BufferedPipe) -> Unit {
+fn BufferedPipe::_close(self: BufferedPipe) -> Unit {
   guard !self._is_closed()
   self.widx = -1
 }
@@ -76,14 +76,14 @@ pub impl @io.Reader for BufferedPipe with available(self) {
 }
 
 ///|
-fn advance_reader_idx(self : BufferedPipe, delta? : Int = 1) -> Int {
+fn BufferedPipe::advance_reader_idx(self: BufferedPipe, delta? : Int = 1) -> Int {
   let v = self.ridx
   self.ridx = (self.ridx + delta) % self.buf.length()
   v
 }
 
 ///|
-fn advance_writer_idx(self : BufferedPipe, delta? : Int = 1) -> Int {
+fn BufferedPipe::advance_writer_idx(self: BufferedPipe, delta? : Int = 1) -> Int {
   let v = self.widx
   self.widx = (self.widx + delta) % self.buf.length()
   v
@@ -163,7 +163,7 @@ pub impl @io.Writer for BufferedPipe with write(self, arr, off, len) {
 }
 
 ///|
-async fn block_read(self : BufferedPipe) -> Unit {
+async fn BufferedPipe::block_read(self: BufferedPipe) -> Unit {
   guard !self.read_waiting else {
     raise fail("Someone called read() while someone is already waiting!")
   }
@@ -179,7 +179,7 @@ async fn block_read(self : BufferedPipe) -> Unit {
 }
 
 ///|
-async fn block_write(self : BufferedPipe) -> Unit {
+async fn BufferedPipe::block_write(self: BufferedPipe) -> Unit {
   guard !self.write_waiting else {
     raise fail("Someone called write() while someone is already waiting!")
   }
