@@ -21,7 +21,7 @@ impl @mc.Packet for UseItemOnC2S with clientbound(self) {
 ///|
 impl @mc.Packet for UseItemOnC2S with serialize(
   self,
-  buf : &@bytebuf.ByteBuf,
+  buf : &@buffer.Buffer,
 ) {
   @types.write_varint(buf, self.hand)
   @types.write_position(buf, self.location)
@@ -36,7 +36,7 @@ impl @mc.Packet for UseItemOnC2S with serialize(
 
 ///|
 impl @mc.Packet for UseItemOnC2S with deserialize(
-  buf : &@bytebuf.ByteBuf,
+  buf : &@buffer.Buffer,
 ) {
   let hand = @types.read_varint(buf)
   let location = @types.read_position(buf)

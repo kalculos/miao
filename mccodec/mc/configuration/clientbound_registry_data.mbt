@@ -15,7 +15,7 @@ impl @mc.Packet for RegistryDataS2C with clientbound(self) {
 ///|
 impl @mc.Packet for RegistryDataS2C with serialize(
   self,
-  buf : &@bytebuf.ByteBuf,
+  buf : &@buffer.Buffer,
 ) {
   @types.write_identifier(buf, self.registry_id)
   @types.write_prefix_array(buf, self.entries, (b, entry) => {
@@ -25,7 +25,7 @@ impl @mc.Packet for RegistryDataS2C with serialize(
 }
 
 ///|
-impl @mc.Packet for RegistryDataS2C with deserialize(buf : &@bytebuf.ByteBuf) {
+impl @mc.Packet for RegistryDataS2C with deserialize(buf : &@buffer.Buffer) {
   let registry_id = @types.read_identifier(buf)
   let entries = @types.read_prefix_array(buf, b => {
     let entry_id = @types.read_string(b)

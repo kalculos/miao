@@ -35,13 +35,13 @@ pub fn Identifier::to_str(self : Identifier) -> String {
 }
 
 ///|
-pub fn read_identifier(buf : &@bytebuf.ByteBuf) -> Identifier raise {
+pub fn read_identifier(buf : &@buffer.Buffer) -> Identifier raise {
   let s = read_string(buf)
   Identifier::from_str(s)
 }
 
 ///|
-pub fn write_identifier(buf : &@bytebuf.ByteBuf, id : Identifier) -> Unit {
+pub fn write_identifier(buf : &@buffer.Buffer, id : Identifier) -> Unit {
   let s = id.to_str()
   write_string(buf, s)
 }

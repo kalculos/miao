@@ -68,7 +68,7 @@ impl @mc.Packet for ServerLinksConfigS2C with clientbound(self) {
 ///|
 impl @mc.Packet for ServerLinksConfigS2C with serialize(
   self,
-  buf : &@bytebuf.ByteBuf,
+  buf : &@buffer.Buffer,
 ) {
   @types.write_prefix_array(buf, self.links, (b, link) => {
     if link.knownType is Some(knownType) {
@@ -84,7 +84,7 @@ impl @mc.Packet for ServerLinksConfigS2C with serialize(
 
 ///|
 impl @mc.Packet for ServerLinksConfigS2C with deserialize(
-  buf : &@bytebuf.ByteBuf,
+  buf : &@buffer.Buffer,
 ) {
   let links = @types.read_prefix_array(buf, b => {
     let mut knownType : ServerLinkType? = None

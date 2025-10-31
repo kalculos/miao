@@ -15,7 +15,7 @@ impl @mc.Packet for LoginPluginRequestS2C with clientbound(self) {
 ///|
 impl @mc.Packet for LoginPluginRequestS2C with serialize(
   self,
-  buf : &@bytebuf.ByteBuf,
+  buf : &@buffer.Buffer,
 ) {
   @types.write_varint(buf, self.message_id)
   @types.write_identifier(buf, self.channel)
@@ -24,7 +24,7 @@ impl @mc.Packet for LoginPluginRequestS2C with serialize(
 
 ///|
 impl @mc.Packet for LoginPluginRequestS2C with deserialize(
-  buf : &@bytebuf.ByteBuf,
+  buf : &@buffer.Buffer,
 ) {
   let message_id = @types.read_varint(buf)
   let channel = @types.read_identifier(buf)

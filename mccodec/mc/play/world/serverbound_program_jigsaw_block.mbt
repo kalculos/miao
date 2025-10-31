@@ -20,7 +20,7 @@ impl @mc.Packet for ProgramJigsawBlockC2S with clientbound(self) {
 ///|
 impl @mc.Packet for ProgramJigsawBlockC2S with serialize(
   self,
-  buf : &@bytebuf.ByteBuf,
+  buf : &@buffer.Buffer,
 ) {
   @types.write_position(buf, self.location)
   @types.write_identifier(buf, self.name)
@@ -34,7 +34,7 @@ impl @mc.Packet for ProgramJigsawBlockC2S with serialize(
 
 ///|
 impl @mc.Packet for ProgramJigsawBlockC2S with deserialize(
-  buf : &@bytebuf.ByteBuf,
+  buf : &@buffer.Buffer,
 ) {
   let location = @types.read_position(buf)
   let name = @types.read_identifier(buf)

@@ -16,7 +16,7 @@ impl @mc.Packet for EncryptionRequestS2C with clientbound(self) {
 ///|
 impl @mc.Packet for EncryptionRequestS2C with serialize(
   self,
-  buf : &@bytebuf.ByteBuf,
+  buf : &@buffer.Buffer,
 ) {
   @types.write_string(buf, self.server_id)
   @types.write_prefix_array(
@@ -34,7 +34,7 @@ impl @mc.Packet for EncryptionRequestS2C with serialize(
 
 ///|
 impl @mc.Packet for EncryptionRequestS2C with deserialize(
-  buf : &@bytebuf.ByteBuf,
+  buf : &@buffer.Buffer,
 ) {
   let server_id = @types.read_string(buf)
   let public_key = @types.read_prefix_array(buf, b => b.read_byte().unwrap_or(0))

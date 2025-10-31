@@ -15,7 +15,7 @@ impl @mc.Packet for EditBookC2S with clientbound(self) {
 ///|
 impl @mc.Packet for EditBookC2S with serialize(
   self,
-  buf : &@bytebuf.ByteBuf,
+  buf : &@buffer.Buffer,
 ) {
   @types.write_varint(buf, self.slot)
   @types.write_prefix_array(buf, self.entries, @types.write_string)
@@ -24,7 +24,7 @@ impl @mc.Packet for EditBookC2S with serialize(
 
 ///|
 impl @mc.Packet for EditBookC2S with deserialize(
-  buf : &@bytebuf.ByteBuf,
+  buf : &@buffer.Buffer,
 ) {
   let slot = @types.read_varint(buf)
   let entries = @types.read_prefix_array(buf, @types.read_string)

@@ -13,13 +13,13 @@ impl @mc.Packet for LoginSuccessS2C with clientbound(self) {
 ///|
 impl @mc.Packet for LoginSuccessS2C with serialize(
   self,
-  buf : &@bytebuf.ByteBuf,
+  buf : &@buffer.Buffer,
 ) {
   @types.write_game_profile(buf, self.profile)
 }
 
 ///|
-impl @mc.Packet for LoginSuccessS2C with deserialize(buf : &@bytebuf.ByteBuf) {
+impl @mc.Packet for LoginSuccessS2C with deserialize(buf : &@buffer.Buffer) {
   let profile = @types.read_game_profile(buf)
   { profile, }
 }

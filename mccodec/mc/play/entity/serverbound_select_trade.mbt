@@ -13,14 +13,14 @@ impl @mc.Packet for SelectTradeC2S with clientbound(self) {
 ///|
 impl @mc.Packet for SelectTradeC2S with serialize(
   self,
-  buf : &@bytebuf.ByteBuf,
+  buf : &@buffer.Buffer,
 ) {
   @types.write_varint(buf, self.selected_slot)
 }
 
 ///|
 impl @mc.Packet for SelectTradeC2S with deserialize(
-  buf : &@bytebuf.ByteBuf,
+  buf : &@buffer.Buffer,
 ) {
   { selected_slot: @types.read_varint(buf) }
 }

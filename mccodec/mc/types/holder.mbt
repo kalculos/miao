@@ -7,8 +7,8 @@ struct Holder[T] {
 
 ///|
 pub fn[T] read_holder(
-  buf : &@bytebuf.ByteBuf,
-  read_value : (&@bytebuf.ByteBuf) -> T,
+  buf : &@buffer.Buffer,
+  read_value : (&@buffer.Buffer) -> T,
 ) -> Holder[T] raise {
   let id = read_varint(buf)
   let value = if id != 0 { Some(read_value(buf)) } else { None }
@@ -17,9 +17,9 @@ pub fn[T] read_holder(
 
 ///|
 pub fn[T] write_holder(
-  buf : &@bytebuf.ByteBuf,
+  buf : &@buffer.Buffer,
   holder : Holder[T],
-  write_value : (&@bytebuf.ByteBuf, T) -> Unit,
+  write_value : (&@buffer.Buffer, T) -> Unit,
 ) -> Unit {
   write_varint(buf, holder.id)
   if holder.id != 0 {
