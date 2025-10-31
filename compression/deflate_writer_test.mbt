@@ -1,5 +1,5 @@
 ///|
-test "DeflateWriter: basic write to byte buffer" {
+test "DeflateWriter: write stored block" {
   // Create a byte buffer to write to
   let buf = @bytebuf.make_unpooled(1024)
   let byte_writer = @io.ByteBufWriter::new(buf)
@@ -16,9 +16,17 @@ test "DeflateWriter: basic write to byte buffer" {
   
   deflate_writer.close()
   
-  // Verify something was written to the buffer
+  // Verify DEFLATE stored block was written
   buf.set_reader_index(0)
   assert_true(buf.remaining() > 0)
+  
+  // Expected format:
+  // - Non-final block with data: BFINAL=0, BTYPE=00, LEN=5, NLEN, data
+  // - Final empty block: BFINAL=1, BTYPE=00, LEN=0, NLEN
+  // Total: 1 + 4 + 5 + 1 + 4 = 15 bytes (after alignment)
+  
+  // Just verify we have reasonable amount of compressed data
+  assert_true(buf.remaining() >= 10)
 }
 
 ///|
@@ -69,4 +77,38 @@ test "DeflateWriter: multiple writes before close" {
   // Verify data was written
   buf.set_reader_index(0)
   assert_true(buf.remaining() > 0)
+}
+
+///|
+test "DeflateWriter/Reader: round-trip test" {
+  // Write compressed data
+  let write_buf = @bytebuf.make_unpooled(1024)
+  let byte_writer = @io.ByteBufWriter::new(write_buf)
+  let deflate_writer = DeflateWriter::new(&byte_writer)
+  
+  let original_data : FixedArray[Byte] = [10, 20, 30, 40, 50, 60, 70, 80]
+  let written = deflate_writer.write(original_data, 0, 8)
+  assert_eq(written, 8)
+  deflate_writer.close()
+  
+  // Read compressed data back
+  write_buf.set_reader_index(0)
+  let byte_reader = @io.ByteBufReader::new(write_buf)
+  let deflate_reader = DeflateReader::new(&byte_reader)
+  
+  let decompressed : FixedArray[Byte] = FixedArray::make(10, 0)
+  let read_bytes = deflate_reader.read(decompressed, 0, 10)
+  
+  // Verify round-trip
+  assert_eq(read_bytes, 8)
+  assert_eq(decompressed[0], 10)
+  assert_eq(decompressed[1], 20)
+  assert_eq(decompressed[2], 30)
+  assert_eq(decompressed[3], 40)
+  assert_eq(decompressed[4], 50)
+  assert_eq(decompressed[5], 60)
+  assert_eq(decompressed[6], 70)
+  assert_eq(decompressed[7], 80)
+  
+  deflate_reader.close()
 }
