@@ -64,7 +64,7 @@ impl Reader with read_buffer(self, len) {
       break // EOF
     }
   }
-  @buffer.HeapByteBuf::wrapped_array(array) as &@buffer.Buffer // data 需要是一个 FixedArray
+  @buffer.HeapByteBuf::wrapped_array(array) as &@buffer.Buffer
 }
 
 ///|
@@ -87,7 +87,7 @@ impl Reader with read_buffer_to(self, buf) -> Int {
 impl Writer with write_buffer(self, buf) {
   let _buf: FixedArray[Byte] = FixedArray::make(1, 0)
   let mut totalWritten = 0
-  while buf.readable_bytes() >0 {
+  while buf.readable_bytes() > 0 {
       let written = self.write(_buf, 0, buf.read(_buf, 0 ,1))
       if written > 0 {
         totalWritten += written
