@@ -47,7 +47,9 @@ impl Reader with read_all(self) {
   let mut read = 1
   while read > 0 {
     read = self.read(array, 0, 1024)
-    buffer.write(array, 0, read)
+    if read > 0 {
+      buffer.write(array, 0, read)
+    }
   }
   buffer as &@buffer.Buffer
 }
@@ -69,7 +71,7 @@ impl Reader with read_buffer(self, len) {
 
 ///|
 impl Reader with read_buffer_to(self, buf) -> Int {
-  let toRead = buf.writable_bytes()
+  let mut toRead = buf.writable_bytes()
   let buffer : FixedArray[Byte] = FixedArray::make(1024, 0)
   let mut totalRead = 0
   while toRead > 0 {
@@ -79,6 +81,7 @@ impl Reader with read_buffer_to(self, buf) -> Int {
     }
     totalRead += read
     buf.write(buffer, 0, read)
+    toRead -= read
   }
   totalRead
 }
