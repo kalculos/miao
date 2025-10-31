@@ -10,7 +10,7 @@ const CONTINUE_BIT : Byte = 0x80
 ///|
 /// Read a variable-length integer from the buffer.
 /// This is a common pattern in Minecraft protocols.
-pub fn read_varint(buf : &@bytebuf.ByteBuf) -> Int raise {
+pub fn read_varint(buf : &@buffer.Buffer) -> Int raise {
   let mut value : Int = 0
   let mut position = 0
   let mut byte : Byte = 0
@@ -30,7 +30,7 @@ pub fn read_varint(buf : &@bytebuf.ByteBuf) -> Int raise {
 
 ///|
 /// Write a variable-length integer to the buffer.
-pub fn write_varint(buf : &@bytebuf.ByteBuf, value : Int) -> Unit {
+pub fn write_varint(buf : &@buffer.Buffer, value : Int) -> Unit {
   let mut v = value
   while true {
     if (v & 0xFFFFFF80) == 0 {
@@ -44,7 +44,7 @@ pub fn write_varint(buf : &@bytebuf.ByteBuf, value : Int) -> Unit {
 
 ///|
 /// Read a variable-length long integer from the buffer.
-pub fn read_varlong(buf : &@bytebuf.ByteBuf) -> Int64 raise {
+pub fn read_varlong(buf : &@buffer.Buffer) -> Int64 raise {
   let mut value : Int64 = 0L
   let mut position = 0
   let mut byte : Byte = 0
@@ -64,7 +64,7 @@ pub fn read_varlong(buf : &@bytebuf.ByteBuf) -> Int64 raise {
 
 ///|
 /// Write a variable-length long integer to the buffer.
-pub fn write_varlong(buf : &@bytebuf.ByteBuf, value : Int64) -> Unit {
+pub fn write_varlong(buf : &@buffer.Buffer, value : Int64) -> Unit {
   let mut v = value
   while true {
     if (v & 0xFFFFFFFFFFFFFF80L) == 0L {
@@ -78,20 +78,20 @@ pub fn write_varlong(buf : &@bytebuf.ByteBuf, value : Int64) -> Unit {
 
 ///|
 /// Read a boolean from the buffer.
-pub fn read_bool(buf : &@bytebuf.ByteBuf) -> Bool {
+pub fn read_bool(buf : &@buffer.Buffer) -> Bool {
   let byte_val = buf.read_byte().unwrap_or(0)
   byte_val != 0
 }
 
 ///|
 /// Write a boolean to the buffer.
-pub fn write_bool(buf : &@bytebuf.ByteBuf, value : Bool) -> Unit {
+pub fn write_bool(buf : &@buffer.Buffer, value : Bool) -> Unit {
   buf.write_byte(if value { 1 } else { 0 })
 }
 
 ///|
 /// Read a length-prefixed UTF-8 string from the buffer.
-pub fn read_string(buf : &@bytebuf.ByteBuf) -> String raise {
+pub fn read_string(buf : &@buffer.Buffer) -> String raise {
   let length = read_varint(buf)
   if length < 0 {
     raise fail("String length is negative")
@@ -105,7 +105,7 @@ pub fn read_string(buf : &@bytebuf.ByteBuf) -> String raise {
 
 ///|
 /// Write a length-prefixed UTF-8 string to the buffer.
-pub fn write_string(buf : &@bytebuf.ByteBuf, str : String) -> Unit {
+pub fn write_string(buf : &@buffer.Buffer, str : String) -> Unit {
   let bytes = @encoding/utf8.encode(str)
   write_varint(buf, bytes.length())
   buf.write_bytes(bytes)
@@ -114,8 +114,8 @@ pub fn write_string(buf : &@bytebuf.ByteBuf, str : String) -> Unit {
 ///|
 /// Read a length-prefixed array from the buffer.
 pub fn[T] read_prefix_array(
-  buf : &@bytebuf.ByteBuf,
-  reader : (&@bytebuf.ByteBuf) -> T raise,
+  buf : &@buffer.Buffer,
+  reader : (&@buffer.Buffer) -> T raise,
 ) -> FixedArray[T] raise {
   let length = read_varint(buf)
   if length < 0 {
@@ -127,9 +127,9 @@ pub fn[T] read_prefix_array(
 ///|
 /// Write a length-prefixed array to the buffer.
 pub fn[T] write_prefix_array(
-  buf : &@bytebuf.ByteBuf,
+  buf : &@buffer.Buffer,
   arr : FixedArray[T],
-  writer : (&@bytebuf.ByteBuf, T) -> Unit,
+  writer : (&@buffer.Buffer, T) -> Unit,
 ) -> Unit {
   write_varint(buf, arr.length())
   for item in arr {
@@ -139,9 +139,9 @@ pub fn[T] write_prefix_array(
 
 ///|
 pub fn[T : Eq + Hash, U] read_map(
-  buf : &@bytebuf.ByteBuf,
-  key_reader : (&@bytebuf.ByteBuf) -> T raise,
-  value_reader : (&@bytebuf.ByteBuf) -> U raise,
+  buf : &@buffer.Buffer,
+  key_reader : (&@buffer.Buffer) -> T raise,
+  value_reader : (&@buffer.Buffer) -> U raise,
 ) -> Map[T, U] raise {
   let length = read_varint(buf)
   if length < 0 {
@@ -158,10 +158,10 @@ pub fn[T : Eq + Hash, U] read_map(
 
 ///|
 pub fn[T : Eq + Hash, U] write_map(
-  buf : &@bytebuf.ByteBuf,
+  buf : &@buffer.Buffer,
   map : Map[T, U],
-  key_writer : (&@bytebuf.ByteBuf, T) -> Unit,
-  value_writer : (&@bytebuf.ByteBuf, U) -> Unit,
+  key_writer : (&@buffer.Buffer, T) -> Unit,
+  value_writer : (&@buffer.Buffer, U) -> Unit,
 ) -> Unit {
   write_varint(buf, map.size())
   map.each((key, value) => {
@@ -173,8 +173,8 @@ pub fn[T : Eq + Hash, U] write_map(
 ///|
 /// Read an optional value from the buffer.
 pub fn[T] read_optional(
-  buf : &@bytebuf.ByteBuf,
-  reader : (&@bytebuf.ByteBuf) -> T raise,
+  buf : &@buffer.Buffer,
+  reader : (&@buffer.Buffer) -> T raise,
 ) -> T? raise {
   let present = read_bool(buf)
   if present {
@@ -187,9 +187,9 @@ pub fn[T] read_optional(
 ///|
 /// Write an optional value to the buffer.
 pub fn[T] write_optional(
-  buf : &@bytebuf.ByteBuf,
+  buf : &@buffer.Buffer,
   value : T?,
-  writer : (&@bytebuf.ByteBuf, T) -> Unit,
+  writer : (&@buffer.Buffer, T) -> Unit,
 ) -> Unit {
   match value {
     None => write_bool(buf, false)
@@ -202,14 +202,14 @@ pub fn[T] write_optional(
 
 ///|
 /// Read a UUID (16 bytes) from the buffer.
-pub fn read_uuid(buf : &@bytebuf.ByteBuf) -> @uuid.UUID raise {
+pub fn read_uuid(buf : &@buffer.Buffer) -> @uuid.UUID raise {
   let bytes = buf.read_bytes(16).unwrap_or(Bytes::make(0, 0))
   @uuid.from_bytes(bytes)
 }
 
 ///|
 /// Write a UUID (16 bytes) to the buffer.
-pub fn write_uuid(buf : &@bytebuf.ByteBuf, uuid : @uuid.UUID) -> Unit {
+pub fn write_uuid(buf : &@buffer.Buffer, uuid : @uuid.UUID) -> Unit {
   let bytes = uuid.to_bytes()
   buf.write_bytes(bytes)
 }
@@ -218,7 +218,7 @@ pub fn write_uuid(buf : &@bytebuf.ByteBuf, uuid : @uuid.UUID) -> Unit {
 
 // ///|
 // /// Read an unsigned short (2 bytes) from the buffer.
-// pub fn read_ushort(buf : &@bytebuf.ByteBuf) -> Int {
+// pub fn read_ushort(buf : &@buffer.Buffer) -> Int {
 //   let byte1 = buf.read_byte().unwrap_or(0).to_int()
 //   let byte2 = buf.read_byte().unwrap_or(0).to_int()
 //   (byte1 << 8) | byte2
@@ -226,14 +226,14 @@ pub fn write_uuid(buf : &@bytebuf.ByteBuf, uuid : @uuid.UUID) -> Unit {
 
 // ///|
 // /// Write an unsigned short (2 bytes) to the buffer.
-// pub fn write_ushort(buf : &@bytebuf.ByteBuf, value : Int) -> Unit {
+// pub fn write_ushort(buf : &@buffer.Buffer, value : Int) -> Unit {
 //   buf.write_byte((value >> 8).to_byte())
 //   buf.write_byte(value.to_byte())
 // }
 
 // ///|
 // /// Read a signed short (2 bytes) from the buffer.
-// pub fn read_short(buf : &@bytebuf.ByteBuf) -> Int {
+// pub fn read_short(buf : &@buffer.Buffer) -> Int {
 //   let unsigned = read_ushort(buf)
 //   if unsigned >= 0x8000 {
 //     unsigned - 0x10000
@@ -244,14 +244,14 @@ pub fn write_uuid(buf : &@bytebuf.ByteBuf, uuid : @uuid.UUID) -> Unit {
 
 // ///|
 // /// Write a signed short (2 bytes) to the buffer.
-// pub fn write_short(buf : &@bytebuf.ByteBuf, value : Int) -> Unit {
+// pub fn write_short(buf : &@buffer.Buffer, value : Int) -> Unit {
 //   let unsigned = if value < 0 { value + 0x10000 } else { value }
 //   write_ushort(buf, unsigned)
 // }
 
 // ///|
 // /// Read an unsigned int (4 bytes) from the buffer.
-// pub fn read_uint(buf : &@bytebuf.ByteBuf) -> Int64 {
+// pub fn read_uint(buf : &@buffer.Buffer) -> Int64 {
 //   let byte1 = buf.read_byte().unwrap_or(0).to_int64()
 //   let byte2 = buf.read_byte().unwrap_or(0).to_int64()
 //   let byte3 = buf.read_byte().unwrap_or(0).to_int64()
@@ -261,7 +261,7 @@ pub fn write_uuid(buf : &@bytebuf.ByteBuf, uuid : @uuid.UUID) -> Unit {
 
 // ///|
 // /// Write an unsigned int (4 bytes) to the buffer.
-// pub fn write_uint(buf : &@bytebuf.ByteBuf, value : Int64) -> Unit {
+// pub fn write_uint(buf : &@buffer.Buffer, value : Int64) -> Unit {
 //   buf.write_byte((value >> 24).to_byte())
 //   buf.write_byte((value >> 16).to_byte())
 //   buf.write_byte((value >> 8).to_byte())
@@ -270,7 +270,7 @@ pub fn write_uuid(buf : &@bytebuf.ByteBuf, uuid : @uuid.UUID) -> Unit {
 
 // ///|
 // /// Read a signed int (4 bytes) from the buffer.
-// pub fn read_int(buf : &@bytebuf.ByteBuf) -> Int {
+// pub fn read_int(buf : &@buffer.Buffer) -> Int {
 //   let byte1 = buf.read_byte().unwrap_or(0).to_int()
 //   let byte2 = buf.read_byte().unwrap_or(0).to_int()
 //   let byte3 = buf.read_byte().unwrap_or(0).to_int()
@@ -280,7 +280,7 @@ pub fn write_uuid(buf : &@bytebuf.ByteBuf, uuid : @uuid.UUID) -> Unit {
 
 // ///|
 // /// Write a signed int (4 bytes) to the buffer.
-// pub fn write_int(buf : &@bytebuf.ByteBuf, value : Int) -> Unit {
+// pub fn write_int(buf : &@buffer.Buffer, value : Int) -> Unit {
 //   buf.write_byte((value >> 24).to_byte())
 //   buf.write_byte((value >> 16).to_byte())
 //   buf.write_byte((value >> 8).to_byte())
@@ -289,7 +289,7 @@ pub fn write_uuid(buf : &@bytebuf.ByteBuf, uuid : @uuid.UUID) -> Unit {
 
 // ///|
 // /// Read a long (8 bytes) from the buffer.
-// pub fn read_long(buf : &@bytebuf.ByteBuf) -> Int64 {
+// pub fn read_long(buf : &@buffer.Buffer) -> Int64 {
 //   let mut result : Int64 = 0L
 //   for i = 0; i < 8; i = i + 1 {
 //     let byte_val = buf.read_byte().unwrap_or(0).to_int64()
@@ -300,7 +300,7 @@ pub fn write_uuid(buf : &@bytebuf.ByteBuf, uuid : @uuid.UUID) -> Unit {
 
 // ///|
 // /// Write a long (8 bytes) to the buffer.
-// pub fn write_long(buf : &@bytebuf.ByteBuf, value : Int64) -> Unit {
+// pub fn write_long(buf : &@buffer.Buffer, value : Int64) -> Unit {
 //   for i = 7; i >= 0; i = i - 1 {
 //     buf.write_byte((value >> (i * 8)).to_byte())
 //   }
@@ -308,7 +308,7 @@ pub fn write_uuid(buf : &@bytebuf.ByteBuf, uuid : @uuid.UUID) -> Unit {
 
 // ///|
 // /// Read a float (4 bytes) from the buffer.
-// pub fn read_float(buf : &@bytebuf.ByteBuf) -> Float {
+// pub fn read_float(buf : &@buffer.Buffer) -> Float {
 //   let _int_value = read_int(buf)
 //   // TODO: Implement proper float conversion
 //   0.0
@@ -316,14 +316,14 @@ pub fn write_uuid(buf : &@bytebuf.ByteBuf, uuid : @uuid.UUID) -> Unit {
 
 // ///|
 // /// Write a float (4 bytes) to the buffer.
-// pub fn write_float(buf : &@bytebuf.ByteBuf, _value : Float) -> Unit {
+// pub fn write_float(buf : &@buffer.Buffer, _value : Float) -> Unit {
 //   // TODO: Implement proper float conversion
 //   write_int(buf, 0)
 // }
 
 // ///|
 // /// Read a double (8 bytes) from the buffer.
-// pub fn read_double(buf : &@bytebuf.ByteBuf) -> Double {
+// pub fn read_double(buf : &@buffer.Buffer) -> Double {
 //   let _long_value = read_long(buf)
 //   // TODO: Implement proper double conversion
 //   0.0
@@ -331,21 +331,21 @@ pub fn write_uuid(buf : &@bytebuf.ByteBuf, uuid : @uuid.UUID) -> Unit {
 
 // ///|
 // /// Write a double (8 bytes) to the buffer.
-// pub fn write_double(buf : &@bytebuf.ByteBuf, _value : Double) -> Unit {
+// pub fn write_double(buf : &@buffer.Buffer, _value : Double) -> Unit {
 //   // TODO: Implement proper double conversion
 //   write_long(buf, 0L)
 // }
 
 ///|
 // /// Read NBT data from the buffer.
-// pub fn read_nbt(_buf : &@bytebuf.ByteBuf) -> @nbt.NBTTag raise {
+// pub fn read_nbt(_buf : &@buffer.Buffer) -> @nbt.NBTTag raise {
 //   // TODO: Implement NBT reading
 //   raise fail("NBT reading not implemented yet")
 // }
 
 // ///|
 // /// Write NBT data to the buffer.
-// pub fn write_nbt(_buf : &@bytebuf.ByteBuf, _nbt : @nbt.NBTTag) -> Unit raise {
+// pub fn write_nbt(_buf : &@buffer.Buffer, _nbt : @nbt.NBTTag) -> Unit raise {
 //   // TODO: Implement NBT writing
 //   raise fail("NBT writing not implemented yet")
 // }

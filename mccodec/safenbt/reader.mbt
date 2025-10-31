@@ -1,9 +1,9 @@
 ///|
 /// This reader utilitie does not track length limit. You must pass a length known bytebuf to it.
 pub fn read_nbt_buf(
-  buf : &@bytebuf.ByteBuf,
+  buf : &@buffer.Buffer,
   max_depth? : Int = 512,
-) -> &@bytebuf.ByteBuf raise {
+) -> &@buffer.Buffer raise {
   let stream_begin = buf.position()
   let mut depth = 0
   while true {

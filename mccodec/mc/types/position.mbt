@@ -15,7 +15,7 @@ const POSITION_Y_SIZE = 12
 const POSITION_Z_SIZE = 26
 
 ///|
-pub fn read_position(buf : &@bytebuf.ByteBuf) -> Position {
+pub fn read_position(buf : &@buffer.Buffer) -> Position {
   let val = buf.read_int64().unwrap_or(0)
   let x = (val >> (POSITION_Y_SIZE + POSITION_Z_SIZE)).to_int()
   let y = (val <<
@@ -26,7 +26,7 @@ pub fn read_position(buf : &@bytebuf.ByteBuf) -> Position {
 }
 
 ///|
-pub fn write_position(buf : &@bytebuf.ByteBuf, position : Position) -> Unit {
+pub fn write_position(buf : &@buffer.Buffer, position : Position) -> Unit {
   let x = position.x.to_int64() << (POSITION_Y_SIZE + POSITION_Z_SIZE)
   let y = position.y.to_int64() <<
     (POSITION_X_SIZE + POSITION_Z_SIZE) >>

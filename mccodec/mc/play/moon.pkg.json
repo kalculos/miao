@@ -1,7 +1,7 @@
 {
   "import": [
     "iceBear67/miao/mccodec/mc",
-    "iceBear67/bytebuf",
+    "kalculos/buffer",
     "iceBear67/miao/mccodec/mc/types",
     "moonbitlang/x/uuid"
   ]

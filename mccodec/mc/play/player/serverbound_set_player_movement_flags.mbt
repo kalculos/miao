@@ -13,14 +13,14 @@ impl @mc.Packet for SetPlayerMovementFlagsC2S with clientbound(self) {
 ///|
 impl @mc.Packet for SetPlayerMovementFlagsC2S with serialize(
   self,
-  buf : &@bytebuf.ByteBuf,
+  buf : &@buffer.Buffer,
 ) {
   buf.write_byte(self.on_ground)
 }
 
 ///|
 impl @mc.Packet for SetPlayerMovementFlagsC2S with deserialize(
-  buf : &@bytebuf.ByteBuf,
+  buf : &@buffer.Buffer,
 ) {
   { on_ground: buf.read_byte().unwrap() }
 }

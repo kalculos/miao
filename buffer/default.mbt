@@ -9,6 +9,11 @@ pub fn &ByteSlice::read_bytes(self : &ByteSlice, len : Int) -> Bytes raise {
 }
 
 ///|
+pub fn &ByteSlice::write_bytes(self : &ByteSlice, bytes : Bytes) -> Int {
+  self.transfer_from(bytes[:])
+}
+
+///|
 pub fn &ByteSlice::read_int(self : &ByteSlice) -> Int raise {
   let bytes = self.read_bytes(4)
   (bytes[0].to_int() << 24) |

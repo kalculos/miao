@@ -13,14 +13,14 @@ impl @mc.Packet for ClientboundKeepAliveConfigS2C with clientbound(self) {
 ///|
 impl @mc.Packet for ClientboundKeepAliveConfigS2C with serialize(
   self,
-  buf : &@bytebuf.ByteBuf,
+  buf : &@buffer.Buffer,
 ) {
   buf.write_int64(self.keep_alive_id)
 }
 
 ///|
 impl @mc.Packet for ClientboundKeepAliveConfigS2C with deserialize(
-  buf : &@bytebuf.ByteBuf,
+  buf : &@buffer.Buffer,
 ) {
   { keep_alive_id: buf.read_int64().unwrap() }
 }

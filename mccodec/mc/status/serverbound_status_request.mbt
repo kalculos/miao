@@ -11,12 +11,12 @@ impl @mc.Packet for StatusRequestC2S with clientbound(self) {
 ///|
 impl @mc.Packet for StatusRequestC2S with serialize(
   self,
-  buf : &@bytebuf.ByteBuf,
+  buf : &@buffer.Buffer,
 ) {
   // No fields to serialize
 }
 
 ///|
-impl @mc.Packet for StatusRequestC2S with deserialize(buf : &@bytebuf.ByteBuf) {
+impl @mc.Packet for StatusRequestC2S with deserialize(buf : &@buffer.Buffer) {
   StatusRequestC2S::{  }
 }

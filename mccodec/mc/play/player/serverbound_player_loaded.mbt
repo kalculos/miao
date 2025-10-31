@@ -11,14 +11,14 @@ impl @mc.Packet for PlayerLoadedC2S with clientbound(self) {
 ///|
 impl @mc.Packet for PlayerLoadedC2S with serialize(
   self,
-  buf : &@bytebuf.ByteBuf,
+  buf : &@buffer.Buffer,
 ) {
   // No fields to serialize
 }
 
 ///|
 impl @mc.Packet for PlayerLoadedC2S with deserialize(
-  buf : &@bytebuf.ByteBuf,
+  buf : &@buffer.Buffer,
 ) {
   PlayerLoadedC2S::{  }
 }

@@ -13,14 +13,14 @@ impl @mc.Packet for PongPlayC2S with clientbound(self) {
 ///|
 impl @mc.Packet for PongPlayC2S with serialize(
   self,
-  buf : &@bytebuf.ByteBuf,
+  buf : &@buffer.Buffer,
 ) {
   @types.write_varint(buf, self.id)
 }
 
 ///|
 impl @mc.Packet for PongPlayC2S with deserialize(
-  buf : &@bytebuf.ByteBuf,
+  buf : &@buffer.Buffer,
 ) {
   { id: @types.read_varint(buf) }
 }

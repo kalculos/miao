@@ -13,13 +13,13 @@ impl @mc.Packet for DisconnectLoginS2C with clientbound(self) {
 ///|
 impl @mc.Packet for DisconnectLoginS2C with serialize(
   self,
-  buf : &@bytebuf.ByteBuf,
+  buf : &@buffer.Buffer,
 ) {
   @types.write_string(buf, self.reason)
 }
 
 ///|
-impl @mc.Packet for DisconnectLoginS2C with deserialize(buf : &@bytebuf.ByteBuf) {
+impl @mc.Packet for DisconnectLoginS2C with deserialize(buf : &@buffer.Buffer) {
   let reason_str = @types.read_string(buf)
   { reason: reason_str }
 }

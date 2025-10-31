@@ -14,7 +14,7 @@ impl @mc.Packet for SeenAdvancementsC2S with clientbound(self) {
 ///|
 impl @mc.Packet for SeenAdvancementsC2S with serialize(
   self,
-  buf : &@bytebuf.ByteBuf,
+  buf : &@buffer.Buffer,
 ) {
   @types.write_varint(buf, self.action)
   @types.write_optional(buf, self.tab_id, @types.write_identifier)
@@ -22,7 +22,7 @@ impl @mc.Packet for SeenAdvancementsC2S with serialize(
 
 ///|
 impl @mc.Packet for SeenAdvancementsC2S with deserialize(
-  buf : &@bytebuf.ByteBuf,
+  buf : &@buffer.Buffer,
 ) {
   let action = @types.read_varint(buf)
   let tab_id = @types.read_optional(buf, @types.read_identifier)
