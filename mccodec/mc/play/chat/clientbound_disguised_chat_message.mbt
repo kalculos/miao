@@ -14,7 +14,7 @@ impl @mc.Packet for DisguisedChatMessageS2C with clientbound(self) {
 
 impl @mc.Packet for DisguisedChatMessageS2C with serialize(
   self,
-  buf : &@bytebuf.ByteBuf,
+  buf : &@buffer.Buffer,
 ) {
   @types.write_string(buf, self.message)
   @types.write_holder(buf, self.chat_type, @types.write_chat_type)
@@ -23,7 +23,7 @@ impl @mc.Packet for DisguisedChatMessageS2C with serialize(
 }
 
 impl @mc.Packet for DisguisedChatMessageS2C with deserialize(
-  buf : &@bytebuf.ByteBuf,
+  buf : &@buffer.Buffer,
 ) {
   let message = @types.read_string(buf)
   let chat_type = @types.read_holder(buf, @types.read_chat_type)
