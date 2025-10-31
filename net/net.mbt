@@ -1,18 +1,59 @@
 ///|
-pub(open) trait TcpServer {
-  async accept(Self, timeout_millis? : UInt64) -> &Connection
-  async close(Self) -> Unit
-  options(Self) -> TcpOption
-  is_closed(Self) -> Unit
-}
+pub(all) suberror NetworkError {
+  InvalidAddress(msg~ : String)
+  DeviceFailure(msg~ : String)
+  ConnReset(msg~ : String)
+  ConnClose(msg~ : String)
+  TimedOut(msg~ : String)
+} derive(Show, Eq, Hash)
 
-pub(open) trait TcpClient {
-  async connect(Self, target: SockAddr, timeout_millis?: UInt64) -> &Connection
-  options(Self) -> TcpOption
+///|
+pub(open) trait Network {
+  async dial(network : String, address : String, options : Int) -> Result[
+    &Connection,
+    NetworkError,
+  ]
+  async bind(network : String, bind : String) -> Result[&Socket, NetworkError]
 }
 
 ///|
-pub(open) trait DatagramSocket {
-  async recv(Self, timeout_millis~ : UInt64) -> SockAddr
-  async send(Self, target~: SockAddr, data~: &@buffer.ByteSlice) -> (Int, Int)
+pub(open) trait Socket {
+  async accept(Self, timeout : @time.Duration) -> Result[
+    &Connection,
+    NetworkError,
+  ]
+  async close(Self) -> Unit
+  is_closed(Self) -> Bool
 }
+
+///|
+pub(open) trait DatagramSocket: Socket {
+  async accept(Self, timeout : @time.Duration) -> Result[
+    &DatagramConnection,
+    NetworkError,
+  ]
+  async send(Self, dst : SockAddr, opt : UdpOption) -> Result[
+    Unit,
+    NetworkError,
+  ]
+}
+
+///|
+pub(open) trait TcpSocket: Socket {
+  async accept(Self, timeout : @time.Duration, opt? : TcpOption) -> Result[
+    &TcpConnection,
+    NetworkError,
+  ]
+  async dial(host : SockAddr, opt : TcpOption) -> Result[
+    &TcpConnection,
+    NetworkError,
+  ]
+}
+
+///|
+pub(open) trait DatagramConnection: Connection {
+  buffer(Self) -> &@buffer.Buffer
+}
+
+///|
+pub(open) trait TcpConnection: Connection {}

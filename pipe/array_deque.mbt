@@ -10,10 +10,10 @@ struct ArrayDeque[T] {
 
 ///|
 /// Create a new ArrayDeque with the given capacity and default value.
-pub fn [T] ArrayDeque::new(capacity : Int, default : T) -> ArrayDeque[T] {
+pub fn [T] ArrayDeque::new(capacity : Int, default : () -> T) -> ArrayDeque[T] {
   guard capacity > 0
   ArrayDeque::{
-    buf: FixedArray::make(capacity, default),
+    buf: FixedArray::makei(capacity, _ => default()),
     head: 0,
     tail: 0,
     size: 0,

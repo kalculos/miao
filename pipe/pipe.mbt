@@ -28,7 +28,7 @@ pub fn BufferedPipe::new(
 ) -> (&@io.Reader, &PipeWriter) {
   guard buffer_size >= 0  // 0 => direct pipe
   let pipe = BufferedPipe::{
-    queue: ArrayBlockingQueue::new(runtime, buffer_size, 0),
+    queue: ArrayBlockingQueue::new(runtime, buffer_size, () => 0),
   }
   (pipe as &@io.Reader, pipe as &PipeWriter)
 }

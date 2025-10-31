@@ -19,7 +19,7 @@ struct ArrayBlockingQueue[T] {
 pub fn [T] ArrayBlockingQueue::new(
   runtime : &@rt.Runtime,
   capacity : Int,
-  default : T
+  default : () -> T
 ) -> ArrayBlockingQueue[T] {
   guard capacity > 0
   ArrayBlockingQueue::{

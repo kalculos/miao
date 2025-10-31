@@ -2,7 +2,7 @@
 pub(all) enum InetAddr {
   IPv4(host~ : Int)
   IPv6(msb~ : Int64, lsb~ : Int64)
-}
+} derive(Hash, Eq)
 
 ///|
 pub fn InetAddr::from_ipv4(s : String) -> InetAddr raise {
@@ -180,4 +180,9 @@ pub fn int64_to_hex(n : Int64) -> String {
     num = num / 16
   }
   result
+}
+
+///|
+pub impl Show for InetAddr with output(self, logger) {
+  logger.write_string(self.to_string())
 }
