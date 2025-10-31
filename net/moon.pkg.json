@@ -1,7 +1,6 @@
 {
     "import": [
       "iceBear67/miao/io",
-      "iceBear67/miao/pipe",
       "iceBear67/time",
       "iceBear67/miao/buffer"
     ]

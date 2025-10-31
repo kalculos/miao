@@ -1,5 +1,5 @@
 ///|
-/// Tests forInetAddr::IPv4 parsing
+/// Tests for InetAddr::IPv4 parsing
 test "from_ipv4 parses validInetAddr::IPv4 address" {
   let addr = InetAddr::from_ipv4("192.168.1.1")
   inspect(addr.to_string(), content="192.168.1.1")
@@ -32,43 +32,43 @@ test "from_ipv4 parses 10.20.30.40" {
 ///|
 test "from_ipv4 fails on too few octets" {
   let result = try? InetAddr::from_ipv4("192.168.1")
-  inspect(result is Err, content="true")
+  inspect(result is Err(_), content="true")
 }
 
 ///|
 test "from_ipv4 fails on too many octets" {
   let result = try? InetAddr::from_ipv4("192.168.1.1.1")
-  inspect(result is Err, content="true")
+  inspect(result is Err(_), content="true")
 }
 
 ///|
 test "from_ipv4 fails on out of range octet (256)" {
   let result = try? InetAddr::from_ipv4("192.168.1.256")
-  inspect(result is Err, content="true")
+  inspect(result is Err(_), content="true")
 }
 
 ///|
 test "from_ipv4 fails on negative octet" {
   let result = try? InetAddr::from_ipv4("192.168.-1.1")
-  inspect(result is Err, content="true")
+  inspect(result is Err(_), content="true")
 }
 
 ///|
 test "from_ipv4 fails on non-numeric octet" {
   let result = try? InetAddr::from_ipv4("192.168.abc.1")
-  inspect(result is Err, content="true")
+  inspect(result is Err(_), content="true")
 }
 
 ///|
 test "from_ipv4 fails on empty string" {
   let result = try? InetAddr::from_ipv4("")
-  inspect(result is Err, content="true")
+  inspect(result is Err(_), content="true")
 }
 
 ///|
 test "from_ipv4 fails on leading zeros causing overflow" {
   let result = try? InetAddr::from_ipv4("192.168.001.1")
-  inspect(result is Ok, content="true")
+  inspect(result is Ok(_), content="true")
   match result {
     Ok(addr) => inspect(addr.to_string(), content="192.168.1.1")
     _ => ()
@@ -76,7 +76,7 @@ test "from_ipv4 fails on leading zeros causing overflow" {
 }
 
 ///|
-/// Tests forInetAddr::IPv6 parsing
+/// Tests for InetAddr::IPv6 parsing
 test "from_ipv6 parses valid fullInetAddr::IPv6 address" {
   let addr = InetAddr::from_ipv6("2001:0db8:85a3:0000:0000:8a2e:0370:7334")
   inspect(addr.to_string(), content="2001:db8:85a3:0:0:8a2e:370:7334")
@@ -109,7 +109,7 @@ test "from_ipv6 parses mixed case hex" {
 ///|
 test "from_ipv6 fails on too few groups" {
   let result = try? InetAddr::from_ipv6("2001:0db8:85a3:0000:0000:8a2e:0370")
-  inspect(result is Err, content="true")
+  inspect(result is Err(_), content="true")
 }
 
 ///|
@@ -117,7 +117,7 @@ test "from_ipv6 fails on too many groups" {
   let result = try? InetAddr::from_ipv6(
       "2001:0db8:85a3:0000:0000:8a2e:0370:7334:1111",
     )
-  inspect(result is Err, content="true")
+  inspect(result is Err(_), content="true")
 }
 
 ///|
@@ -125,7 +125,7 @@ test "from_ipv6 fails on out of range hex (10000)" {
   let result = try? InetAddr::from_ipv6(
       "2001:0db8:85a3:10000:0000:8a2e:0370:7334",
     )
-  inspect(result is Err, content="true")
+  inspect(result is Err(_), content="true")
 }
 
 ///|
@@ -133,7 +133,7 @@ test "from_ipv6 fails on invalid hex characters" {
   let result = try? InetAddr::from_ipv6(
       "2001:0db8:85g3:0000:0000:8a2e:0370:7334",
     )
-  inspect(result is Err, content="true")
+  inspect(result is Err(_), content="true")
 }
 
 ///|
@@ -141,7 +141,7 @@ test "from_ipv6 fails on negative hex" {
   let result = try? InetAddr::from_ipv6(
       "2001:0db8:-85a3:0000:0000:8a2e:0370:7334",
     )
-  inspect(result is Err, content="true")
+  inspect(result is Err(_), content="true")
 }
 
 ///|
@@ -237,17 +237,15 @@ test "IPv6 round-trip through string" {
 
 ///|
 test "IPv6 round-trip preserves all bits" {
-  let original = InetAddr::from_ipv6(
-    "1234:5678:9abc:def0:fedc:ba98:7654:3210",
-  )
+  let original = InetAddr::from_ipv6("1234:5678:9abc:def0:fedc:ba98:7654:3210")
   let str = original.to_string()
   let reparsed = InetAddr::from_ipv6(str)
   match (original, reparsed) {
-    (InetAddr::IPv6 as a, InetAddr::IPv6(msb~, lsb~)) => {
+    (InetAddr::IPv6(..) as a, InetAddr::IPv6(msb~, lsb~)) => {
       inspect(msb == a.msb, content="true")
       inspect(lsb == a.lsb, content="true")
     }
-    _ => abort("ExpectedInetAddr::IPv6 addresses")
+    _ => abort("Expected InetAddr::IPv6 addresses")
   }
 }
 
@@ -257,7 +255,7 @@ test "IPv4 broadcast address" {
   let addr = InetAddr::from_ipv4("255.255.255.255")
   match addr {
     InetAddr::IPv4(host~) => inspect(host, content="-1")
-    _ => abort("ExpectedInetAddr::IPv4")
+    _ => abort("Expected InetAddr::IPv4")
   }
 }
 
@@ -292,19 +290,19 @@ test "IPv6 multicast address" {
 }
 
 ///|
-test "InetAddr enum pattern matchingInetAddr::IPv4" {
+test "InetAddr enum pattern matching InetAddr::IPv4" {
   let addr = InetAddr::from_ipv4("1.2.3.4")
   match addr {
     InetAddr::IPv4(_) => inspect(true, content="true")
-    InetAddr::IPv6 => inspect(false, content="true")
+    InetAddr::IPv6(..) => inspect(false, content="true")
   }
 }
 
 ///|
-test "InetAddr enum pattern matchingInetAddr::IPv6" {
+test "InetAddr enum pattern matching InetAddr::IPv6" {
   let addr = InetAddr::from_ipv6("::1")
   match addr {
     InetAddr::IPv4(_) => inspect(false, content="true")
-    InetAddr::IPv6 => inspect(true, content="true")
+    InetAddr::IPv6(..) => inspect(true, content="true")
   }
 }
