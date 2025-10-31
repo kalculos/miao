@@ -1,20 +1,20 @@
 ///|
 pub struct ByteBufReader {
-  buffer : &@bytebuf.ByteBuf
+  buffer : &@buffer.Buffer
   priv mut closed : Bool
 }
 
 ///|
-pub fn ByteBufReader::new(buf : &@bytebuf.ByteBuf) -> ByteBufReader {
+pub fn ByteBufReader::new(buf : &@buffer.Buffer) -> ByteBufReader {
   { buffer: buf, closed: false }
 }
 
 ///|
-impl Reader for ByteBufReader with read(self, dst : FixedArray[Byte], off : Int, len : Int) -> Int {
+pub impl Reader for ByteBufReader with read(self, dst : FixedArray[Byte], off : Int, len : Int) -> Int {
   if self.closed {
     return 0
   }
-  let remaining = self.buffer.remaining()
+  let remaining = self.buffer.readable_bytes()
   if remaining == 0 {
     return 0
   }
@@ -24,23 +24,23 @@ impl Reader for ByteBufReader with read(self, dst : FixedArray[Byte], off : Int,
 }
 
 ///|
-impl Reader for ByteBufReader with close(self) -> Unit {
+pub impl Reader for ByteBufReader with close(self) -> Unit {
   self.closed = true
 }
 
 ///|
-impl Reader for ByteBufReader with is_closed(self) -> Bool {
+pub impl Reader for ByteBufReader with is_closed(self) -> Bool {
   self.closed
 }
 
 ///|
 pub(all) struct ByteBufWriter {
-  buffer : &@bytebuf.ByteBuf
+  buffer : &@buffer.Buffer
   priv mut closed : Bool
 }
 
 ///|
-pub fn ByteBufWriter::new(buf : &@bytebuf.ByteBuf) -> ByteBufWriter {
+pub fn ByteBufWriter::new(buf : &@buffer.Buffer) -> ByteBufWriter {
   ByteBufWriter::{ buffer: buf, closed: false }
 }
 
@@ -49,12 +49,12 @@ pub impl Writer for ByteBufWriter with write(self, arr : FixedArray[Byte], off :
   if self.closed {
     return 0
   }
-  let remaining_capacity = self.buffer.capacity()
+  let remaining_capacity = self.buffer.writable_bytes()
   if remaining_capacity == 0 {
     return 0
   }
   let to_write = @cmp.minimum(len, remaining_capacity)
-  self.buffer.write_array(arr, off, to_write)
+  self.buffer.write(arr, off, to_write)
   to_write
 }
 
