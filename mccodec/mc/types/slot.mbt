@@ -17,7 +17,7 @@ pub struct Slot {
 pub struct HashedSlot {
   item_count : Int // VarInt - number of items in the slot (0 = empty)
   item_id : Int? // Optional VarInt - numeric ID of the item (present if item_count > 0)
-  components : Map[Int, Int?] // All components (both to add and remove), empty if item_count = 0, None for components to remove
+  components_hashes : Map[Int, Int?] // All components (both to add and remove), empty if item_count = 0, None for components to remove
 }
 
 ///|
@@ -29,7 +29,7 @@ pub fn Slot::empty() -> Slot {
 ///|
 /// Creates an empty hashed slot
 pub fn HashedSlot::empty() -> HashedSlot {
-  { item_count: 0, item_id: None, components: Map::new() }
+  { item_count: 0, item_id: None, components_hashes: Map::new() }
 }
 
 ///|
@@ -116,7 +116,7 @@ pub fn read_hashed_slot(buf : &@buffer.Buffer) -> HashedSlot raise {
   for i = 0; i < length_to_remove; i = i + 1 {
     components.set(read_varint(buf), None)
   }
-  { item_count, item_id: Some(item_id), components }
+  { item_count, item_id: Some(item_id), components_hashes: components }
 }
 
 ///|
@@ -133,7 +133,7 @@ pub fn write_hashed_slot(
     write_varint(buf, id)
     let mut length_to_add = 0
     let mut length_to_remove = 0
-    for _, component_data in slot.components {
+    for _, component_data in slot.components_hashes {
       if component_data is Some(_) {
         length_to_add = length_to_add + 1
       } else {
@@ -141,14 +141,14 @@ pub fn write_hashed_slot(
       }
     }
     write_varint(buf, length_to_add)
-    for component_id, component_data in slot.components {
+    for component_id, component_data in slot.components_hashes {
       if component_data is Some(data) {
         write_varint(buf, component_id)
         buf.write_int(data)
       }
     }
     write_varint(buf, length_to_remove)
-    for component_id, component_data in slot.components {
+    for component_id, component_data in slot.components_hashes {
       if component_data is None {
         write_varint(buf, component_id)
       }
