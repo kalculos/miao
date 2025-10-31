@@ -1,13 +1,19 @@
+///| Default buffer size for I/O operations
+let default_buffer_size : Int = 1024
+
 ///|
 pub(open) trait Reader {
   /// Read a specific amount of bytes at most, to the destinated buffer.
   /// It returns the actual bytes read or 0 if the Reader is closed or drained.
   async read(Self, dst : FixedArray[Byte], off : Int, len : Int) -> Int
   /// Read bytes to a bytebuffer until the reader is drained or closed.
-  async read_all(Self) -> &@bytebuf.ByteBuf = _
-  async read_buffer(Self, len : Int) -> &@bytebuf.ByteBuf = _
+  async read_all(Self) -> &@buffer.Buffer = _
+  async read_buffer(Self, len : Int) -> &@buffer.Buffer = _
   /// Read (buf.len - off) bytes at most to the buffer.
-  async read_buffer_to(Self, buf : &@bytebuf.ByteBuf) -> Int = _
+  async read_buffer_to(Self, buf : &@buffer.Buffer) -> Int = _
+  /// Check if there are available bytes. When any bytes available, it returns a positive value. Otherwise, zero or negative is returned.
+  /// It does not guarantee the return value equals to the number of bytes you can read.
+  async available(Self) -> Int = _
   async close(Self) -> Unit
   ///| This also indicates the state of closer
   async is_closed(Self) -> Bool
@@ -21,69 +27,83 @@ pub(open) trait Writer {
   /// It returns the bytes actually written. 
   async write_buffer(
     Self,
-    buf : &@bytebuf.ByteBuf, // a sliced buffer can be used to control if reader index should inc. Or also supports skipN
+    buf : &@buffer.Buffer, // a sliced buffer can be used to control if reader index should inc. Or also supports skipN
   ) -> Int = _
   async close(Self) -> Unit
   ///| This also indicates the state of closer
   async is_closed(Self) -> Bool
 }
 
+impl Reader with available(self) {
+  if self.is_closed() {
+    0
+  } else {
+    1
+  }
+}
+
 ///|
 impl Reader with read_all(self) {
-  let buffer = @bytebuf.make_unpooled(1024)
-  // 需要 ensure capacity 以及合理扩容策略
-  let array : FixedArray[Byte] = FixedArray::make(1024, 0)
+  let buffer = @buffer.HeapByteBuf::new(default_buffer_size)
+  // Buffer will expand capacity automatically
+  let array : FixedArray[Byte] = FixedArray::make(default_buffer_size, 0)
   let mut read = 1
   while read > 0 {
-    read = self.read(array, 0, 1024)
-    buffer.write_array(array, 0, read)
+    read = self.read(array, 0, default_buffer_size)
+    if read > 0 {
+      buffer.write(array, 0, read) |> ignore // must success
+    }
   }
-  buffer
+  buffer as &@buffer.Buffer
 }
 
 ///|
 impl Reader with read_buffer(self, len) {
-  let array : FixedArray[Byte] = FixedArray::make(len, 0)
+  let buffer = @buffer.HeapByteBuf::new(len)
+  let array : FixedArray[Byte] = FixedArray::make(default_buffer_size, 0)
   let mut toRead = len
   while toRead > 0 {
-    let read = self.read(array, len - toRead, toRead)
+    let read = self.read(array, 0, @cmp.minimum(toRead, default_buffer_size))
     if read > 0 {
+      buffer.write(array, 0, read) |> ignore // must success
       toRead -= read
     } else {
       break // EOF
     }
   }
-  @bytebuf.make_unpooled_from_array(Array::from_fixed_array(array)) // data 需要是一个 FixedArray
+  buffer as &@buffer.Buffer
 }
 
 ///|
 impl Reader with read_buffer_to(self, buf) -> Int {
-  let toRead = buf.capacity()
-  let buffer : FixedArray[Byte] = FixedArray::make(1024, 0)
+  let mut toRead = buf.writable_bytes()
+  let buffer : FixedArray[Byte] = FixedArray::make(default_buffer_size, 0)
   let mut totalRead = 0
   while toRead > 0 {
-    let read = self.read(buffer, 0, @cmp.minimum(toRead, 1024))
+    let read = self.read(buffer, 0, @cmp.minimum(toRead, default_buffer_size))
     if read <= 0 {
       break // eof
     }
     totalRead += read
-    buf.write_array(buffer, 0, read)
+    buf.write(buffer, 0, read) |> ignore // must success
+    toRead -= read
   }
   totalRead
 }
 
 ///|
 impl Writer with write_buffer(self, buf) {
-  let _buf: FixedArray[Byte] = FixedArray::make(1, 0)
+  let _buf: FixedArray[Byte] = FixedArray::make(default_buffer_size, 0)
   let mut totalWritten = 0
-  while buf.remaining() >0 {
-      let written = self.write(_buf, 0, buf.read(_buf, 0 ,1))
+  while buf.readable_bytes() > 0 {
+      let to_write = @cmp.minimum(buf.readable_bytes(), default_buffer_size)
+      let read = buf.read(_buf, 0, to_write)
+      let written = self.write(_buf, 0, read)
       if written > 0 {
         totalWritten += written
-        continue
+      } else {
+        break
       }
-      break
   }
   totalWritten
-
 }

@@ -115,38 +115,38 @@ pub fn OpenFlags::read_write(
   flags
 }
 
-pub fn is_append(self: OpenFlags) -> Bool {
+pub fn OpenFlags::is_append(self: OpenFlags) -> Bool {
   (self.0 & _O_APPEND) != 0
 }
 
-pub fn is_create(self: OpenFlags) -> Bool {
+pub fn OpenFlags::is_create(self: OpenFlags) -> Bool {
   (self.0 & _O_CREATE) != 0
 }
 
-pub fn is_truncate(self: OpenFlags) -> Bool {
+pub fn OpenFlags::is_truncate(self: OpenFlags) -> Bool {
   (self.0 & _O_TRUNCATE) != 0
 }
 
-pub fn is_exclusive(self: OpenFlags) -> Bool {
+pub fn OpenFlags::is_exclusive(self: OpenFlags) -> Bool {
   (self.0 & _O_EXCLUSIVE) != 0
 }
 
-pub fn has_read(self: OpenFlags) -> Bool {
+pub fn OpenFlags::has_read(self: OpenFlags) -> Bool {
   (self.0 & _O_RDONLY) != 0
 }
 
-pub fn has_write(self: OpenFlags) -> Bool {
+pub fn OpenFlags::has_write(self: OpenFlags) -> Bool {
   (self.0 & _O_WRONLY) != 0
 }
 
-pub fn is_read_write(self: OpenFlags) -> Bool {
+pub fn OpenFlags::is_read_write(self: OpenFlags) -> Bool {
   (self.0 & _O_RDWR) != 0
 }
 
-pub fn is_read_only(self: OpenFlags) -> Bool {
+pub fn OpenFlags::is_read_only(self: OpenFlags) -> Bool {
   (self.0 & 0b11) == _O_RDONLY
 }
 
-pub fn is_write_only(self: OpenFlags) -> Bool {
+pub fn OpenFlags::is_write_only(self: OpenFlags) -> Bool {
   (self.0 & 0b11) == _O_WRONLY
 }
