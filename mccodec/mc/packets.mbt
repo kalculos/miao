@@ -1,7 +1,7 @@
 ///|
 pub(open) trait Packet {
   clientbound(Self) -> Bool
-  serialize(Self, &@bytebuf.ByteBuf) -> Unit = _
+  serialize(Self, &@bytebuf.ByteBuf) -> Unit raise = _
   deserialize(&@bytebuf.ByteBuf) -> Self raise = _
 }
 
