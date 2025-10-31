@@ -1,0 +1,7 @@
+{
+  "import": [
+    "iceBear67/miao/mccodec/mc",
+    "iceBear67/miao/buffer",
+    "iceBear67/miao/mccodec/mc/types"
+  ]
+}
