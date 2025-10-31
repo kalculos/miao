@@ -30,16 +30,16 @@ pub fn EmptyClosedReader::new() -> EmptyClosedReader {
 }
 
 ///|
-pub impl Reader for EmptyClosedReader with read(self, dst, off, len) {
+pub impl Reader for EmptyClosedReader with read(_, _, _, _) {
   0
 }
 
 ///|
-pub impl Reader for EmptyClosedReader with close(self) {
+pub impl Reader for EmptyClosedReader with close(_) {
 
 }
 
 ///|
-pub impl Reader for EmptyClosedReader with is_closed(self) {
+pub impl Reader for EmptyClosedReader with is_closed(_) {
   true
 }

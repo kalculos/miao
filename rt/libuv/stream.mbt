@@ -12,7 +12,7 @@ pub fn StreamWriter::new(s : @uv.Stream) -> StreamWriter {
 ///|
 pub impl @io.Writer for StreamWriter with write(this, arr, off, len) {
   uvrt_op_suspend((resolve, reject, _) => {
-      let handle = this.stream.write(
+      let _ = this.stream.write(
         [arr.unsafe_reinterpret_as_bytes()[off:off + len]],
         () => resolve(len),
         err => reject(err),
@@ -49,8 +49,8 @@ pub fn read_stream(
     let data = uvrt_op_suspend((resolve, reject, _) => {
       stream.read_start(
         (_, _) => buffer.unsafe_reinterpret_as_bytes(),
-        (stream, _, bytes) => resolve(bytes),
-        (stream, err) => reject(err),
+        (_, _, bytes) => resolve(bytes),
+        (_, err) => reject(err),
       )
       () => {
           defer reject(@uv.Errno::ECANCELED)

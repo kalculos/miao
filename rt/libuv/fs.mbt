@@ -4,7 +4,7 @@ struct LibuvFileSystem {
 }
 
 ///|
-fn uv(self : LibuvFileSystem) -> @uv.Loop {
+fn LibuvFileSystem::uv(self: LibuvFileSystem) -> @uv.Loop {
   self.rt.uv
 }
 
@@ -25,7 +25,7 @@ impl @fs.FileSystem for LibuvFileSystem with open_file(
 }
 
 ///|
-fn to_bytes(self : @fs.Path) -> Bytes {
+fn @fs.Path::to_bytes(self: @fs.Path) -> Bytes {
   @encoding/utf8.encode(self.to_unix_path())
 }
 
@@ -106,7 +106,7 @@ fn to_uv_access(mode : @fs.AccessFlags) -> @uv.AccessFlags {
 }
 
 ///|
-fn access_flag_inner(self : @uv.AccessFlags) -> Int = "%identity"
+fn access_flag_inner(flag: @uv.AccessFlags) -> Int = "%identity"
 
 ///|
 impl @fs.FileSystem for LibuvFileSystem with can_access(self, path, mode) {
@@ -168,7 +168,8 @@ impl @fs.FileSystem for LibuvFileSystem with read_symbol_link(self, path) {
 }
 
 ///|
-impl @fs.FileSystem for LibuvFileSystem with move(self, src, dst, copy_attr~) {
+impl @fs.FileSystem for LibuvFileSystem with rename(self, src, dst, copy_attr~) {
+  ignore(copy_attr)
   let uv = self.uv()
   // todo: support copy_attr
   uvrt_op_suspend((resolve, reject, _) => {
@@ -191,7 +192,7 @@ impl @fs.FileSystem for LibuvFileSystem with cwd(self) {
     let cwd = @uv.cwd()
     @fs.path(@encoding/utf8.decode(cwd), using_fs=self)
   } catch {
-    err => panic()
+    _ => panic()
   }
 }
 

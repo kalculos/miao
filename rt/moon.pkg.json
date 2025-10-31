@@ -1,11 +1,7 @@
 {
   "link": {
 	  "native": {
-		  "gcc-flags": "--std=gnu23"
+		  "gcc-flags": "--std=gnu2x"
 	  }
-  },
-  "import": [
-    "iceBear67/miao/fs",
-    "iceBear67/miao/process"
-  ]
+  }
 }

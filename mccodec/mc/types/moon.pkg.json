@@ -1,0 +1,9 @@
+{
+    "import": [
+      "moonbitlang/x/uuid",
+      "iceBear67/miao/buffer",
+      "iceBear67/miao/mccodec/safenbt",
+      "iceBear67/mnbt/nbt",
+      "iceBear67/mnbt/nbt/bnbt"
+    ]
+}

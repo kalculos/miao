@@ -14,7 +14,7 @@ pub impl Reader for TeeReader with read(self, dst : FixedArray[Byte], off : Int,
   let bytes_read = self.reader.read(dst, off, len)
   if bytes_read > 0 {
     // Write the same data to the writer
-    let bytes_written = self.writer.write(dst, off, bytes_read)
+    self.writer.write(dst, off, bytes_read) |> ignore
     // If we couldn't write all bytes, that's okay - we still return the bytes we read
     // The tee pattern continues even if the writer fails
   }

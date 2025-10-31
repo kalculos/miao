@@ -1,5 +1,5 @@
 {
     "import": [
-        "iceBear67/bytebuf"
+        "iceBear67/miao/buffer"
     ]
 }
