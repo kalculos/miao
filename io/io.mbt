@@ -4,10 +4,10 @@ pub(open) trait Reader {
   /// It returns the actual bytes read or 0 if the Reader is closed or drained.
   async read(Self, dst : FixedArray[Byte], off : Int, len : Int) -> Int
   /// Read bytes to a bytebuffer until the reader is drained or closed.
-  async read_all(Self) -> &@bytebuf.ByteBuf = _
-  async read_buffer(Self, len : Int) -> &@bytebuf.ByteBuf = _
+  async read_all(Self) -> &@buffer.Buffer = _
+  async read_buffer(Self, len : Int) -> &@buffer.Buffer = _
   /// Read (buf.len - off) bytes at most to the buffer.
-  async read_buffer_to(Self, buf : &@bytebuf.ByteBuf) -> Int = _
+  async read_buffer_to(Self, buf : &@buffer.Buffer) -> Int = _
   /// Check if there are available bytes. When any bytes available, it returns a positive value. Otherwise, zero or negative is returned.
   /// It does not guarantee the return value equals to the number of bytes you can read.
   async available(Self) -> Int = _
@@ -24,7 +24,7 @@ pub(open) trait Writer {
   /// It returns the bytes actually written. 
   async write_buffer(
     Self,
-    buf : &@bytebuf.ByteBuf, // a sliced buffer can be used to control if reader index should inc. Or also supports skipN
+    buf : &@buffer.Buffer, // a sliced buffer can be used to control if reader index should inc. Or also supports skipN
   ) -> Int = _
   async close(Self) -> Unit
   ///| This also indicates the state of closer
@@ -41,15 +41,15 @@ impl Reader with available(self) {
 
 ///|
 impl Reader with read_all(self) {
-  let buffer = @bytebuf.make_unpooled(1024)
+  let buffer = @buffer.HeapByteBuf::new(1024)
   // 需要 ensure capacity 以及合理扩容策略
   let array : FixedArray[Byte] = FixedArray::make(1024, 0)
   let mut read = 1
   while read > 0 {
     read = self.read(array, 0, 1024)
-    buffer.write_array(array, 0, read)
+    buffer.write(array, 0, read)
   }
-  buffer
+  buffer as &@buffer.Buffer
 }
 
 ///|
@@ -64,12 +64,12 @@ impl Reader with read_buffer(self, len) {
       break // EOF
     }
   }
-  @bytebuf.make_unpooled_from_array(Array::from_fixed_array(array)) // data 需要是一个 FixedArray
+  @buffer.HeapByteBuf::wrapped_array(array) as &@buffer.Buffer // data 需要是一个 FixedArray
 }
 
 ///|
 impl Reader with read_buffer_to(self, buf) -> Int {
-  let toRead = buf.capacity()
+  let toRead = buf.writable_bytes()
   let buffer : FixedArray[Byte] = FixedArray::make(1024, 0)
   let mut totalRead = 0
   while toRead > 0 {
@@ -78,7 +78,7 @@ impl Reader with read_buffer_to(self, buf) -> Int {
       break // eof
     }
     totalRead += read
-    buf.write_array(buffer, 0, read)
+    buf.write(buffer, 0, read)
   }
   totalRead
 }
@@ -87,7 +87,7 @@ impl Reader with read_buffer_to(self, buf) -> Int {
 impl Writer with write_buffer(self, buf) {
   let _buf: FixedArray[Byte] = FixedArray::make(1, 0)
   let mut totalWritten = 0
-  while buf.remaining() >0 {
+  while buf.readable_bytes() >0 {
       let written = self.write(_buf, 0, buf.read(_buf, 0 ,1))
       if written > 0 {
         totalWritten += written
