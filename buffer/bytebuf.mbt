@@ -4,7 +4,7 @@ pub(open) trait ByteSlice {
   read(Self, dst : FixedArray[Byte], off : Int, len : Int) -> Int
   read_byte(Self) -> Byte raise
   write(Self, src : FixedArray[Byte], off : Int, len : Int) -> Int
-  write_byte(Self, Byte) -> Int
+  write_byte(Self, Byte) -> Unit raise
   ridx(Self) -> Int
   widx(Self) -> Int
   readable_bytes(Self) -> Int
@@ -13,7 +13,7 @@ pub(open) trait ByteSlice {
   // The slice does not guarantee auto expansion.
   slice(Self, from_index : Int, to_index : Int) -> &ByteSlice
   /// Create a deep copy of this slice.
-  copy_slice(Self) -> &Buffer
+  copy(Self) -> &Buffer
   view_as_bytes(Self) -> Bytes
   to_bytes(Self) -> Bytes
   set_position(Self, Int) -> Unit
