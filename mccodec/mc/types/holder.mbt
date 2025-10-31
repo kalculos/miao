@@ -8,7 +8,7 @@ struct Holder[T] {
 ///|
 pub fn[T] read_holder(
   buf : &@buffer.Buffer,
-  read_value : (&@buffer.Buffer) -> T,
+  read_value : (&@buffer.Buffer) -> T raise,
 ) -> Holder[T] raise {
   let id = read_varint(buf)
   let value = if id != 0 { Some(read_value(buf)) } else { None }
