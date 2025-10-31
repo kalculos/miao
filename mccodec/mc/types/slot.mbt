@@ -110,7 +110,7 @@ pub fn read_hashed_slot(buf : &@buffer.Buffer) -> HashedSlot raise {
   let components = Map::new()
   let length_to_add = read_varint(buf)
   for i = 0; i < length_to_add; i = i + 1 {
-    components.set(read_varint(buf), Some(read_varint(buf)))
+    components.set(read_varint(buf), Some(buf.read_int()))
   }
   let length_to_remove = read_varint(buf)
   for i = 0; i < length_to_remove; i = i + 1 {
@@ -144,7 +144,7 @@ pub fn write_hashed_slot(
     for component_id, component_data in slot.components {
       if component_data is Some(data) {
         write_varint(buf, component_id)
-        write_varint(buf, data)
+        buf.write_int(data)
       }
     }
     write_varint(buf, length_to_remove)
