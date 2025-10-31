@@ -7,7 +7,7 @@ pub struct DeflateReader {
   priv mut closed : Bool
   priv mut buffer : Array[Byte]
   priv mut finished : Bool
-  priv mut window : Array[Byte]  // LZ77 sliding window
+  priv mut window : Array[Byte] // LZ77 sliding window
 }
 
 ///|
@@ -30,7 +30,7 @@ pub impl @io.Reader for DeflateReader with read(
   self,
   dst : FixedArray[Byte],
   off : Int,
-  len : Int
+  len : Int,
 ) -> Int {
   if self.closed || len <= 0 {
     return 0
@@ -65,7 +65,6 @@ pub impl @io.Reader for DeflateReader with read(
     // Try to read more compressed data from source and feed to bit reader
     let input_buf : FixedArray[Byte] = FixedArray::make(4096, 0)
     let bytes_read = self.source.read(input_buf, 0, 4096)
-    
     if bytes_read > 0 {
       // Convert FixedArray to Bytes and feed to bit reader
       let input_bytes = Array::new()
@@ -76,15 +75,14 @@ pub impl @io.Reader for DeflateReader with read(
       }
       ignore(self.bit_reader.feed(Bytes::from_array(input_bytes)))
     }
-    
+
     // Decode DEFLATE blocks
-    let decoded = try_decode_block(self)
+    let decoded = self.try_decode_block()
     if decoded {
       // Recursively call read to return buffered data
       return self.read(dst, off, len)
     }
   }
-  
   0
 }
 
@@ -98,17 +96,16 @@ fn try_decode_block(self : DeflateReader) -> Bool {
       if bfinal == 1U {
         self.finished = true
       }
-      
+
       // Read block type (2 bits)
       match self.bit_reader.read_bits(2U) {
-        Some(btype) => {
+        Some(btype) =>
           match btype {
-            0U => decode_stored_block(self) // Stored block
+            0U => self.decode_stored_block() // Stored block
             1U => false // Fixed Huffman (not implemented yet)
             2U => false // Dynamic Huffman (not implemented yet)
-            _ => false  // Reserved/invalid
+            _ => false // Reserved/invalid
           }
-        }
         None => false
       }
     }
@@ -121,15 +118,15 @@ fn try_decode_block(self : DeflateReader) -> Bool {
 fn decode_stored_block(self : DeflateReader) -> Bool {
   // Align to byte boundary
   self.bit_reader.align_to_byte()
-  
+
   // Read LEN (2 bytes, little-endian)
   match self.bit_reader.take_bytes(2) {
     Some(len_bytes) => {
       let len = len_bytes[0].to_int() | (len_bytes[1].to_int() << 8)
-      
+
       // Read NLEN (2 bytes, little-endian) - we don't verify it for now
       match self.bit_reader.take_bytes(2) {
-        Some(_nlen_bytes) => {
+        Some(_nlen_bytes) =>
           // Read LEN bytes of literal data
           match self.bit_reader.take_bytes(len) {
             Some(data) => {
@@ -143,7 +140,6 @@ fn decode_stored_block(self : DeflateReader) -> Bool {
             }
             None => false
           }
-        }
         None => false
       }
     }

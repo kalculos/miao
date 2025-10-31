@@ -27,7 +27,7 @@ pub impl @io.Writer for DeflateWriter with write(
   self,
   arr : FixedArray[Byte],
   off : Int,
-  len : Int
+  len : Int,
 ) -> Int {
   if self.closed || len <= 0 {
     return 0
@@ -40,20 +40,20 @@ pub impl @io.Writer for DeflateWriter with write(
   // - 2 bytes: LEN (length of data, little-endian)
   // - 2 bytes: NLEN (one's complement of LEN, little-endian)
   // - LEN bytes: literal data
-  
+
   // Write block header: BFINAL=0, BTYPE=00 (stored)
   self.bit_writer.write_bits(0U, 1U) // BFINAL = 0 (not final)
   self.bit_writer.write_bits(0U, 2U) // BTYPE = 00 (stored)
-  
+
   // Align to byte boundary
   self.bit_writer.align_to_byte()
-  
+
   // Write LEN and NLEN
   let block_len = len.to_uint16()
-  let nlen = (0xFFFF - block_len.to_uint()).to_uint16()
+  let nlen = (0xFFFF - block_len.to_int()).to_uint16()
   self.bit_writer.write_le16(block_len)
   self.bit_writer.write_le16(nlen)
-  
+
   // Write raw data bytes
   let data_bytes = Array::new()
   let mut i = 0
@@ -62,7 +62,7 @@ pub impl @io.Writer for DeflateWriter with write(
     i = i + 1
   }
   self.bit_writer.write_raw_bytes(Bytes::from_array(data_bytes))
-  
+
   // Flush compressed data to sink
   let compressed = self.bit_writer.take_bytes()
   if compressed.length() > 0 {
@@ -75,10 +75,9 @@ pub impl @io.Writer for DeflateWriter with write(
     let written = self.sink.write(output_buf, 0, compressed.length())
     if written < compressed.length() {
       // Handle partial writes - return proportional input consumed
-      return (len * written) / compressed.length()
+      return len * written / compressed.length()
     }
   }
-  
   len
 }
 
@@ -87,28 +86,30 @@ pub impl @io.Writer for DeflateWriter with write(
 pub impl @io.Writer for DeflateWriter with close(self) -> Unit {
   if !self.closed {
     self.closed = true
-    
+
     // Write final empty stored block if not already written
     if !self.final_written {
       // Write block header: BFINAL=1, BTYPE=00 (stored)
       self.bit_writer.write_bits(1U, 1U) // BFINAL = 1 (final block)
       self.bit_writer.write_bits(0U, 2U) // BTYPE = 00 (stored)
-      
+
       // Align to byte boundary
       self.bit_writer.align_to_byte()
-      
+
       // Write LEN=0 and NLEN=0xFFFF for empty block
       self.bit_writer.write_le16(0U.to_uint16())
       self.bit_writer.write_le16(0xFFFFU.to_uint16())
-      
       self.final_written = true
     }
-    
+
     // Flush any remaining bits
     self.bit_writer.align_to_byte()
     let remaining = self.bit_writer.take_bytes()
     if remaining.length() > 0 {
-      let output_buf : FixedArray[Byte] = FixedArray::make(remaining.length(), 0)
+      let output_buf : FixedArray[Byte] = FixedArray::make(
+        remaining.length(),
+        0,
+      )
       let mut i = 0
       while i < remaining.length() {
         output_buf[i] = remaining[i]
@@ -116,7 +117,6 @@ pub impl @io.Writer for DeflateWriter with close(self) -> Unit {
       }
       ignore(self.sink.write(output_buf, 0, remaining.length()))
     }
-    
     self.sink.close()
   }
 }
