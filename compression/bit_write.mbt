@@ -14,7 +14,7 @@ pub fn bit_writer() -> BitWriter {
 ///|
 /// Write low `n` bits of `value` in LSB-first order.
 /// Debug constraint kept from Rust version: n <= 24.
-pub fn write_bits(self : BitWriter, value : UInt, n : UInt) -> Unit {
+pub fn BitWriter::write_bits(self : BitWriter, value : UInt, n : UInt) -> Unit {
   if n == 0U {
     return
   }
@@ -39,14 +39,14 @@ pub fn write_bits(self : BitWriter, value : UInt, n : UInt) -> Unit {
 ///|
 /// Write little-endian 16-bit value (used for stored block LEN/NLEN).
 /// Must be byte-aligned.
-pub fn write_le16(self : BitWriter, v : UInt16) -> Unit {
+pub fn BitWriter::write_le16(self : BitWriter, v : UInt16) -> Unit {
   self.out.push((v & 0x00FF).to_uint().to_byte())
   self.out.push(((v >> 8).to_uint() & 0xFFU).to_byte())
 }
 
 ///|
 /// Write raw bytes directly (used by stored blocks), must be byte-aligned.
-pub fn write_raw_bytes(self : BitWriter, bytes : Bytes) -> Unit {
+pub fn BitWriter::write_raw_bytes(self : BitWriter, bytes : Bytes) -> Unit {
   let n = bytes.length()
   let mut i = 0
   while i < n {
@@ -57,7 +57,7 @@ pub fn write_raw_bytes(self : BitWriter, bytes : Bytes) -> Unit {
 
 ///|
 /// Flush remaining bits (if any) into one byte (LSB-first) and clear the bit buffer.
-pub fn align_to_byte(self : BitWriter) -> Unit {
+pub fn BitWriter::align_to_byte(self : BitWriter) -> Unit {
   if self.bit_cnt > 0U {
     let byte = (self.bit_buff & 0xFF).to_uint().to_byte()
     self.out.push(byte)
@@ -69,7 +69,7 @@ pub fn align_to_byte(self : BitWriter) -> Unit {
 ///|
 /// Take and clear all emitted bytes. 
 /// Note: does not implicitly align (DEFLATE allows block tail to be non byte-aligned).
-pub fn take_bytes(self : BitWriter) -> Bytes {
+pub fn BitWriter::take_bytes(self : BitWriter) -> Bytes {
   // keep bit_buf as-is; we only move out the fully emitted bytes
   let out = Bytes::from_array(self.out)
   self.out = Array::new()
@@ -78,7 +78,7 @@ pub fn take_bytes(self : BitWriter) -> Bytes {
 
 ///|
 /// Test-only helper: align then take all bytes.
-pub fn drain_all_aligned(self : BitWriter) -> Bytes {
+pub fn BitWriter::drain_all_aligned(self : BitWriter) -> Bytes {
   self.align_to_byte()
   self.take_bytes()
 }

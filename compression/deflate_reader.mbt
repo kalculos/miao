@@ -89,7 +89,7 @@ pub impl @io.Reader for DeflateReader with read(
 ///|
 /// Try to decode one DEFLATE block from the bit reader.
 /// Returns true if data was decoded and buffered, false otherwise.
-fn try_decode_block(self : DeflateReader) -> Bool {
+fn DeflateReader::try_decode_block(self : DeflateReader) -> Bool {
   // Read DEFLATE block header (3 bits)
   match self.bit_reader.read_bits(1U) {
     Some(bfinal) => {
@@ -115,7 +115,7 @@ fn try_decode_block(self : DeflateReader) -> Bool {
 
 ///|
 /// Decode a stored (uncompressed) block.
-fn decode_stored_block(self : DeflateReader) -> Bool {
+fn DeflateReader::decode_stored_block(self : DeflateReader) -> Bool {
   // Align to byte boundary
   self.bit_reader.align_to_byte()
 

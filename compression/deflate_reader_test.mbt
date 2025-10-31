@@ -3,12 +3,13 @@ test "DeflateReader: decode stored block" {
   // Create a DEFLATE stored block containing [1, 2, 3, 4, 5]
   // Format: BFINAL=1, BTYPE=00, align, LEN=5, NLEN=0xFFFA, data
   let compressed = Bytes::from_array([
-    0b00000101, // BFINAL=1, BTYPE=00, align (5 zero bits padding)
-     5, 0, // LEN = 5 (little-endian)
-     250, 255, // NLEN = 0xFFFA = ~5 (little-endian)
-     1, 2, 3, 4, 5, // data
-  ])
-  let buf = @bytebuf.make_unpooled(1024)
+      0b00000101, // BFINAL=1, BTYPE=00, align (5 zero bits padding)
+       5, 0, // LEN = 5 (little-endian)
+       250, 255, // NLEN = 0xFFFA = ~5 (little-endian)
+       1, 2, 3, 4, 5,
+    ], // data
+  )
+  let buf = @buffer.HeapByteBuf::new(1024)
   let mut i = 0
   while i < compressed.length() {
     buf.write_byte(compressed[i])
@@ -38,7 +39,7 @@ test "DeflateReader: decode stored block" {
 
 ///|
 test "DeflateReader: read returns 0 when closed" {
-  let buf = @bytebuf.make_unpooled(1024)
+  let buf = @buffer.HeapByteBuf::new(1024)
   let byte_reader = @io.ByteBufReader::new(buf)
   let deflate_reader = DeflateReader::new(byte_reader)
   run_async_unit(fn() { deflate_reader.close() })
@@ -49,7 +50,7 @@ test "DeflateReader: read returns 0 when closed" {
 
 ///|
 test "DeflateReader: is_closed returns correct state" {
-  let buf = @bytebuf.make_unpooled(1024)
+  let buf = @buffer.HeapByteBuf::new(1024)
   let byte_reader = @io.ByteBufReader::new(buf)
   let deflate_reader = DeflateReader::new(byte_reader)
   assert_false(run_async_bool(fn() { deflate_reader.is_closed() }))

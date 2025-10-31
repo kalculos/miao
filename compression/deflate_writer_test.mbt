@@ -1,7 +1,7 @@
 ///|
 test "DeflateWriter: write stored block" {
   // Create a byte buffer to write to
-  let buf = @bytebuf.make_unpooled(1024)
+  let buf = @buffer.HeapByteBuf::new(1024)
   let byte_writer = @io.ByteBufWriter::new(buf)
 
   // Create DeflateWriter
@@ -16,8 +16,8 @@ test "DeflateWriter: write stored block" {
   run_async_unit(fn() { deflate_writer.close() })
 
   // Verify DEFLATE stored block was written
-  buf.reset()
-  assert_true(buf.remaining() > 0)
+  buf.set_position(0)
+  assert_true(buf.readable_bytes() > 0)
 
   // Expected format:
   // - Non-final block with data: BFINAL=0, BTYPE=00, LEN=5, NLEN, data
@@ -25,12 +25,12 @@ test "DeflateWriter: write stored block" {
   // Total: 1 + 4 + 5 + 1 + 4 = 15 bytes (after alignment)
 
   // Just verify we have reasonable amount of compressed data
-  assert_true(buf.remaining() >= 10)
+  assert_true(buf.readable_bytes() >= 10)
 }
 
 ///|
 test "DeflateWriter: write returns 0 when closed" {
-  let buf = @bytebuf.make_unpooled(1024)
+  let buf = @buffer.HeapByteBuf::new(1024)
   let byte_writer = @io.ByteBufWriter::new(buf)
   let deflate_writer = DeflateWriter::new(byte_writer)
   run_async_unit(fn() { deflate_writer.close() })
@@ -41,7 +41,7 @@ test "DeflateWriter: write returns 0 when closed" {
 
 ///|
 test "DeflateWriter: is_closed returns correct state" {
-  let buf = @bytebuf.make_unpooled(1024)
+  let buf = @buffer.HeapByteBuf::new(1024)
   let byte_writer = @io.ByteBufWriter::new(buf)
   let deflate_writer = DeflateWriter::new(byte_writer)
   assert_false(run_async_bool(fn() { deflate_writer.is_closed() }))
@@ -51,7 +51,7 @@ test "DeflateWriter: is_closed returns correct state" {
 
 ///|
 test "DeflateWriter: multiple writes before close" {
-  let buf = @bytebuf.make_unpooled(1024)
+  let buf = @buffer.HeapByteBuf::new(1024)
   let byte_writer = @io.ByteBufWriter::new(buf)
   let deflate_writer = DeflateWriter::new(byte_writer)
 
@@ -65,14 +65,14 @@ test "DeflateWriter: multiple writes before close" {
   run_async_unit(fn() { deflate_writer.close() })
 
   // Verify data was written
-  buf.reset()
-  assert_true(buf.remaining() > 0)
+  buf.set_position(0)
+  assert_true(buf.readable_bytes() > 0)
 }
 
 ///|
 test "DeflateWriter/Reader: round-trip test" {
   // Write compressed data
-  let write_buf = @bytebuf.make_unpooled(1024)
+  let write_buf = @buffer.HeapByteBuf::new(1024)
   let byte_writer = @io.ByteBufWriter::new(write_buf)
   let deflate_writer = DeflateWriter::new(byte_writer)
   let original_data : FixedArray[Byte] = [10, 20, 30, 40, 50, 60, 70, 80]
@@ -81,7 +81,7 @@ test "DeflateWriter/Reader: round-trip test" {
   run_async_unit(fn() { deflate_writer.close() })
 
   // Read compressed data back
-  write_buf.reset()
+  write_buf.set_position(0)
   let byte_reader = @io.ByteBufReader::new(write_buf)
   let deflate_reader = DeflateReader::new(byte_reader)
   let decompressed : FixedArray[Byte] = FixedArray::make(10, 0)

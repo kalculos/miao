@@ -168,7 +168,7 @@ pub fn from_explicit_codes_dist(
 }
 
 ///|
-pub fn decode(
+pub fn Huffman::decode(
   self : Huffman,
   br : BitReaderStream,
 ) -> UInt16? raise CompressionError {

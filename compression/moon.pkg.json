@@ -1,6 +1,6 @@
 {
     "import": [
-        "iceBear67/bytebuf",
+        "iceBear67/miao/buffer",
         "iceBear67/miao/io",
         "iceBear67/miao/checksum"
     ]

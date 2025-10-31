@@ -23,7 +23,7 @@ pub fn bit_reader() -> BitReaderStream {
 
 ///|
 /// Current number of bytes stored in the ring buffer.
-fn fifo_len(self : BitReaderStream) -> Int {
+fn BitReaderStream::fifo_len(self : BitReaderStream) -> Int {
   if self.tail >= self.head {
     self.tail - self.head
   } else {
@@ -33,7 +33,7 @@ fn fifo_len(self : BitReaderStream) -> Int {
 
 ///|
 /// Pop one byte from FIFO. Returns None if empty.
-fn fifo_pop(self : BitReaderStream) -> Byte? {
+fn BitReaderStream::fifo_pop(self : BitReaderStream) -> Byte? {
   if self.head == self.tail {
     None
   } else {
@@ -46,7 +46,10 @@ fn fifo_pop(self : BitReaderStream) -> Byte? {
 ///|
 /// Ensure capacity for `extra` more bytes (including one sentinel slot),
 /// compacting current content to [0..len) if we need to grow.
-fn ensure_capacity(self : BitReaderStream, extra : Int) -> Unit {
+fn BitReaderStream::ensure_capacity(
+  self : BitReaderStream,
+  extra : Int,
+) -> Unit {
   let need = self.fifo_len() + extra + 1
   if need <= self.cap {
     return
@@ -73,7 +76,7 @@ fn ensure_capacity(self : BitReaderStream, extra : Int) -> Unit {
 
 ///|
 /// Push as many bytes as possible into the ring buffer. Returns #pushed.
-fn fifo_push(self : BitReaderStream, bytes : Bytes) -> Int {
+fn BitReaderStream::fifo_push(self : BitReaderStream, bytes : Bytes) -> Int {
   let n = bytes.length()
   self.ensure_capacity(n)
   let mut pushed = 0
@@ -93,13 +96,13 @@ fn fifo_push(self : BitReaderStream, bytes : Bytes) -> Int {
 
 ///|
 /// Feed bytes into the stream. Returns number of bytes accepted.
-pub fn feed(self : BitReaderStream, input : Bytes) -> Int {
+pub fn BitReaderStream::feed(self : BitReaderStream, input : Bytes) -> Int {
   self.fifo_push(input)
 }
 
 ///|
 /// Read `n` bits (1..=15) in LSB-first order. Returns None if not enough bits/bytes yet.
-pub fn read_bits(self : BitReaderStream, n : UInt) -> UInt? {
+pub fn BitReaderStream::read_bits(self : BitReaderStream, n : UInt) -> UInt? {
   if n == 0U {
     return Some(0U)
   }
@@ -124,7 +127,7 @@ pub fn read_bits(self : BitReaderStream, n : UInt) -> UInt? {
 }
 
 ///|
-pub fn read_bit(self : BitReaderStream) -> Byte? {
+pub fn BitReaderStream::read_bit(self : BitReaderStream) -> Byte? {
   match self.read_bits(1U) {
     Some(v) => Some((v & 1U).to_byte())
     None => None
@@ -133,7 +136,7 @@ pub fn read_bit(self : BitReaderStream) -> Byte? {
 
 ///|
 /// Align to next byte boundary by discarding up to 7 pending bits.
-pub fn align_to_byte(self : BitReaderStream) -> Unit {
+pub fn BitReaderStream::align_to_byte(self : BitReaderStream) -> Unit {
   let rem = self.bit_cnt % 8U
   if rem != 0U {
     ignore(self.read_bits(rem))
@@ -142,19 +145,19 @@ pub fn align_to_byte(self : BitReaderStream) -> Unit {
 
 ///|
 /// Whether there is at least one bit or byte available to read.
-pub fn can_read(self : BitReaderStream) -> Bool {
+pub fn BitReaderStream::can_read(self : BitReaderStream) -> Bool {
   self.bit_cnt > 0U || self.fifo_len() > 0
 }
 
 ///|
 /// Number of whole bytes currently buffered (not counting bits in bit_buf).
-pub fn byte_available(self : BitReaderStream) -> Int {
+pub fn BitReaderStream::byte_available(self : BitReaderStream) -> Int {
   self.fifo_len()
 }
 
 ///|
 /// Take exactly `n` bytes from FIFO if available. Returns None if insufficient.
-pub fn take_bytes(self : BitReaderStream, n : Int) -> Bytes? {
+pub fn BitReaderStream::take_bytes(self : BitReaderStream, n : Int) -> Bytes? {
   if self.fifo_len() < n {
     return None
   }
