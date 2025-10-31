@@ -57,7 +57,7 @@ fn calculate_new_capacity(current : Int, min_required : Int) -> Int {
 }
 
 ///|
-fn expand_capacity(self : HeapByteBuf, min_writable : Int) -> Unit {
+fn HeapByteBuf::expand_capacity(self: HeapByteBuf, min_writable : Int) -> Unit {
   let current_cap = self.array.length()
   let min_required = self.widx + min_writable
   if min_required <= current_cap {

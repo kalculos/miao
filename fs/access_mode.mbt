@@ -29,12 +29,12 @@ pub fn AccessFlags::new(
   flag
 }
 
-pub fn read(self: AccessFlags) -> Bool{
+pub fn AccessFlags::read(self: AccessFlags) -> Bool{
   (self.0 & _A_READ) != 0
 }
-pub fn write(self: AccessFlags) -> Bool{
+pub fn AccessFlags::write(self: AccessFlags) -> Bool{
   (self.0 & _A_WRITE) != 0
 }
-pub fn execute(self: AccessFlags) -> Bool{
+pub fn AccessFlags::execute(self: AccessFlags) -> Bool{
   (self.0 & _A_EXECUTE) != 0
 }

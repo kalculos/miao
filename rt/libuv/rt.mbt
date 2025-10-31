@@ -35,7 +35,7 @@ pub impl @rt.Runtime for LibuvRuntime with new_task(self, task) {
 }
 
 ///|
-pub impl @rt.Runtime for LibuvRuntime with unsafe_suspend(self, f) {
+pub impl @rt.Runtime for LibuvRuntime with unsafe_suspend(_, f) {
   uvrt_suspend((resolve, reject, task) => f(resolve, reject, task))
 }
 
@@ -54,7 +54,7 @@ pub impl @rt.Runtime for LibuvRuntime with sleep(self, time_millis) {
 }
 
 ///|
-enum ExitType {
+pub enum ExitType {
   Cancelled
   UnhandledError
   Done
@@ -73,7 +73,7 @@ struct UvTask {
 }
 
 ///|
-fn on_exit(self : UvTask, _type : ExitType, handler : () -> Unit) -> () -> Unit {
+fn UvTask::on_exit(self: UvTask, _type : ExitType, handler : () -> Unit) -> () -> Unit {
   if self.state == Completed || self.state == Cancelled {
     handler()
     return () => ()
@@ -90,7 +90,7 @@ fn on_exit(self : UvTask, _type : ExitType, handler : () -> Unit) -> () -> Unit 
 }
 
 ///|
-fn _cleanup_exit(self : UvTask, _type : ExitType) -> Unit {
+fn UvTask::_cleanup_exit(self: UvTask, _type : ExitType) -> Unit {
   guard _type != Any
   (self.exit_handler)(_type)
 }
