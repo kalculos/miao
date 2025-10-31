@@ -13,14 +13,14 @@ impl @mc.Packet for PlayerInputC2S with clientbound(self) {
 ///|
 impl @mc.Packet for PlayerInputC2S with serialize(
   self,
-  buf : &@buffer.Buffer,
+  buf : &@bytebuf.ByteBuf,
 ) {
   buf.write_byte(self.flags)
 }
 
 ///|
 impl @mc.Packet for PlayerInputC2S with deserialize(
-  buf : &@buffer.Buffer,
+  buf : &@bytebuf.ByteBuf,
 ) {
   let flags = buf.read_byte().unwrap()
   {  flags, }

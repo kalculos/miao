@@ -6,7 +6,7 @@ struct Property {
 }
 
 ///|
-pub fn read_property(buf : &@buffer.ByteSlice) -> Property raise {
+pub fn read_property(buf : &@bytebuf.ByteBuf) -> Property raise {
   let name = read_string(buf)
   let value = read_string(buf)
   let signature = read_optional(buf, read_string)
@@ -14,7 +14,7 @@ pub fn read_property(buf : &@buffer.ByteSlice) -> Property raise {
 }
 
 ///|
-pub fn write_property(buf : &@buffer.ByteSlice, property : Property) -> Unit raise {
+pub fn write_property(buf : &@bytebuf.ByteBuf, property : Property) -> Unit {
   write_string(buf, property.name)
   write_string(buf, property.value)
   write_optional(buf, property.signature, write_string)
@@ -28,7 +28,7 @@ struct GameProfile {
 }
 
 ///|
-pub fn read_game_profile(buf : &@buffer.ByteSlice) -> GameProfile raise {
+pub fn read_game_profile(buf : &@bytebuf.ByteBuf) -> GameProfile raise {
   let uuid = read_uuid(buf)
   let username = read_string(buf)
   let properties = read_prefix_array(buf, read_property)
@@ -37,9 +37,9 @@ pub fn read_game_profile(buf : &@buffer.ByteSlice) -> GameProfile raise {
 
 ///|
 pub fn write_game_profile(
-  buf : &@buffer.ByteSlice,
+  buf : &@bytebuf.ByteBuf,
   profile : GameProfile,
-) -> Unit raise {
+) -> Unit {
   write_uuid(buf, profile.uuid)
   write_string(buf, profile.username)
   write_prefix_array(buf, profile.properties, write_property)

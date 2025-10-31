@@ -9,12 +9,12 @@ impl @mc.Packet for ResetChatS2C with clientbound(self) {
 }
 
 ///|
-impl @mc.Packet for ResetChatS2C with serialize(self, buf : &@buffer.Buffer) {
+impl @mc.Packet for ResetChatS2C with serialize(self, buf : &@bytebuf.ByteBuf) {
   // No fields to serialize
 }
 
 ///|
-impl @mc.Packet for ResetChatS2C with deserialize(buf : &@buffer.Buffer) {
+impl @mc.Packet for ResetChatS2C with deserialize(buf : &@bytebuf.ByteBuf) {
   ResetChatS2C::{  }
 }
 

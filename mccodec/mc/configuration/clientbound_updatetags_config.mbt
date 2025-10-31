@@ -14,7 +14,7 @@ impl @mc.Packet for UpdateTagsConfigS2C with clientbound(self) {
 ///|
 impl @mc.Packet for UpdateTagsConfigS2C with serialize(
   self,
-  buf : &@buffer.Buffer,
+  buf : &@bytebuf.ByteBuf,
 ) {
   @types.write_map(buf, self.tags, @types.write_identifier, (buf, tag_map) => @types.write_map(
     buf,
@@ -28,7 +28,7 @@ impl @mc.Packet for UpdateTagsConfigS2C with serialize(
 
 ///|
 impl @mc.Packet for UpdateTagsConfigS2C with deserialize(
-  buf : &@buffer.Buffer,
+  buf : &@bytebuf.ByteBuf,
 ) {
   let tags = @types.read_map(buf, @types.read_identifier, buf => @types.read_map(
     buf,

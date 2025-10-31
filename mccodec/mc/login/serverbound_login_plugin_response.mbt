@@ -14,7 +14,7 @@ impl @mc.Packet for LoginPluginResponseC2S with clientbound(self) {
 ///|
 impl @mc.Packet for LoginPluginResponseC2S with serialize(
   self,
-  buf : &@buffer.Buffer,
+  buf : &@bytebuf.ByteBuf,
 ) {
   @types.write_varint(buf, self.message_id)
   @types.write_optional(buf, self.data, (b, d) => b.write_bytes(
@@ -24,7 +24,7 @@ impl @mc.Packet for LoginPluginResponseC2S with serialize(
 
 ///|
 impl @mc.Packet for LoginPluginResponseC2S with deserialize(
-  buf : &@buffer.Buffer,
+  buf : &@bytebuf.ByteBuf,
 ) {
   let message_id = @types.read_varint(buf)
   let data = @types.read_optional(buf, b => {

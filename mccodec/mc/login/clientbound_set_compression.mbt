@@ -13,13 +13,13 @@ impl @mc.Packet for SetCompressionS2C with clientbound(self) {
 ///|
 impl @mc.Packet for SetCompressionS2C with serialize(
   self,
-  buf : &@buffer.Buffer,
+  buf : &@bytebuf.ByteBuf,
 ) {
   @types.write_varint(buf, self.threshold)
 }
 
 ///|
-impl @mc.Packet for SetCompressionS2C with deserialize(buf : &@buffer.Buffer) {
+impl @mc.Packet for SetCompressionS2C with deserialize(buf : &@bytebuf.ByteBuf) {
   let threshold = @types.read_varint(buf)
   { threshold, }
 }

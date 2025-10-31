@@ -11,14 +11,14 @@ impl @mc.Packet for ClientTickEndC2S with clientbound(self) {
 ///|
 impl @mc.Packet for ClientTickEndC2S with serialize(
   self,
-  buf : &@buffer.Buffer,
+  buf : &@bytebuf.ByteBuf,
 ) {
   // No fields to serialize
 }
 
 ///|
 impl @mc.Packet for ClientTickEndC2S with deserialize(
-  buf : &@buffer.Buffer,
+  buf : &@bytebuf.ByteBuf,
 ) {
   ClientTickEndC2S::{  }
 }

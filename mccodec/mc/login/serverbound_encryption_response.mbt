@@ -14,7 +14,7 @@ impl @mc.Packet for EncryptionResponseC2S with clientbound(self) {
 ///|
 impl @mc.Packet for EncryptionResponseC2S with serialize(
   self,
-  buf : &@buffer.Buffer,
+  buf : &@bytebuf.ByteBuf,
 ) {
   @types.write_prefix_array(
     buf,
@@ -30,7 +30,7 @@ impl @mc.Packet for EncryptionResponseC2S with serialize(
 
 ///|
 impl @mc.Packet for EncryptionResponseC2S with deserialize(
-  buf : &@buffer.Buffer,
+  buf : &@bytebuf.ByteBuf,
 ) {
   let shared_secret = @types.read_prefix_array(buf, b => b
     .read_byte()

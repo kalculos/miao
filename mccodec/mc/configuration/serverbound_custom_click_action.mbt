@@ -15,7 +15,7 @@ impl @mc.Packet for CustomClickActionC2S with clientbound(self) {
 ///|
 impl @mc.Packet for CustomClickActionC2S with serialize(
   self,
-  buf : &@buffer.Buffer,
+  buf : &@bytebuf.ByteBuf,
 ) {
   @types.write_identifier(buf, self.id)
   // TODO: Implement NBT writing
@@ -24,7 +24,7 @@ impl @mc.Packet for CustomClickActionC2S with serialize(
 
 ///|
 impl @mc.Packet for CustomClickActionC2S with deserialize(
-  buf : &@buffer.Buffer,
+  buf : &@bytebuf.ByteBuf,
 ) {
   let id = @types.read_identifier(buf)
   // TODO: Implement NBT reading

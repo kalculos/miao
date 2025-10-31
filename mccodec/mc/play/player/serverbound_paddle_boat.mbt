@@ -14,7 +14,7 @@ impl @mc.Packet for PaddleBoatC2S with clientbound(self) {
 ///|
 impl @mc.Packet for PaddleBoatC2S with serialize(
   self,
-  buf : &@buffer.Buffer,
+  buf : &@bytebuf.ByteBuf,
 ) {
   @types.write_bool(buf, self.left_paddle_turning)
   @types.write_bool(buf, self.right_paddle_turning)
@@ -22,7 +22,7 @@ impl @mc.Packet for PaddleBoatC2S with serialize(
 
 ///|
 impl @mc.Packet for PaddleBoatC2S with deserialize(
-  buf : &@buffer.Buffer,
+  buf : &@bytebuf.ByteBuf,
 ) {
   let left_paddle_turning = @types.read_bool(buf)
   let right_paddle_turning = @types.read_bool(buf)

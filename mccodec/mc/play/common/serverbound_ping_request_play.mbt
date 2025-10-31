@@ -13,14 +13,14 @@ impl @mc.Packet for PingRequestPlayC2S with clientbound(self) {
 ///|
 impl @mc.Packet for PingRequestPlayC2S with serialize(
   self,
-  buf : &@buffer.Buffer,
+  buf : &@bytebuf.ByteBuf,
 ) {
   buf.write_int64(self.payload)
 }
 
 ///|
 impl @mc.Packet for PingRequestPlayC2S with deserialize(
-  buf : &@buffer.Buffer,
+  buf : &@bytebuf.ByteBuf,
 ) {
   { payload: buf.read_int64().unwrap() }
 }

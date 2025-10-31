@@ -18,7 +18,7 @@ impl @mc.Packet for InteractC2S with clientbound(self) {
 
 impl @mc.Packet for InteractC2S with serialize(
   self,
-  buf : &@buffer.Buffer,
+  buf : &@bytebuf.ByteBuf,
 ) {
   @types.write_varint(buf, self.entity_id)
   @types.write_varint(buf, self.interaction_type)
@@ -34,7 +34,7 @@ impl @mc.Packet for InteractC2S with serialize(
 }
 
 impl @mc.Packet for InteractC2S with deserialize(
-  buf : &@buffer.Buffer,
+  buf : &@bytebuf.ByteBuf,
 ) {
   let entity_id = @types.read_varint(buf)
   let interaction_type = @types.read_varint(buf)

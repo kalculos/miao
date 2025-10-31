@@ -15,7 +15,7 @@ impl @mc.Packet for PlayerSessionC2S with clientbound(self) {
 
 impl @mc.Packet for PlayerSessionC2S with serialize(
   self,
-  buf : &@buffer.Buffer,
+  buf : &@bytebuf.ByteBuf,
 ) {
   @types.write_uuid(buf, self.session_uuid)
   buf.write_int64(self.expires_at)
@@ -24,7 +24,7 @@ impl @mc.Packet for PlayerSessionC2S with serialize(
 }
 
 impl @mc.Packet for PlayerSessionC2S with deserialize(
-  buf : &@buffer.Buffer,
+  buf : &@bytebuf.ByteBuf,
 ) {
   let session_uuid = @types.read_uuid(buf)
   let expires_at = buf.read_int64().unwrap()

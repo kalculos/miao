@@ -14,7 +14,7 @@ impl @mc.Packet for ServerboundPluginMessageConfigC2S with clientbound(self) {
 ///|
 impl @mc.Packet for ServerboundPluginMessageConfigC2S with serialize(
   self,
-  buf : &@buffer.Buffer,
+  buf : &@bytebuf.ByteBuf,
 ) {
   @types.write_identifier(buf, self.channel)
   buf.write_bytes(Bytes::from_array(self.data))
@@ -22,7 +22,7 @@ impl @mc.Packet for ServerboundPluginMessageConfigC2S with serialize(
 
 ///|
 impl @mc.Packet for ServerboundPluginMessageConfigC2S with deserialize(
-  buf : &@buffer.Buffer,
+  buf : &@bytebuf.ByteBuf,
 ) {
   let channel = @types.read_identifier(buf)
   let data = buf.read_bytes(buf.remaining()).unwrap().to_array()

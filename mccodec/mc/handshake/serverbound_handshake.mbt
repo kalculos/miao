@@ -25,7 +25,7 @@ impl @mc.Packet for HandshakeC2S with clientbound(self) {
 }
 
 ///|
-impl @mc.Packet for HandshakeC2S with serialize(self, buf : &@buffer.Buffer) {
+impl @mc.Packet for HandshakeC2S with serialize(self, buf : &@bytebuf.ByteBuf) {
   @types.write_varint(buf, self.protocol_version)
   @types.write_string(buf, self.server_address)
   buf.write_uint16(self.server_port)
@@ -40,7 +40,7 @@ impl @mc.Packet for HandshakeC2S with serialize(self, buf : &@buffer.Buffer) {
 }
 
 ///|
-impl @mc.Packet for HandshakeC2S with deserialize(buf : &@buffer.Buffer) {
+impl @mc.Packet for HandshakeC2S with deserialize(buf : &@bytebuf.ByteBuf) {
   {
     protocol_version: @types.read_varint(buf),
     server_address: @types.read_string(buf),

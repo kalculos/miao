@@ -16,7 +16,7 @@ impl @mc.Packet for ProgramCommandBlockC2S with clientbound(self) {
 ///|
 impl @mc.Packet for ProgramCommandBlockC2S with serialize(
   self,
-  buf : &@buffer.Buffer,
+  buf : &@bytebuf.ByteBuf,
 ) {
   @types.write_position(buf, self.location)
   @types.write_string(buf, self.command)
@@ -26,7 +26,7 @@ impl @mc.Packet for ProgramCommandBlockC2S with serialize(
 
 ///|
 impl @mc.Packet for ProgramCommandBlockC2S with deserialize(
-  buf : &@buffer.Buffer,
+  buf : &@bytebuf.ByteBuf,
 ) {
   let location = @types.read_position(buf)
   let command = @types.read_string(buf)

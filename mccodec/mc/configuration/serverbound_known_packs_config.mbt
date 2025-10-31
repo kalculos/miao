@@ -13,14 +13,14 @@ impl @mc.Packet for ServerboundKnownPacksC2S with clientbound(self) {
 ///|
 impl @mc.Packet for ServerboundKnownPacksC2S with serialize(
   self,
-  buf : &@buffer.Buffer,
+  buf : &@bytebuf.ByteBuf,
 ) {
   @types.write_prefix_array(buf, self.known_packs, @types.write_known_pack)
 }
 
 ///|
 impl @mc.Packet for ServerboundKnownPacksC2S with deserialize(
-  buf : &@buffer.Buffer,
+  buf : &@bytebuf.ByteBuf,
 ) {
   let known_packs = @types.read_prefix_array(buf, @types.read_known_pack)
   { known_packs, }

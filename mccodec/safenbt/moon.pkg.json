@@ -2,6 +2,6 @@
     "import": [
       "iceBear67/mnbt/nbt",
       "iceBear67/miao/io",
-      "iceBear67/miao/buffer"
+      "iceBear67/bytebuf"
     ]
 }

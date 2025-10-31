@@ -13,7 +13,7 @@ impl @mc.Packet for ShowDialogConfigS2C with clientbound(self) {
 ///|
 impl @mc.Packet for ShowDialogConfigS2C with serialize(
   self,
-  buf : &@buffer.Buffer,
+  buf : &@bytebuf.ByteBuf,
 ) {
   // TODO: Implement NBT writing
   panic()
@@ -21,7 +21,7 @@ impl @mc.Packet for ShowDialogConfigS2C with serialize(
 
 ///|
 impl @mc.Packet for ShowDialogConfigS2C with deserialize(
-  buf : &@buffer.Buffer,
+  buf : &@bytebuf.ByteBuf,
 ) {
   // TODO: Implement NBT reading
   panic()

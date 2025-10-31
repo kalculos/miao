@@ -13,14 +13,14 @@ impl @mc.Packet for DisconnectConfigS2C with clientbound(self) {
 ///|
 impl @mc.Packet for DisconnectConfigS2C with serialize(
   self,
-  buf : &@buffer.Buffer,
+  buf : &@bytebuf.ByteBuf,
 ) {
   @types.write_string(buf, self.reason)
 }
 
 ///|
 impl @mc.Packet for DisconnectConfigS2C with deserialize(
-  buf : &@buffer.Buffer,
+  buf : &@bytebuf.ByteBuf,
 ) {
   { reason: @types.read_string(buf) }
 }

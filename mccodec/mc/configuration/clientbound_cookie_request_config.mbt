@@ -13,14 +13,14 @@ impl @mc.Packet for CookieRequestConfigS2C with clientbound(self) {
 ///|
 impl @mc.Packet for CookieRequestConfigS2C with serialize(
   self,
-  buf : &@buffer.Buffer,
+  buf : &@bytebuf.ByteBuf,
 ) {
   @types.write_identifier(buf, self.key)
 }
 
 ///|
 impl @mc.Packet for CookieRequestConfigS2C with deserialize(
-  buf : &@buffer.Buffer,
+  buf : &@bytebuf.ByteBuf,
 ) {
   { key: @types.read_identifier(buf) }
 }

@@ -14,7 +14,7 @@ impl @mc.Packet for StoreCookieConfigS2C with clientbound(self) {
 ///|
 impl @mc.Packet for StoreCookieConfigS2C with serialize(
   self,
-  buf : &@buffer.Buffer,
+  buf : &@bytebuf.ByteBuf,
 ) {
   @types.write_identifier(buf, self.key)
   @types.write_prefix_array(buf, self.payload, @bytebuf.ByteWriter::write_byte)
@@ -22,7 +22,7 @@ impl @mc.Packet for StoreCookieConfigS2C with serialize(
 
 ///|
 impl @mc.Packet for StoreCookieConfigS2C with deserialize(
-  buf : &@buffer.Buffer,
+  buf : &@bytebuf.ByteBuf,
 ) {
   let key = @types.read_identifier(buf)
   let payload = @types.read_prefix_array(buf, b => b.read_byte().unwrap_or(0))

@@ -14,14 +14,14 @@ impl @mc.Packet for TransferConfigS2C with clientbound(self) {
 ///|
 impl @mc.Packet for TransferConfigS2C with serialize(
   self,
-  buf : &@buffer.Buffer,
+  buf : &@bytebuf.ByteBuf,
 ) {
   @types.write_string(buf, self.host)
   @types.write_varint(buf, self.port)
 }
 
 ///|
-impl @mc.Packet for TransferConfigS2C with deserialize(buf : &@buffer.Buffer) {
+impl @mc.Packet for TransferConfigS2C with deserialize(buf : &@bytebuf.ByteBuf) {
   let host = @types.read_string(buf)
   let port = @types.read_varint(buf)
   { host, port }

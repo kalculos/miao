@@ -13,14 +13,14 @@ impl @mc.Packet for AcknowledgeMessageC2S with clientbound(self) {
 ///|
 impl @mc.Packet for AcknowledgeMessageC2S with serialize(
   self,
-  buf : &@buffer.Buffer,
+  buf : &@bytebuf.ByteBuf,
 ) {
   @types.write_varint(buf, self.message_count)
 }
 
 ///|
 impl @mc.Packet for AcknowledgeMessageC2S with deserialize(
-  buf : &@buffer.Buffer,
+  buf : &@bytebuf.ByteBuf,
 ) {
   { message_count: @types.read_varint(buf) }
 }

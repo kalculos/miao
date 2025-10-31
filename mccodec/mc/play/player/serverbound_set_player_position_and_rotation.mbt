@@ -18,7 +18,7 @@ impl @mc.Packet for SetPlayerPositionAndRotationC2S with clientbound(self) {
 ///|
 impl @mc.Packet for SetPlayerPositionAndRotationC2S with serialize(
   self,
-  buf : &@buffer.Buffer,
+  buf : &@bytebuf.ByteBuf,
 ) {
   buf.write_double(self.x)
   buf.write_double(self.feet_y)
@@ -30,7 +30,7 @@ impl @mc.Packet for SetPlayerPositionAndRotationC2S with serialize(
 
 ///|
 impl @mc.Packet for SetPlayerPositionAndRotationC2S with deserialize(
-  buf : &@buffer.Buffer,
+  buf : &@bytebuf.ByteBuf,
 ) {
   let x = buf.read_double().unwrap()
   let feet_y = buf.read_double().unwrap()

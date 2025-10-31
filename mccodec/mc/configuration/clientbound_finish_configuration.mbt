@@ -11,14 +11,14 @@ impl @mc.Packet for FinishConfigurationS2C with clientbound(self) {
 ///|
 impl @mc.Packet for FinishConfigurationS2C with serialize(
   self,
-  buf : &@buffer.Buffer,
+  buf : &@bytebuf.ByteBuf,
 ) {
   // No fields to serialize
 }
 
 ///|
 impl @mc.Packet for FinishConfigurationS2C with deserialize(
-  buf : &@buffer.Buffer,
+  buf : &@bytebuf.ByteBuf,
 ) {
   FinishConfigurationS2C::{  }
 }

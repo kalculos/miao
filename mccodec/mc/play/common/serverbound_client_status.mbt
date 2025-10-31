@@ -13,14 +13,14 @@ impl @mc.Packet for ClientStatusC2S with clientbound(self) {
 ///|
 impl @mc.Packet for ClientStatusC2S with serialize(
   self,
-  buf : &@buffer.Buffer,
+  buf : &@bytebuf.ByteBuf,
 ) {
   @types.write_varint(buf, self.action_id)
 }
 
 ///|
 impl @mc.Packet for ClientStatusC2S with deserialize(
-  buf : &@buffer.Buffer,
+  buf : &@bytebuf.ByteBuf,
 ) {
   { action_id: @types.read_varint(buf) }
 }

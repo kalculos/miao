@@ -21,7 +21,7 @@ impl @mc.Packet for ClientInformationConfigC2S with clientbound(self) {
 ///|
 impl @mc.Packet for ClientInformationConfigC2S with serialize(
   self,
-  buf : &@buffer.Buffer,
+  buf : &@bytebuf.ByteBuf,
 ) {
   @types.write_string(buf, self.locale)
   buf.write_byte(self.view_distance)
@@ -36,7 +36,7 @@ impl @mc.Packet for ClientInformationConfigC2S with serialize(
 
 ///|
 impl @mc.Packet for ClientInformationConfigC2S with deserialize(
-  buf : &@buffer.Buffer,
+  buf : &@bytebuf.ByteBuf,
 ) {
   let locale = @types.read_string(buf)
   let view_distance = buf.read_byte().unwrap_or(0)

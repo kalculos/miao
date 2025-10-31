@@ -13,14 +13,14 @@ impl @mc.Packet for SetHeldItemC2S with clientbound(self) {
 ///|
 impl @mc.Packet for SetHeldItemC2S with serialize(
   self,
-  buf : &@buffer.Buffer,
+  buf : &@bytebuf.ByteBuf,
 ) {
   buf.write_int16(self.slot)
 }
 
 ///|
 impl @mc.Packet for SetHeldItemC2S with deserialize(
-  buf : &@buffer.Buffer,
+  buf : &@bytebuf.ByteBuf,
 ) {
   { slot: buf.read_int16() |> Option::unwrap }
 }

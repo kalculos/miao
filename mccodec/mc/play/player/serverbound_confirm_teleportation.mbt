@@ -13,14 +13,14 @@ impl @mc.Packet for ConfirmTeleportationC2S with clientbound(self) {
 ///|
 impl @mc.Packet for ConfirmTeleportationC2S with serialize(
   self,
-  buf : &@buffer.Buffer,
+  buf : &@bytebuf.ByteBuf,
 ) {
   @types.write_varint(buf, self.teleport_id)
 }
 
 ///|
 impl @mc.Packet for ConfirmTeleportationC2S with deserialize(
-  buf : &@buffer.Buffer,
+  buf : &@bytebuf.ByteBuf,
 ) {
   { teleport_id: @types.read_varint(buf) }
 }

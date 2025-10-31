@@ -13,13 +13,13 @@ impl @mc.Packet for FeatureFlagsS2C with clientbound(self) {
 ///|
 impl @mc.Packet for FeatureFlagsS2C with serialize(
   self,
-  buf : &@buffer.Buffer,
+  buf : &@bytebuf.ByteBuf,
 ) {
   @types.write_prefix_array(buf, self.feature_flags, @types.write_identifier)
 }
 
 ///|
-impl @mc.Packet for FeatureFlagsS2C with deserialize(buf : &@buffer.Buffer) {
+impl @mc.Packet for FeatureFlagsS2C with deserialize(buf : &@bytebuf.ByteBuf) {
   let feature_flags = @types.read_prefix_array(buf, @types.read_identifier)
   { feature_flags, }
 }

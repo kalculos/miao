@@ -15,7 +15,7 @@ impl @mc.Packet for JigsawGenerateC2S with clientbound(self) {
 ///|
 impl @mc.Packet for JigsawGenerateC2S with serialize(
   self,
-  buf : &@buffer.Buffer,
+  buf : &@bytebuf.ByteBuf,
 ) {
   @types.write_position(buf, self.location)
   @types.write_varint(buf, self.levels)
@@ -24,7 +24,7 @@ impl @mc.Packet for JigsawGenerateC2S with serialize(
 
 ///|
 impl @mc.Packet for JigsawGenerateC2S with deserialize(
-  buf : &@buffer.Buffer,
+  buf : &@bytebuf.ByteBuf,
 ) {
   let location = @types.read_position(buf);
   let levels = @types.read_varint(buf);

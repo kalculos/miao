@@ -13,14 +13,14 @@ impl @mc.Packet for CookieRequestLoginS2C with clientbound(self) {
 ///|
 impl @mc.Packet for CookieRequestLoginS2C with serialize(
   self,
-  buf : &@buffer.Buffer,
+  buf : &@bytebuf.ByteBuf,
 ) {
   @types.write_identifier(buf, self.key)
 }
 
 ///|
 impl @mc.Packet for CookieRequestLoginS2C with deserialize(
-  buf : &@buffer.Buffer,
+  buf : &@bytebuf.ByteBuf,
 ) {
   let key = @types.read_identifier(buf)
   { key, }

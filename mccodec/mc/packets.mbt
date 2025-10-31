@@ -1,17 +1,17 @@
 ///|
 pub(open) trait Packet {
   clientbound(Self) -> Bool
-  serialize(Self, &@buffer.Buffer) -> Unit = _
-  deserialize(&@buffer.Buffer) -> Self raise = _
+  serialize(Self, &@bytebuf.ByteBuf) -> Unit = _
+  deserialize(&@bytebuf.ByteBuf) -> Self raise = _
 }
 
 ///|
-impl Packet with serialize(self, buf : &@buffer.Buffer) {
+impl Packet with serialize(self, buf : &@bytebuf.ByteBuf) {
   // Default implementation does nothing
 }
 
 ///|
-impl Packet with deserialize(buf : &@buffer.Buffer) {
+impl Packet with deserialize(buf : &@bytebuf.ByteBuf) {
    // Default implementation does nothing
    raise fail("Deserialize not implemented for this packet")
 }

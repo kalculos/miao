@@ -17,7 +17,7 @@ impl @mc.Packet for ChatMessageC2S with clientbound(self) {
 }
 
 ///|
-impl @mc.Packet for ChatMessageC2S with serialize(self, buf : &@buffer.Buffer) {
+impl @mc.Packet for ChatMessageC2S with serialize(self, buf : &@bytebuf.ByteBuf) {
   @types.write_string(buf, self.message)
   buf.write_int64(self.timestamp)
   buf.write_int64(self.salt)
@@ -31,7 +31,7 @@ impl @mc.Packet for ChatMessageC2S with serialize(self, buf : &@buffer.Buffer) {
 }
 
 ///|
-impl @mc.Packet for ChatMessageC2S with deserialize(buf : &@buffer.Buffer) {
+impl @mc.Packet for ChatMessageC2S with deserialize(buf : &@bytebuf.ByteBuf) {
   let message = @types.read_string(buf)
   let timestamp = buf.read_int64().unwrap()
   let salt = buf.read_int64().unwrap()
