@@ -55,7 +55,6 @@ pub impl Writer for ByteBufWriter with write(self, arr : FixedArray[Byte], off :
   }
   let to_write = @cmp.minimum(len, remaining_capacity)
   self.buffer.write(arr, off, to_write)
-  to_write
 }
 
 ///|

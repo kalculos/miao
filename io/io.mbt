@@ -51,7 +51,7 @@ impl Reader with read_all(self) {
   while read > 0 {
     read = self.read(array, 0, default_buffer_size)
     if read > 0 {
-      buffer.write(array, 0, read)
+      buffer.write(array, 0, read) |> ignore // must success
     }
   }
   buffer as &@buffer.Buffer
@@ -65,7 +65,7 @@ impl Reader with read_buffer(self, len) {
   while toRead > 0 {
     let read = self.read(array, 0, @cmp.minimum(toRead, default_buffer_size))
     if read > 0 {
-      buffer.write(array, 0, read)
+      buffer.write(array, 0, read) |> ignore // must success
       toRead -= read
     } else {
       break // EOF
@@ -85,7 +85,7 @@ impl Reader with read_buffer_to(self, buf) -> Int {
       break // eof
     }
     totalRead += read
-    buf.write(buffer, 0, read)
+    buf.write(buffer, 0, read) |> ignore // must success
     toRead -= read
   }
   totalRead
