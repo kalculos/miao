@@ -56,17 +56,19 @@ impl Reader with read_all(self) {
 
 ///|
 impl Reader with read_buffer(self, len) {
-  let array : FixedArray[Byte] = FixedArray::make(len, 0)
+  let buffer = @buffer.HeapByteBuf::new(len)
+  let array : FixedArray[Byte] = FixedArray::make(1024, 0)
   let mut toRead = len
   while toRead > 0 {
-    let read = self.read(array, len - toRead, toRead)
+    let read = self.read(array, 0, @cmp.minimum(toRead, 1024))
     if read > 0 {
+      buffer.write(array, 0, read)
       toRead -= read
     } else {
       break // EOF
     }
   }
-  @buffer.HeapByteBuf::wrapped_array(array) as &@buffer.Buffer
+  buffer as &@buffer.Buffer
 }
 
 ///|
@@ -88,15 +90,17 @@ impl Reader with read_buffer_to(self, buf) -> Int {
 
 ///|
 impl Writer with write_buffer(self, buf) {
-  let _buf: FixedArray[Byte] = FixedArray::make(1, 0)
+  let _buf: FixedArray[Byte] = FixedArray::make(1024, 0)
   let mut totalWritten = 0
   while buf.readable_bytes() > 0 {
-      let written = self.write(_buf, 0, buf.read(_buf, 0 ,1))
+      let to_write = @cmp.minimum(buf.readable_bytes(), 1024)
+      let read = buf.read(_buf, 0, to_write)
+      let written = self.write(_buf, 0, read)
       if written > 0 {
         totalWritten += written
-        continue
+      } else {
+        break
       }
-      break
   }
   totalWritten
 
