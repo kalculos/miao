@@ -217,7 +217,7 @@ pub fn write_uuid(buf : &@bytebuf.ByteBuf, uuid : @uuid.UUID) -> Unit {
 ///|
 pub fn read_nbt(buf : &@bytebuf.ByteBuf) -> @nbt.NBTTag raise {
   let safe_buf = @safenbt.read_nbt_buf(buf)
-  @bnbt.parse_auto(safe_buf.read_bytes(safe_buf.remaining()).unwrap())
+  @bnbt.parse_uncompressed(safe_buf.read_bytes(safe_buf.remaining()).unwrap())
 }
 
 ///|
