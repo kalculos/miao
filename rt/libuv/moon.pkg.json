@@ -1,7 +1,7 @@
 {
   "link": {
     "native": {
-      "stub-cc-flags": "--std=gnu23"
+      "stub-cc-flags": "--std=gnu2x"
     }
   },
   "import": [
