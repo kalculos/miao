@@ -4,7 +4,7 @@
 struct LoginPluginRequestS2C {
   message_id : Int // Unique to the connection
   channel : @types.Identifier // Plugin channel identifier
-  data : Array[Byte] // Plugin data
+  data : FixedArray[Byte] // Plugin data
 }
 
 ///|
@@ -15,19 +15,19 @@ impl @mc.Packet for LoginPluginRequestS2C with clientbound(self) {
 ///|
 impl @mc.Packet for LoginPluginRequestS2C with serialize(
   self,
-  buf : &@bytebuf.ByteBuf,
+  buf : &@buffer.Buffer,
 ) {
   @types.write_varint(buf, self.message_id)
   @types.write_identifier(buf, self.channel)
-  buf.write_bytes(Bytes::from_array(self.data))
+  buf.write(self.data, 0, self.data.length()) |> ignore
 }
 
 ///|
 impl @mc.Packet for LoginPluginRequestS2C with deserialize(
-  buf : &@bytebuf.ByteBuf,
+  buf : &@buffer.Buffer,
 ) {
   let message_id = @types.read_varint(buf)
   let channel = @types.read_identifier(buf)
-  let data = buf.read_bytes(buf.remaining()).unwrap().to_array()
+  let data = buf.read_bytes(buf.readable_bytes()).to_fixedarray()
   { message_id, channel, data }
 }

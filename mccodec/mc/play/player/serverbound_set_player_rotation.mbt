@@ -15,7 +15,7 @@ impl @mc.Packet for SetPlayerRotationC2S with clientbound(self) {
 ///|
 impl @mc.Packet for SetPlayerRotationC2S with serialize(
   self,
-  buf : &@bytebuf.ByteBuf,
+  buf : &@buffer.Buffer,
 ) {
   buf.write_float(self.yaw)
   buf.write_float(self.pitch)
@@ -24,11 +24,11 @@ impl @mc.Packet for SetPlayerRotationC2S with serialize(
 
 ///|
 impl @mc.Packet for SetPlayerRotationC2S with deserialize(
-  buf : &@bytebuf.ByteBuf,
+  buf : &@buffer.Buffer,
 ) {
-  let yaw = buf.read_float().unwrap()
-  let pitch = buf.read_float().unwrap()
-  let on_ground = buf.read_byte().unwrap()
+  let yaw = buf.read_float()
+  let pitch = buf.read_float()
+  let on_ground = buf.read_byte()
   { yaw, pitch, on_ground }
 }
 

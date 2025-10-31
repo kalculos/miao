@@ -15,7 +15,7 @@ impl @mc.Packet for PlaceRecipeC2S with clientbound(self) {
 ///|
 impl @mc.Packet for PlaceRecipeC2S with serialize(
   self,
-  buf : &@bytebuf.ByteBuf,
+  buf : &@buffer.Buffer,
 ) {
   buf.write_int(self.window_id)
   @types.write_string(buf, self.recipe)
@@ -24,9 +24,9 @@ impl @mc.Packet for PlaceRecipeC2S with serialize(
 
 ///|
 impl @mc.Packet for PlaceRecipeC2S with deserialize(
-  buf : &@bytebuf.ByteBuf,
+  buf : &@buffer.Buffer,
 ) {
-  let window_id = buf.read_int().unwrap()
+  let window_id = buf.read_int()
   let recipe = @types.read_string(buf)
   let make_all = @types.read_bool(buf)
   { window_id, recipe, make_all }

@@ -13,14 +13,14 @@ impl @mc.Packet for LockDifficultyC2S with clientbound(self) {
 ///|
 impl @mc.Packet for LockDifficultyC2S with serialize(
   self,
-  buf : &@bytebuf.ByteBuf,
+  buf : &@buffer.Buffer,
 ) {
   @types.write_bool(buf, self.locked)
 }
 
 ///|
 impl @mc.Packet for LockDifficultyC2S with deserialize(
-  buf : &@bytebuf.ByteBuf,
+  buf : &@buffer.Buffer,
 ) {
   { locked: @types.read_bool(buf) }
 }

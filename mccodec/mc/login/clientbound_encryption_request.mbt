@@ -16,31 +16,23 @@ impl @mc.Packet for EncryptionRequestS2C with clientbound(self) {
 ///|
 impl @mc.Packet for EncryptionRequestS2C with serialize(
   self,
-  buf : &@bytebuf.ByteBuf,
+  buf : &@buffer.Buffer,
 ) {
   @types.write_string(buf, self.server_id)
-  @types.write_prefix_array(
-    buf,
-    self.public_key,
-    @bytebuf.ByteWriter::write_byte,
-  )
+  @types.write_prefix_array(buf, self.public_key, @buffer.ByteSlice::write_byte)
   @types.write_prefix_array(
     buf,
     self.verify_token,
-    @bytebuf.ByteWriter::write_byte,
+    @buffer.ByteSlice::write_byte,
   )
   @types.write_bool(buf, self.should_authenticate)
 }
 
 ///|
-impl @mc.Packet for EncryptionRequestS2C with deserialize(
-  buf : &@bytebuf.ByteBuf,
-) {
+impl @mc.Packet for EncryptionRequestS2C with deserialize(buf : &@buffer.Buffer) {
   let server_id = @types.read_string(buf)
-  let public_key = @types.read_prefix_array(buf, b => b.read_byte().unwrap_or(0))
-  let verify_token = @types.read_prefix_array(buf, b => b
-    .read_byte()
-    .unwrap_or(0))
+  let public_key = @types.read_prefix_array(buf, b => b.read_byte())
+  let verify_token = @types.read_prefix_array(buf, b => b.read_byte())
   let should_authenticate = @types.read_bool(buf)
   { server_id, public_key, verify_token, should_authenticate }
 }

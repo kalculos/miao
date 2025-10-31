@@ -12,14 +12,14 @@ impl @mc.Packet for ChunkBatchReceivedC2S with clientbound(self) {
 
 impl @mc.Packet for ChunkBatchReceivedC2S with serialize(
   self,
-  buf : &@bytebuf.ByteBuf,
+  buf : &@buffer.Buffer,
 ) {
   buf.write_float(self.chunks_per_tick)
 }
 
 impl @mc.Packet for ChunkBatchReceivedC2S with deserialize(
-  buf : &@bytebuf.ByteBuf,
+  buf : &@buffer.Buffer,
 ) {
-  { chunks_per_tick: buf.read_float().unwrap() }
+  { chunks_per_tick: buf.read_float() }
 }
 

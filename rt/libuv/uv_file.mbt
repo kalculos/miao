@@ -8,7 +8,7 @@ struct LibuvFile {
 }
 
 ///|
-fn to_uv_flags(self : @fs.OpenFlags) -> @uv.OpenFlags {
+fn @fs.OpenFlags::to_uv_flags(self : @fs.OpenFlags) -> @uv.OpenFlags {
   if self.is_read_only() {
     return @uv.OpenFlags::read_only()
   } else if self.is_write_only() {
@@ -42,7 +42,7 @@ fn to_file_kind(stat : @uv.Stat) -> @fs.FileKind {
 
 ///|
 async fn gather_fattr(rt : LibuvRuntime, fd : @uv.File) -> @fs.FileAttribute {
-  uvrt_op_suspend((resolve, reject, task) => {
+  uvrt_op_suspend((resolve, reject, _) => {
     let handle = rt.uv.fs_fstat(
       fd,
       stat => {
@@ -84,11 +84,11 @@ async fn LibuvFile::new(
 ) -> LibuvFile {
   let uv = rt.uv
   let path_bytes = @encoding/utf8.encode(path.to_unix_path())
-  let fd = uvrt_op_suspend((resolve, reject, task) => {
+  let fd = uvrt_op_suspend((resolve, reject, _) => {
     let handle = uv.fs_open(
       path_bytes,
       flag.to_uv_flags(),
-      to_uv_access(mode).access_flag_inner(),
+      to_uv_access(mode) |> access_flag_inner,
       file => resolve(file),
       err => reject(err),
     )
@@ -104,7 +104,7 @@ async fn LibuvFile::new(
 }
 
 ///|
-pub fn fd(self : LibuvFile) -> Int {
+pub fn LibuvFile::fd(self: LibuvFile) -> Int {
   self.fd.to_int()
 }
 
@@ -119,11 +119,11 @@ impl @fs.FileChannel for LibuvFile with info(self) {
 }
 
 ///|
-async fn close(self : LibuvFile) -> Unit {
+async fn LibuvFile::close(self: LibuvFile) -> Unit {
   guard !self.closed else {
     raise fail("File \{self.info.path} (fd: \{self.fd()}) is already closed!")
   }
-  uvrt_op_suspend((resolve, reject, task) => {
+  uvrt_op_suspend((resolve, reject, _) => {
     let handle = self.uv.fs_close(self.fd, () => resolve(()), err => reject(err))
     () => {
       handle.cancel()
@@ -145,7 +145,7 @@ impl @io.Channel for LibuvFile with is_closed(self) {
 
 ///|
 impl @io.Writer for LibuvFile with write(self, arr, off, len) {
-  uvrt_op_suspend((resolve, reject, task) => {
+  uvrt_op_suspend((resolve, reject, _) => {
     let handle = self.uv.fs_write(
       self.fd,
       [arr.unsafe_reinterpret_as_bytes()[off:off + len]],
@@ -171,7 +171,7 @@ impl @io.Writer for LibuvFile with is_closed(self) {
 
 ///|
 impl @io.Reader for LibuvFile with read(self, dst, off, len) {
-  uvrt_op_suspend((resolve, reject, task) => {
+  uvrt_op_suspend((resolve, reject, _) => {
     let handle = self.uv.fs_read(
       self.fd,
       [dst.unsafe_reinterpret_as_bytes()[off:off + len]],

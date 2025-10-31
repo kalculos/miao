@@ -13,12 +13,12 @@ impl @mc.Packet for PongResponseS2C with clientbound(self) {
 ///|
 impl @mc.Packet for PongResponseS2C with serialize(
   self,
-  buf : &@bytebuf.ByteBuf,
+  buf : &@buffer.Buffer,
 ) {
   buf.write_int64(self.timestamp)
 }
 
 ///|
-impl @mc.Packet for PongResponseS2C with deserialize(buf : &@bytebuf.ByteBuf) {
-  { timestamp: buf.read_int64().unwrap() }
+impl @mc.Packet for PongResponseS2C with deserialize(buf : &@buffer.Buffer) {
+  { timestamp: buf.read_int64() }
 }

@@ -15,7 +15,7 @@ pub(open) trait Runtime {
 }
 
 ///|
-pub async fn[T] suspend(
+pub async fn[T] &Runtime::suspend(
   self : &Runtime,
   f : ((T) -> Unit, (Error) -> Unit, &Task) -> CancellationToken,
 ) -> T {

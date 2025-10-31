@@ -14,7 +14,7 @@ impl @mc.Packet for SystemChatMessageS2C with clientbound(self) {
 ///|
 impl @mc.Packet for SystemChatMessageS2C with serialize(
   self,
-  buf : &@bytebuf.ByteBuf,
+  buf : &@buffer.Buffer,
 ) {
   @types.write_string(buf, self.content)
   @types.write_bool(buf, self.overlay)
@@ -22,7 +22,7 @@ impl @mc.Packet for SystemChatMessageS2C with serialize(
 
 ///|
 impl @mc.Packet for SystemChatMessageS2C with deserialize(
-  buf : &@bytebuf.ByteBuf,
+  buf : &@buffer.Buffer,
 ) {
   let content = @types.read_string(buf)
   let overlay = @types.read_bool(buf)

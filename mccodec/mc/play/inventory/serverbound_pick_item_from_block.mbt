@@ -14,7 +14,7 @@ impl @mc.Packet for PickItemFromBlockC2S with clientbound(self) {
 ///|
 impl @mc.Packet for PickItemFromBlockC2S with serialize(
   self,
-  buf : &@bytebuf.ByteBuf,
+  buf : &@buffer.Buffer,
 ) {
   @types.write_position(buf, self.location)
   @types.write_bool(buf, self.include_nbt)
@@ -22,7 +22,7 @@ impl @mc.Packet for PickItemFromBlockC2S with serialize(
 
 ///|
 impl @mc.Packet for PickItemFromBlockC2S with deserialize(
-  buf : &@bytebuf.ByteBuf,
+  buf : &@buffer.Buffer,
 ) {
   let location = @types.read_position(buf)
   let include_nbt = @types.read_bool(buf)

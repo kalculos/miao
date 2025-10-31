@@ -1,0 +1,37 @@
+name: Moon Linter
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+  pull_request:
+
+jobs:
+  check:
+    strategy:
+      matrix:
+        version: [stable]
+        os:
+          - name: ubuntu-latest
+            triple: x86_64-linux-gnu
+          # - name: macos-latest
+          #   triple: arm64-apple-darwin
+          # - name: windows-latest
+          #   triple: x86_64-w64-mingw32        
+      fail-fast: false
+    runs-on: ${{ matrix.os.name }}
+    continue-on-error: false
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Moonbit
+        run: |
+          curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash
+          echo "$HOME/.moon/bin" >> $GITHUB_PATH
+      - name: Moon check
+        run: |
+          moon update
+          moon check
+      - name: Moon test
+        run: |
+          moon test

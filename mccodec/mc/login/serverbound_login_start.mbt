@@ -12,13 +12,13 @@ impl @mc.Packet for LoginStartC2S with clientbound(self) {
 }
 
 ///|
-impl @mc.Packet for LoginStartC2S with serialize(self, buf : &@bytebuf.ByteBuf) {
+impl @mc.Packet for LoginStartC2S with serialize(self, buf : &@buffer.Buffer) {
   @types.write_string(buf, self.name)
   @types.write_uuid(buf, self.player_uuid)
 }
 
 ///|
-impl @mc.Packet for LoginStartC2S with deserialize(buf : &@bytebuf.ByteBuf) {
+impl @mc.Packet for LoginStartC2S with deserialize(buf : &@buffer.Buffer) {
   let name = @types.read_string(buf)
   let player_uuid = @types.read_uuid(buf)
   { name, player_uuid }

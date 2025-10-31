@@ -13,14 +13,14 @@ impl @mc.Packet for SwingArmC2S with clientbound(self) {
 ///|
 impl @mc.Packet for SwingArmC2S with serialize(
   self,
-  buf : &@bytebuf.ByteBuf,
+  buf : &@buffer.Buffer,
 ) {
   @types.write_varint(buf, self.hand)
 }
 
 ///|
 impl @mc.Packet for SwingArmC2S with deserialize(
-  buf : &@bytebuf.ByteBuf,
+  buf : &@buffer.Buffer,
 ) {
   { hand: @types.read_varint(buf) }
 }

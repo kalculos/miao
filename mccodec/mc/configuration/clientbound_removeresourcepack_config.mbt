@@ -13,14 +13,14 @@ impl @mc.Packet for RemoveResourcePackConfigS2C with clientbound(self) {
 ///|
 impl @mc.Packet for RemoveResourcePackConfigS2C with serialize(
   self,
-  buf : &@bytebuf.ByteBuf,
+  buf : &@buffer.Buffer,
 ) {
   @types.write_optional(buf, self.uuid, @types.write_uuid)
 }
 
 ///|
 impl @mc.Packet for RemoveResourcePackConfigS2C with deserialize(
-  buf : &@bytebuf.ByteBuf,
+  buf : &@buffer.Buffer,
 ) {
   { uuid: @types.read_optional(buf, @types.read_uuid) }
 }

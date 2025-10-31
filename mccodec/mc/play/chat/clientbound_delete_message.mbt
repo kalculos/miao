@@ -14,20 +14,20 @@ impl @mc.Packet for DeleteMessageS2C with clientbound(self) {
 ///|
 impl @mc.Packet for DeleteMessageS2C with serialize(
   self,
-  buf : &@bytebuf.ByteBuf,
+  buf : &@buffer.Buffer,
 ) {
   @types.write_varint(buf, self.message_id)
-  @types.write_optional(buf, self.signature, (buf, sig) => buf.write_array(
-    sig, 0, 256,
-  ))
+  @types.write_optional(buf, self.signature, (buf, sig) => buf.write(
+      sig, 0, 256,
+    )
+    |> ignore)
 }
 
 ///|
-impl @mc.Packet for DeleteMessageS2C with deserialize(buf : &@bytebuf.ByteBuf) {
+impl @mc.Packet for DeleteMessageS2C with deserialize(buf : &@buffer.Buffer) {
   let message_id = @types.read_varint(buf)
   let signature = @types.read_optional(buf, buf => buf
     .read_bytes(256)
-    .unwrap()
     .to_fixedarray())
   { message_id, signature }
 }

@@ -11,11 +11,11 @@ impl @mc.Packet for PingRequestC2S with clientbound(self) {
 }
 
 ///|
-impl @mc.Packet for PingRequestC2S with serialize(self, buf : &@bytebuf.ByteBuf) {
+impl @mc.Packet for PingRequestC2S with serialize(self, buf : &@buffer.Buffer) {
   buf.write_int64(self.timestamp)
 }
 
 ///|
-impl @mc.Packet for PingRequestC2S with deserialize(buf : &@bytebuf.ByteBuf) {
-  { timestamp: buf.read_int64().unwrap() }
+impl @mc.Packet for PingRequestC2S with deserialize(buf : &@buffer.Buffer) {
+  { timestamp: buf.read_int64() }
 }

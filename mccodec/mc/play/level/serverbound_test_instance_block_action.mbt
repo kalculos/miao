@@ -22,7 +22,7 @@ impl @mc.Packet for TestInstanceBlockActionC2S with clientbound(self) {
 ///|
 impl @mc.Packet for TestInstanceBlockActionC2S with serialize(
   self,
-  buf : &@bytebuf.ByteBuf,
+  buf : &@buffer.Buffer,
 ) {
   // Position as 3 separate ints
   @types.write_position(buf, self.location)
@@ -39,7 +39,7 @@ impl @mc.Packet for TestInstanceBlockActionC2S with serialize(
 
 ///|
 impl @mc.Packet for TestInstanceBlockActionC2S with deserialize(
-  buf : &@bytebuf.ByteBuf,
+  buf : &@buffer.Buffer,
 ) {
   let location = @types.read_position(buf)
   let action = @types.read_varint(buf)

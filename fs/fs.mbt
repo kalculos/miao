@@ -47,7 +47,7 @@ pub(open) trait FileSystem {
   ///| Resolves a symbol link. Raise if the path is not a symbol link
   async read_symbol_link(Self, Path) -> Path raise 
   ///| Move a file to another path. Raise if the operation is failed.
-  async move(Self, src : Path, dst : Path, copy_attr~ : Bool) -> Unit raise
+  async rename(Self, src : Path, dst : Path, copy_attr~ : Bool) -> Unit raise
   ///| Returns a path with all symbolic links and path redirections resolved.
   async real_path(Self, path: Path) -> Path
   ///| The current working directory.

@@ -14,7 +14,7 @@ impl @mc.Packet for PickItemFromEntityC2S with clientbound(self) {
 ///|
 impl @mc.Packet for PickItemFromEntityC2S with serialize(
   self,
-  buf : &@bytebuf.ByteBuf,
+  buf : &@buffer.Buffer,
 ) {
   @types.write_varint(buf, self.entity_id)
   @types.write_bool(buf, self.include_nbt)
@@ -22,7 +22,7 @@ impl @mc.Packet for PickItemFromEntityC2S with serialize(
 
 ///|
 impl @mc.Packet for PickItemFromEntityC2S with deserialize(
-  buf : &@bytebuf.ByteBuf,
+  buf : &@buffer.Buffer,
 ) {
   let entity_id = @types.read_varint(buf)
   let include_nbt = @types.read_bool(buf)
