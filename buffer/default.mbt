@@ -1,4 +1,201 @@
 ///|
+pub fn &Buffer::read_bytes(self : &Buffer, len : Int) -> Bytes raise {
+  (self as &ByteSlice).read_bytes(len)
+}
+
+///|
+pub fn &Buffer::read_int(self : &Buffer) -> Int raise {
+  (self as &ByteSlice).read_int()
+}
+
+///|
+pub fn &Buffer::read_int_le(self : &Buffer) -> Int raise {
+  (self as &ByteSlice).read_int_le()
+}
+
+///|
+pub fn &Buffer::read_int16(self : &Buffer) -> Int16 raise {
+  (self as &ByteSlice).read_int16()
+}
+
+///|
+pub fn &Buffer::read_int16_le(self : &Buffer) -> Int16 raise {
+  (self as &ByteSlice).read_int16_le()
+}
+
+///|
+pub fn &Buffer::read_int64(self : &Buffer) -> Int64 raise {
+  (self as &ByteSlice).read_int64()
+}
+
+///|
+pub fn &Buffer::read_int64_le(self : &Buffer) -> Int64 raise {
+  (self as &ByteSlice).read_int64_le()
+}
+
+///|
+pub fn &Buffer::read_uint(self : &Buffer) -> UInt raise {
+  (self as &ByteSlice).read_uint()
+}
+
+///|
+pub fn &Buffer::read_uint_le(self : &Buffer) -> UInt raise {
+  (self as &ByteSlice).read_uint_le()
+}
+
+///|
+pub fn &Buffer::read_uint16(self : &Buffer) -> UInt16 raise {
+  (self as &ByteSlice).read_uint16()
+}
+
+///|
+pub fn &Buffer::read_uint16_le(self : &Buffer) -> UInt16 raise {
+  (self as &ByteSlice).read_uint16_le()
+}
+
+///|
+pub fn &Buffer::read_uint64(self : &Buffer) -> UInt64 raise {
+  (self as &ByteSlice).read_uint64()
+}
+
+///|
+pub fn &Buffer::read_uint64_le(self : &Buffer) -> UInt64 raise {
+  (self as &ByteSlice).read_uint64_le()
+}
+
+///|
+pub fn &Buffer::read_float_le(self : &Buffer) -> Float raise {
+  (self as &ByteSlice).read_float_le()
+}
+
+///|
+pub fn &Buffer::read_float(self : &Buffer) -> Float raise {
+  (self as &ByteSlice).read_float()
+}
+
+///|
+pub fn &Buffer::read_double_le(self : &Buffer) -> Double raise {
+  (self as &ByteSlice).read_double_le()
+}
+
+///|
+pub fn &Buffer::read_double(self : &Buffer) -> Double raise {
+  (self as &ByteSlice).read_double()
+}
+
+///|
+pub fn &Buffer::write_int(self : &Buffer, value : Int) -> Unit {
+  (self as &ByteSlice).write_int(value) catch {
+    _ => abort("unexpected exception")
+  }
+}
+
+///|
+pub fn &Buffer::write_int16(self : &Buffer, value : Int16) -> Unit {
+  (self as &ByteSlice).write_int16(value) catch {
+    _ => abort("unexpected exception")
+  }
+}
+
+///|
+pub fn &Buffer::write_int64(self : &Buffer, value : Int64) -> Unit {
+  (self as &ByteSlice).write_int64(value) catch {
+    _ => abort("unexpected exception")
+  }
+}
+
+///|
+pub fn &Buffer::write_uint(self : &Buffer, value : UInt) -> Unit {
+  (self as &ByteSlice).write_uint(value) catch {
+    _ => abort("unexpected exception")
+  }
+}
+
+///|
+pub fn &Buffer::write_uint16(self : &Buffer, value : UInt16) -> Unit {
+  (self as &ByteSlice).write_uint16(value) catch {
+    _ => abort("unexpected exception")
+  }
+}
+
+///|
+pub fn &Buffer::write_uint64(self : &Buffer, value : UInt64) -> Unit {
+  (self as &ByteSlice).write_uint64(value) catch {
+    _ => abort("unexpected exception")
+  }
+}
+
+///|
+pub fn &Buffer::write_int_le(self : &Buffer, value : Int) -> Unit {
+  (self as &ByteSlice).write_int_le(value) catch {
+    _ => abort("unexpected exception")
+  }
+}
+
+///|
+pub fn &Buffer::write_int16_le(self : &Buffer, value : Int16) -> Unit {
+  (self as &ByteSlice).write_int16_le(value) catch {
+    _ => abort("unexpected exception")
+  }
+}
+
+///|
+pub fn &Buffer::write_int64_le(self : &Buffer, value : Int64) -> Unit {
+  (self as &ByteSlice).write_int64_le(value) catch {
+    _ => abort("unexpected exception")
+  }
+}
+
+///|
+pub fn &Buffer::write_uint_le(self : &Buffer, value : UInt) -> Unit {
+  (self as &ByteSlice).write_uint_le(value) catch {
+    _ => abort("unexpected exception")
+  }
+}
+
+///|
+pub fn &Buffer::write_uint16_le(self : &Buffer, value : UInt16) -> Unit {
+  (self as &ByteSlice).write_uint16_le(value) catch {
+    _ => abort("unexpected exception")
+  }
+}
+
+///|
+pub fn &Buffer::write_uint64_le(self : &Buffer, value : UInt64) -> Unit {
+  (self as &ByteSlice).write_uint64_le(value) catch {
+    _ => abort("unexpected exception")
+  }
+}
+
+///|
+pub fn &Buffer::write_float_le(self : &Buffer, f : Float) -> Unit {
+  (self as &ByteSlice).write_float_le(f) catch {
+    _ => abort("unexpected exception")
+  }
+}
+
+///|
+pub fn &Buffer::write_float(self : &Buffer, f : Float) -> Unit {
+  (self as &ByteSlice).write_float(f) catch {
+    _ => abort("unexpected exception")
+  }
+}
+
+///|
+pub fn &Buffer::write_double_le(self : &Buffer, d : Double) -> Unit {
+  (self as &ByteSlice).write_double_le(d) catch {
+    _ => abort("unexpected exception")
+  }
+}
+
+///|
+pub fn &Buffer::write_double(self : &Buffer, d : Double) -> Unit {
+  (self as &ByteSlice).write_double(d) catch {
+    _ => abort("unexpected exception")
+  }
+}
+
+///|
 pub fn &ByteSlice::read_bytes(self : &ByteSlice, len : Int) -> Bytes raise {
   let buf : FixedArray[Byte] = FixedArray::make(len, 0o0)
   guard self.readable_bytes() >= len else {
