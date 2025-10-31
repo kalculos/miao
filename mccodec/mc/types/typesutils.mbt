@@ -138,6 +138,39 @@ pub fn[T] write_prefix_array(
 }
 
 ///|
+pub fn[T : Eq + Hash, U] read_map(
+  buf : &@bytebuf.ByteBuf,
+  key_reader : (&@bytebuf.ByteBuf) -> T raise,
+  value_reader : (&@bytebuf.ByteBuf) -> U raise,
+) -> Map[T, U] raise {
+  let length = read_varint(buf)
+  if length < 0 {
+    raise fail("Map length is negative")
+  }
+  let map = Map::new()
+  for i = 0; i < length; i = i + 1 {
+    let key = key_reader(buf)
+    let value = value_reader(buf)
+    map.set(key, value)
+  }
+  map
+}
+
+///|
+pub fn[T : Eq + Hash, U] write_map(
+  buf : &@bytebuf.ByteBuf,
+  map : Map[T, U],
+  key_writer : (&@bytebuf.ByteBuf, T) -> Unit,
+  value_writer : (&@bytebuf.ByteBuf, U) -> Unit,
+) -> Unit {
+  write_varint(buf, map.size())
+  map.each((key, value) => {
+    key_writer(buf, key)
+    value_writer(buf, value)
+  })
+}
+
+///|
 /// Read an optional value from the buffer.
 pub fn[T] read_optional(
   buf : &@bytebuf.ByteBuf,
