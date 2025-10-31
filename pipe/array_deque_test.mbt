@@ -2,7 +2,7 @@
 /// Tests for ArrayDeque creation and basic properties
 
 test "ArrayDeque::new creates deque with correct capacity" {
-  let deque : ArrayDeque[Int] = ArrayDeque::new(5, 0)
+  let deque : ArrayDeque[Int] = ArrayDeque::new(5, () => 0)
   inspect(deque.capacity(), content="5")
   inspect(deque.length(), content="0")
   inspect(deque.is_empty(), content="true")
@@ -12,7 +12,7 @@ test "ArrayDeque::new creates deque with correct capacity" {
 
 ///|
 test "ArrayDeque::new with capacity 1" {
-  let deque : ArrayDeque[Int] = ArrayDeque::new(1, 0)
+  let deque : ArrayDeque[Int] = ArrayDeque::new(1, () => 0)
   inspect(deque.capacity(), content="1")
   inspect(deque.length(), content="0")
 }
@@ -21,7 +21,7 @@ test "ArrayDeque::new with capacity 1" {
 /// Tests for push_back and pop_front operations
 
 test "push_back single element" {
-  let deque : ArrayDeque[Int] = ArrayDeque::new(5, 0)
+  let deque : ArrayDeque[Int] = ArrayDeque::new(5, () => 0)
   let success = deque.push_back(42)
   inspect(success, content="true")
   inspect(deque.length(), content="1")
@@ -31,7 +31,7 @@ test "push_back single element" {
 
 ///|
 test "push_back and pop_front single element" {
-  let deque : ArrayDeque[Int] = ArrayDeque::new(5, 0)
+  let deque : ArrayDeque[Int] = ArrayDeque::new(5, () => 0)
   deque.push_back(42) |> ignore
   let value = deque.pop_front()
   inspect(value, content="Some(42)")
@@ -41,7 +41,7 @@ test "push_back and pop_front single element" {
 
 ///|
 test "push_back multiple elements" {
-  let deque : ArrayDeque[Int] = ArrayDeque::new(5, 0)
+  let deque : ArrayDeque[Int] = ArrayDeque::new(5, () => 0)
   deque.push_back(1) |> ignore
   deque.push_back(2) |> ignore
   deque.push_back(3) |> ignore
@@ -51,7 +51,7 @@ test "push_back multiple elements" {
 
 ///|
 test "pop_front maintains FIFO order" {
-  let deque : ArrayDeque[Int] = ArrayDeque::new(5, 0)
+  let deque : ArrayDeque[Int] = ArrayDeque::new(5, () => 0)
   deque.push_back(1) |> ignore
   deque.push_back(2) |> ignore
   deque.push_back(3) |> ignore
@@ -63,7 +63,7 @@ test "pop_front maintains FIFO order" {
 
 ///|
 test "pop_front from empty deque returns None" {
-  let deque : ArrayDeque[Int] = ArrayDeque::new(5, 0)
+  let deque : ArrayDeque[Int] = ArrayDeque::new(5, () => 0)
   inspect(deque.pop_front(), content="None")
 }
 
@@ -71,7 +71,7 @@ test "pop_front from empty deque returns None" {
 /// Tests for full deque behavior
 
 test "push_back to full deque returns false" {
-  let deque : ArrayDeque[Int] = ArrayDeque::new(3, 0)
+  let deque : ArrayDeque[Int] = ArrayDeque::new(3, () => 0)
   inspect(deque.push_back(1), content="true")
   inspect(deque.push_back(2), content="true")
   inspect(deque.push_back(3), content="true")
@@ -84,7 +84,7 @@ test "push_back to full deque returns false" {
 /// Tests for peek operations
 
 test "peek_front returns front element without removing" {
-  let deque : ArrayDeque[Int] = ArrayDeque::new(5, 0)
+  let deque : ArrayDeque[Int] = ArrayDeque::new(5, () => 0)
   deque.push_back(10) |> ignore
   deque.push_back(20) |> ignore
   inspect(deque.peek_front(), content="Some(10)")
@@ -94,13 +94,13 @@ test "peek_front returns front element without removing" {
 
 ///|
 test "peek_front on empty deque returns None" {
-  let deque : ArrayDeque[Int] = ArrayDeque::new(5, 0)
+  let deque : ArrayDeque[Int] = ArrayDeque::new(5, () => 0)
   inspect(deque.peek_front(), content="None")
 }
 
 ///|
 test "peek alias works correctly" {
-  let deque : ArrayDeque[Int] = ArrayDeque::new(5, 0)
+  let deque : ArrayDeque[Int] = ArrayDeque::new(5, () => 0)
   deque.push_back(42) |> ignore
   inspect(deque.peek(), content="Some(42)")
 }
@@ -109,7 +109,7 @@ test "peek alias works correctly" {
 /// Tests for ring buffer wrap-around behavior
 
 test "wrap-around behavior when tail wraps" {
-  let deque : ArrayDeque[Int] = ArrayDeque::new(3, 0)
+  let deque : ArrayDeque[Int] = ArrayDeque::new(3, () => 0)
   // Fill the deque
   deque.push_back(1) |> ignore
   deque.push_back(2) |> ignore
@@ -128,7 +128,7 @@ test "wrap-around behavior when tail wraps" {
 
 ///|
 test "wrap-around with continuous push and pop" {
-  let deque : ArrayDeque[Int] = ArrayDeque::new(4, 0)
+  let deque : ArrayDeque[Int] = ArrayDeque::new(4, () => 0)
   deque.push_back(1) |> ignore
   deque.push_back(2) |> ignore
   inspect(deque.pop_front(), content="Some(1)")
@@ -146,7 +146,7 @@ test "wrap-around with continuous push and pop" {
 /// Tests for clear operation
 
 test "clear empties the deque" {
-  let deque : ArrayDeque[Int] = ArrayDeque::new(5, 0)
+  let deque : ArrayDeque[Int] = ArrayDeque::new(5, () => 0)
   deque.push_back(1) |> ignore
   deque.push_back(2) |> ignore
   deque.push_back(3) |> ignore
@@ -158,7 +158,7 @@ test "clear empties the deque" {
 
 ///|
 test "clear on empty deque" {
-  let deque : ArrayDeque[Int] = ArrayDeque::new(5, 0)
+  let deque : ArrayDeque[Int] = ArrayDeque::new(5, () => 0)
   deque.clear()
   inspect(deque.length(), content="0")
   inspect(deque.is_empty(), content="true")
@@ -166,7 +166,7 @@ test "clear on empty deque" {
 
 ///|
 test "deque can be reused after clear" {
-  let deque : ArrayDeque[Int] = ArrayDeque::new(3, 0)
+  let deque : ArrayDeque[Int] = ArrayDeque::new(3, () => 0)
   deque.push_back(1) |> ignore
   deque.push_back(2) |> ignore
   deque.clear()
@@ -180,7 +180,7 @@ test "deque can be reused after clear" {
 /// Tests for Queue interface aliases
 
 test "try_push alias works correctly" {
-  let deque : ArrayDeque[Int] = ArrayDeque::new(3, 0)
+  let deque : ArrayDeque[Int] = ArrayDeque::new(3, () => 0)
   inspect(deque.try_push(1), content="true")
   inspect(deque.try_push(2), content="true")
   inspect(deque.try_push(3), content="true")
@@ -189,7 +189,7 @@ test "try_push alias works correctly" {
 
 ///|
 test "try_pop alias works correctly" {
-  let deque : ArrayDeque[Int] = ArrayDeque::new(3, 0)
+  let deque : ArrayDeque[Int] = ArrayDeque::new(3, () => 0)
   deque.push_back(42) |> ignore
   inspect(deque.try_pop(), content="Some(42)")
   inspect(deque.try_pop(), content="None")
@@ -199,7 +199,7 @@ test "try_pop alias works correctly" {
 /// Tests for read_into operation (Byte-specific)
 
 test "read_into reads bytes into destination array" {
-  let deque : ArrayDeque[Byte] = ArrayDeque::new(5, b'\x00')
+  let deque : ArrayDeque[Byte] = ArrayDeque::new(5, () => b'\x00')
   deque.push_back(b'A') |> ignore
   deque.push_back(b'B') |> ignore
   deque.push_back(b'C') |> ignore
@@ -215,7 +215,7 @@ test "read_into reads bytes into destination array" {
 
 ///|
 test "read_into with offset" {
-  let deque : ArrayDeque[Byte] = ArrayDeque::new(5, b'\x00')
+  let deque : ArrayDeque[Byte] = ArrayDeque::new(5, () => b'\x00')
   deque.push_back(b'X') |> ignore
   deque.push_back(b'Y') |> ignore
   
@@ -231,7 +231,7 @@ test "read_into with offset" {
 
 ///|
 test "read_into reads less when deque has fewer elements" {
-  let deque : ArrayDeque[Byte] = ArrayDeque::new(5, b'\x00')
+  let deque : ArrayDeque[Byte] = ArrayDeque::new(5, () => b'\x00')
   deque.push_back(b'A') |> ignore
   deque.push_back(b'B') |> ignore
   
@@ -243,7 +243,7 @@ test "read_into reads less when deque has fewer elements" {
 
 ///|
 test "read_into from empty deque returns 0" {
-  let deque : ArrayDeque[Byte] = ArrayDeque::new(5, b'\x00')
+  let deque : ArrayDeque[Byte] = ArrayDeque::new(5, () => b'\x00')
   let dst : FixedArray[Byte] = FixedArray::make(5, b'\x00')
   let read = deque.read_into(dst, 0, 5)
   inspect(read, content="0")
@@ -251,7 +251,7 @@ test "read_into from empty deque returns 0" {
 
 ///|
 test "read_into with wrap-around" {
-  let deque : ArrayDeque[Byte] = ArrayDeque::new(4, b'\x00')
+  let deque : ArrayDeque[Byte] = ArrayDeque::new(4, () => b'\x00')
   // Fill and partially drain to create wrap-around
   deque.push_back(b'A') |> ignore
   deque.push_back(b'B') |> ignore
@@ -276,7 +276,7 @@ test "read_into with wrap-around" {
 /// Tests for write_from operation (Byte-specific)
 
 test "write_from writes bytes from source array" {
-  let deque : ArrayDeque[Byte] = ArrayDeque::new(5, b'\x00')
+  let deque : ArrayDeque[Byte] = ArrayDeque::new(5, () => b'\x00')
   let src : FixedArray[Byte] = [b'A', b'B', b'C', b'D', b'E']
   let written = deque.write_from(src, 0, 3)
   inspect(written, content="3")
@@ -288,7 +288,7 @@ test "write_from writes bytes from source array" {
 
 ///|
 test "write_from with offset" {
-  let deque : ArrayDeque[Byte] = ArrayDeque::new(5, b'\x00')
+  let deque : ArrayDeque[Byte] = ArrayDeque::new(5, () => b'\x00')
   let src : FixedArray[Byte] = [b'A', b'B', b'C', b'D', b'E']
   let written = deque.write_from(src, 2, 2)
   inspect(written, content="2")
@@ -298,7 +298,7 @@ test "write_from with offset" {
 
 ///|
 test "write_from writes less when deque has less space" {
-  let deque : ArrayDeque[Byte] = ArrayDeque::new(3, b'\x00')
+  let deque : ArrayDeque[Byte] = ArrayDeque::new(3, () => b'\x00')
   let src : FixedArray[Byte] = [b'A', b'B', b'C', b'D', b'E']
   let written = deque.write_from(src, 0, 5)
   inspect(written, content="3")
@@ -307,7 +307,7 @@ test "write_from writes less when deque has less space" {
 
 ///|
 test "write_from to full deque returns 0" {
-  let deque : ArrayDeque[Byte] = ArrayDeque::new(2, b'\x00')
+  let deque : ArrayDeque[Byte] = ArrayDeque::new(2, () => b'\x00')
   deque.push_back(b'X') |> ignore
   deque.push_back(b'Y') |> ignore
   
@@ -318,7 +318,7 @@ test "write_from to full deque returns 0" {
 
 ///|
 test "write_from with wrap-around" {
-  let deque : ArrayDeque[Byte] = ArrayDeque::new(4, b'\x00')
+  let deque : ArrayDeque[Byte] = ArrayDeque::new(4, () => b'\x00')
   // Fill and partially drain to create wrap-around
   deque.push_back(b'A') |> ignore
   deque.push_back(b'B') |> ignore
@@ -341,7 +341,7 @@ test "write_from with wrap-around" {
 /// Tests for combined operations
 
 test "alternating push and pop operations" {
-  let deque : ArrayDeque[Int] = ArrayDeque::new(3, 0)
+  let deque : ArrayDeque[Int] = ArrayDeque::new(3, () => 0)
   deque.push_back(1) |> ignore
   inspect(deque.pop_front(), content="Some(1)")
   deque.push_back(2) |> ignore
@@ -355,7 +355,7 @@ test "alternating push and pop operations" {
 
 ///|
 test "read_into and write_from combined" {
-  let deque : ArrayDeque[Byte] = ArrayDeque::new(6, b'\x00')
+  let deque : ArrayDeque[Byte] = ArrayDeque::new(6, () => b'\x00')
   
   // Write some data
   let src1 : FixedArray[Byte] = [b'A', b'B', b'C']
@@ -385,7 +385,7 @@ test "read_into and write_from combined" {
 /// Edge case tests
 
 test "single element capacity deque" {
-  let deque : ArrayDeque[Int] = ArrayDeque::new(1, 0)
+  let deque : ArrayDeque[Int] = ArrayDeque::new(1, () => 0)
   inspect(deque.push_back(42), content="true")
   inspect(deque.is_full(), content="true")
   inspect(deque.push_back(43), content="false")
@@ -397,7 +397,7 @@ test "single element capacity deque" {
 
 ///|
 test "large capacity deque" {
-  let deque : ArrayDeque[Int] = ArrayDeque::new(100, 0)
+  let deque : ArrayDeque[Int] = ArrayDeque::new(100, () => 0)
   // Fill half
   let mut i = 0
   while i < 50 {
@@ -426,7 +426,7 @@ test "large capacity deque" {
 
 ///|
 test "stress test with many wrap-arounds" {
-  let deque : ArrayDeque[Int] = ArrayDeque::new(10, 0)
+  let deque : ArrayDeque[Int] = ArrayDeque::new(10, () => 0)
   let mut counter = 0
   let mut iterations = 0
   
