@@ -15,10 +15,10 @@ jobs:
         os:
           - name: ubuntu-latest
             triple: x86_64-linux-gnu
-          - name: macos-latest
-            triple: arm64-apple-darwin
-          - name: windows-latest
-            triple: x86_64-w64-mingw32        
+          # - name: macos-latest
+          #   triple: arm64-apple-darwin
+          # - name: windows-latest
+          #   triple: x86_64-w64-mingw32        
       fail-fast: false
     runs-on: ${{ matrix.os.name }}
     continue-on-error: false
