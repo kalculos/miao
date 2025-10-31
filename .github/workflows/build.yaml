@@ -32,3 +32,6 @@ jobs:
         run: |
           moon update
           moon check
+      - name: Moon test
+        run: |
+          moon test
