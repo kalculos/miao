@@ -8,12 +8,28 @@ pub(all) suberror NetworkError {
 } derive(Show, Eq, Hash)
 
 ///|
+/// A low-level interface for accessing network.
+/// Users should not depend on this trait directly. Use @net.dialXXX instead!!
+/// `dial` create a socket with a bound random address and connects to the destinated address.
+/// 
+/// `bind` create and bind a socket to the specified address. You may reuse this socket to 
+/// connect somewhere else or listen for requests by invoking Socket#accept.
+/// bind and dial are both sockets, but the first one isn't bound to a user-specified address, 
+/// which discourages the use of listening incoming packets. and the next one bound to a specified address
+/// which encourages listening for incoming packets.
+///
+/// The returned socket may varies in the network parameter.
+///  - When the network is specified to be `tcp`, the returned socket must be TcpSocket.
+///  - When the network is specified to be 'udp', the returned socket must be DatagramSocket.
 pub(open) trait Network {
-  async dial(network : String, address : String, options : Int) -> Result[
+  async dial(Self, network : String, address : String, options : Int) -> Result[
     &Connection,
     NetworkError,
   ]
-  async bind(network : String, bind : String) -> Result[&Socket, NetworkError]
+  async bind(Self, network : String, bind : String) -> Result[
+    &Socket,
+    NetworkError,
+  ]
 }
 
 ///|
@@ -52,6 +68,7 @@ pub(open) trait TcpSocket: Socket {
 
 ///|
 pub(open) trait DatagramConnection: Connection {
+  socket(Self) -> &DatagramSocket
   buffer(Self) -> &@buffer.Buffer
 }
 

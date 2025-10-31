@@ -281,9 +281,9 @@ test "write_from writes bytes from source array" {
   let written = deque.write_from(src, 0, 3)
   inspect(written, content="3")
   inspect(deque.length(), content="3")
-  inspect(deque.pop_front(), content="Some(65)")  // 'A'
-  inspect(deque.pop_front(), content="Some(66)")  // 'B'
-  inspect(deque.pop_front(), content="Some(67)")  // 'C'
+  inspect(deque.pop_front(), content="Some(b'\\x41')")  // 'A'
+  inspect(deque.pop_front(), content="Some(b'\\x42')")  // 'B'
+  inspect(deque.pop_front(), content="Some(b'\\x43')")  // 'C'
 }
 
 ///|
@@ -292,8 +292,8 @@ test "write_from with offset" {
   let src : FixedArray[Byte] = [b'A', b'B', b'C', b'D', b'E']
   let written = deque.write_from(src, 2, 2)
   inspect(written, content="2")
-  inspect(deque.pop_front(), content="Some(67)")  // 'C'
-  inspect(deque.pop_front(), content="Some(68)")  // 'D'
+  inspect(deque.pop_front(), content="Some(b'\\x43')")  // 'C'
+  inspect(deque.pop_front(), content="Some(b'\\x44')")  // 'D'
 }
 
 ///|
@@ -331,10 +331,10 @@ test "write_from with wrap-around" {
   inspect(deque.is_full(), content="true")
   
   // Verify order
-  inspect(deque.pop_front(), content="Some(67)")  // 'C'
-  inspect(deque.pop_front(), content="Some(68)")  // 'D'
-  inspect(deque.pop_front(), content="Some(69)")  // 'E'
-  inspect(deque.pop_front(), content="Some(70)")  // 'F'
+  inspect(deque.pop_front(), content="Some(b'\\x43')")  // 'C'
+  inspect(deque.pop_front(), content="Some(b'\\x44')")  // 'D'
+  inspect(deque.pop_front(), content="Some(b'\\x45')")  // 'E'
+  inspect(deque.pop_front(), content="Some(b'\\x46')")  // 'F'
 }
 
 ///|
@@ -374,11 +374,11 @@ test "read_into and write_from combined" {
   
   // Verify all remaining data
   inspect(deque.length(), content="5")
-  inspect(deque.pop_front(), content="Some(67)")  // 'C'
-  inspect(deque.pop_front(), content="Some(68)")  // 'D'
-  inspect(deque.pop_front(), content="Some(69)")  // 'E'
-  inspect(deque.pop_front(), content="Some(70)")  // 'F'
-  inspect(deque.pop_front(), content="Some(71)")  // 'G'
+  inspect(deque.pop_front(), content="Some(b'\\x43')")  // 'C'
+  inspect(deque.pop_front(), content="Some(b'\\x44')")  // 'D'
+  inspect(deque.pop_front(), content="Some(b'\\x45')")  // 'E'
+  inspect(deque.pop_front(), content="Some(b'\\x46')")  // 'F'
+  inspect(deque.pop_front(), content="Some(b'\\x47')")  // 'G'
 }
 
 ///|
