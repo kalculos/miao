@@ -4,6 +4,8 @@ pub struct UdpOption(Int)
 ///|
 let _UDP_OP_BROADCAST = 1
 
+let _UDP_OPT_EMPTY : UdpOption = UdpOption(0)
+
 ///|
 pub fn UdpOption::new(broadcast? : Bool = false) -> UdpOption {
   let mut flags = 0

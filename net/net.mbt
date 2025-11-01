@@ -26,7 +26,7 @@ pub(open) trait Network {
     &Connection,
     NetworkError,
   ]
-  async bind(Self, network : String, bind : String) -> Result[
+  async bind(Self, network : String, bind : String, options : Int) -> Result[
     &Socket,
     NetworkError,
   ]
@@ -44,8 +44,9 @@ pub(open) trait Socket {
 
 ///|
 pub(open) trait DatagramSocket: Socket {
-  async accept(Self, timeout : @time.Duration) -> Result[
-    &DatagramConnection,
+  /// Return (socksAddr, truncated)
+  async accept(Self, buffer : &@buffer.Buffer, timeout : @time.Duration) -> Result[
+    (SockAddr, Int),
     NetworkError,
   ]
   async send(Self, dst : SockAddr, buffer : &@buffer.Buffer, opt : UdpOption) -> Result[
@@ -60,13 +61,19 @@ pub(open) trait TcpSocket: Socket {
     &TcpConnection,
     NetworkError,
   ]
-  async dial(host : SockAddr, opt : TcpOption) -> Result[
+  async dial(Self, host : SockAddr, opt : TcpOption) -> Result[
     &TcpConnection,
     NetworkError,
   ]
 }
 
 ///|
+/// The datagram connection focuses on end-to-end communication over UDP.
+/// It automatically rejects any incoming packets that is not originated from
+/// the destination, and sets destination for all outgoing packets.
+/// 
+/// When this is returned by accept, it implies a wrapper of a packet. Miao
+/// does not track its state to make udp "Connections".
 pub(open) trait DatagramConnection: Connection {
   socket(Self) -> &DatagramSocket
   buffer(Self) -> &@buffer.Buffer

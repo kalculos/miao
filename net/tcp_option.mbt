@@ -5,6 +5,9 @@ pub struct TcpOption(Int)
 let _REUSE_ADDR = 1
 
 ///|
+let _TCP_OPT_EMPTY: TcpOption = TcpOption(0)
+
+///|
 pub fn TcpOption::new(reuseaddr? : Bool = false) -> TcpOption {
   let mut flag = 0
   if reuseaddr {
