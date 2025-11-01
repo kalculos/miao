@@ -25,6 +25,8 @@ This project uses [version evolution](https://github.com/saltedfishclub/document
  - mccodec: a headless Minecraft client for Java Edition 1.21.8. It is being developed alongside miao to gather API ideas and adopt new APIs rapidly. We are developing mccodec and the rest of Miao in parallel.  
    _Status: Most of the packet definitions and serialisers have been completed, although there is room for improvement in terms of API usability._  
    The project is maintained by @Sehouz and reviewed by @iceBear67.
+ - `compress`: Compression algorithm codecs with miao compatible API.
+   Status: Zlib algorithm has been supported. This module is maintained by @hanbings
  - pipe and buffer  
     The `pipe` and `buffer` modules are a very specific type of `io` utility. 'pipe' provides an 'asynchronous blocking queue' implementation that allows the libuv runtime to bridge reactive-style APIs to a 'blocking' API style semantically. 'buffer' is a redesignation of 'iceBear67/bytebuf' (previously used), with API improvements to enable enhanced performance in the future.  
  - process: This module relates to subprocess management and stdio.    
