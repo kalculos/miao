@@ -1,10 +1,10 @@
 ///|
-impl Network for Unit with dial(self, net, addr, opts) {
+impl Network for Unit with dial(_, _, _, _) {
   abort("Network not supported on this runtime")
 }
 
 ///|
-impl Network for Unit with bind(self, net, bind, opt) {
+impl Network for Unit with bind(_, _, _, _) {
   abort("Network not supported on this runtime")
 }
 
