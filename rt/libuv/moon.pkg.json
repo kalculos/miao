@@ -11,7 +11,9 @@
     "iceBear67/miao/pipe",
     "iceBear67/miao/rt",
     "iceBear67/time",
-    "iceBear67/miao/process"
+    "iceBear67/miao/process",
+    "iceBear67/miao/net",
+    "iceBear67/miao/buffer"
   ],
   "native-stub": ["coroutine.c"]
 }

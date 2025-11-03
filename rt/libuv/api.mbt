@@ -5,6 +5,7 @@ pub fn LibuvRuntime::run(entry : async () -> Unit noraise) -> Unit raise {
     .map(it => it.rt)
     .unwrap_or(rt)
   @fs.set_default_fs(LibuvFileSystem::{ rt, })
+  @net.set_network(UvNetwork::{ rt, })
   ___run_async(() => {
     let task = assert_uvtask(rt.new_task(_ => entry()))
     ___suspend((resolve, _) => task.on_exit(Any, () => resolve(())) |> ignore) catch {
