@@ -14,10 +14,10 @@ impl @net.Network for UvNetwork with dial(self, network, address, options) {
   match network {
     "tcp" => {
       let sockaddr = try @net.SockAddr::parse(address) catch {
-        _ => raise @net.NetworkError::InvalidAddress(msg="Invalid address: \{address}")
+        _ => return Err(@net.NetworkError::InvalidAddress(msg="Invalid address: \{address}"))
       }
       let tcp = @uv.Tcp::new(self.uv())
-      uvrt_op_suspend((resolve, reject, _) => {
+      try uvrt_op_suspend((resolve, reject, _) => {
         let handle = tcp.connect(
           sockaddr_to_uv(sockaddr),
           () => resolve(UvTcpConnection::{ tcp, rt: self.rt, local: None, remote: Some(sockaddr) }),
@@ -27,19 +27,25 @@ impl @net.Network for UvNetwork with dial(self, network, address, options) {
           defer reject(@rt.CoroutineError::Cancelled)
           handle.cancel()
         }
-      })
+      }) catch {
+        @net.NetworkError(_) as err => Err(err)
+        _ => Err(@net.NetworkError::DeviceFailure(msg="Failed to connect"))
+      } noraise {
+        conn => Ok(conn)
+      }
     }
     "udp" => {
       let sockaddr = try @net.SockAddr::parse(address) catch {
-        _ => raise @net.NetworkError::InvalidAddress(msg="Invalid address: \{address}")
+        _ => return Err(@net.NetworkError::InvalidAddress(msg="Invalid address: \{address}"))
       }
       let udp = @uv.Udp::new(self.uv())
       try udp.connect(sockaddr_to_uv(sockaddr)) catch {
-        err => raise @net.NetworkError::DeviceFailure(msg="Failed to connect UDP: \{err}")
+        err => return Err(@net.NetworkError::DeviceFailure(msg="Failed to connect UDP: \{err}"))
       }
-      UvDatagramConnection::{ udp, rt: self.rt, sockaddr, buffer: @buffer.HeapByteBuf::new(65536) }
+      let socket = UvDatagramSocket::{ udp, rt: self.rt, local: None }
+      Ok(UvDatagramConnection::{ udp, rt: self.rt, sockaddr, buffer: @buffer.HeapByteBuf::new(65536), socket })
     }
-    _ => raise @net.NetworkError::InvalidAddress(msg="Unsupported network type: \{network}")
+    _ => Err(@net.NetworkError::InvalidAddress(msg="Unsupported network type: \{network}"))
   }
 }
 
@@ -48,25 +54,25 @@ impl @net.Network for UvNetwork with bind(self, network, address, options) {
   match network {
     "tcp" => {
       let sockaddr = try @net.SockAddr::parse(address) catch {
-        _ => raise @net.NetworkError::InvalidAddress(msg="Invalid address: \{address}")
+        _ => return Err(@net.NetworkError::InvalidAddress(msg="Invalid address: \{address}"))
       }
       let tcp = @uv.Tcp::new(self.uv())
       try tcp.bind(sockaddr_to_uv(sockaddr), reuseaddr=(options & 1) != 0) catch {
-        err => raise @net.NetworkError::DeviceFailure(msg="Failed to bind TCP: \{err}")
+        err => return Err(@net.NetworkError::DeviceFailure(msg="Failed to bind TCP: \{err}"))
       }
-      UvTcpSocket::{ tcp, rt: self.rt, local: Some(sockaddr) }
+      Ok(UvTcpSocket::{ tcp, rt: self.rt, local: Some(sockaddr) })
     }
     "udp" => {
       let sockaddr = try @net.SockAddr::parse(address) catch {
-        _ => raise @net.NetworkError::InvalidAddress(msg="Invalid address: \{address}")
+        _ => return Err(@net.NetworkError::InvalidAddress(msg="Invalid address: \{address}"))
       }
       let udp = @uv.Udp::new(self.uv())
       try udp.bind(sockaddr_to_uv(sockaddr), reuseaddr=(options & 1) != 0) catch {
-        err => raise @net.NetworkError::DeviceFailure(msg="Failed to bind UDP: \{err}")
+        err => return Err(@net.NetworkError::DeviceFailure(msg="Failed to bind UDP: \{err}"))
       }
-      UvDatagramSocket::{ udp, rt: self.rt, local: Some(sockaddr) }
+      Ok(UvDatagramSocket::{ udp, rt: self.rt, local: Some(sockaddr) })
     }
-    _ => raise @net.NetworkError::InvalidAddress(msg="Unsupported network type: \{network}")
+    _ => Err(@net.NetworkError::InvalidAddress(msg="Unsupported network type: \{network}"))
   }
 }
 
@@ -147,6 +153,8 @@ struct UvTcpConnection {
 
 ///|
 impl @net.Connection for UvTcpConnection with local_addr(self) {
+  // TODO: Address should always be present. Need to query socket for actual bound address
+  // when not provided explicitly (e.g., after accept or when binding to 0.0.0.0).
   self.local.unwrap_or(@net.SockAddr::{ inet: @net.InetAddr::IPv4(host=0), port: 0 })
 }
 
@@ -163,6 +171,9 @@ impl @net.Connection for UvTcpConnection with flush(self) {
 
 ///|
 impl @io.Channel for UvTcpConnection with read(self, buffer, offset, length) {
+  // TODO: This is an anti-pattern. Should use @pipe and read_stream for a buffered approach
+  // instead of directly reading into the provided buffer. This would require refactoring
+  // TcpConnection to hold a BufferedPipe reader created via read_stream.
   let stream = self.tcp.to_stream()
   uvrt_op_suspend((resolve, reject, _) => {
     let mut read_once = false
@@ -241,78 +252,56 @@ impl @net.Socket for UvDatagramSocket with is_closed(self) {
 ///|
 impl @net.DatagramSocket for UvDatagramSocket with accept(self, buffer, timeout) {
   let _ = timeout
-  // Fast path: if buffer has direct array access, use it directly
-  match buffer.array() {
-    Some(backing_array) => {
-      let buffer_capacity = backing_array.length()
-      let initial_widx = buffer.widx()
-      uvrt_op_suspend((resolve, reject, _) => {
-        self.udp.recv_start(
-          (_, _) => backing_array.unsafe_reinterpret_as_bytes()[initial_widx:],
-          (_, nread, sockaddr, _) => {
-            self.udp.recv_stop()
-            if nread > 0 {
-              let addr = uv_to_sockaddr(sockaddr)
-              let available_space = buffer_capacity - initial_widx
-              let truncated = if nread > available_space {
-                // Update buffer's widx by the space we could write
-                buffer.set_position(buffer_capacity)
-                nread - available_space
-              } else {
-                // Update buffer's widx
-                buffer.set_position(initial_widx + nread)
-                0
-              }
-              resolve((addr, truncated))
-            } else {
-              reject(@net.NetworkError::ConnClose(msg="Connection closed"))
-            }
-          },
-          (_, err) => {
-            self.udp.recv_stop()
-            reject(@net.NetworkError::DeviceFailure(msg="Receive failed: \{err}"))
-          },
-        ) catch {
-          err => reject(@net.NetworkError::DeviceFailure(msg="Failed to start receive: \{err}"))
-        }
-        () => {
-          defer reject(@rt.CoroutineError::Cancelled)
-          self.udp.recv_stop()
-        }
-      })
-    }
-    None => {
-      // Slow path: allocate temporary buffer and transfer
-      let recv_buffer = FixedArray::make(65536, 0)
-      uvrt_op_suspend((resolve, reject, _) => {
-        self.udp.recv_start(
-          (_, _) => recv_buffer.unsafe_reinterpret_as_bytes(),
-          (_, nread, sockaddr, _) => {
-            self.udp.recv_stop()
-            if nread > 0 {
-              let bytes_written = buffer.transfer_from(recv_buffer.unsafe_reinterpret_as_bytes()[0:nread])
-              let addr = uv_to_sockaddr(sockaddr)
-              // Return (addr, truncated) where truncated is bytes not written
-              let truncated = nread - bytes_written
-              resolve((addr, truncated))
-            } else {
-              reject(@net.NetworkError::ConnClose(msg="Connection closed"))
-            }
-          },
-          (_, err) => {
-            self.udp.recv_stop()
-            reject(@net.NetworkError::DeviceFailure(msg="Receive failed: \{err}"))
-          },
-        ) catch {
-          err => reject(@net.NetworkError::DeviceFailure(msg="Failed to start receive: \{err}"))
-        }
-        () => {
-          defer reject(@rt.CoroutineError::Cancelled)
-          self.udp.recv_stop()
-        }
-      })
-    }
+  
+  // Try fast path first, fall back to slow path
+  let (recv_buf, initial_widx, use_fast_path) = match buffer.array() {
+    Some(backing_array) => (backing_array, buffer.widx(), true)
+    None => (FixedArray::make(65536, 0), 0, false)
   }
+  
+  uvrt_op_suspend((resolve, reject, _) => {
+    self.udp.recv_start(
+      (_, _) => if use_fast_path {
+        recv_buf.unsafe_reinterpret_as_bytes()[initial_widx:]
+      } else {
+        recv_buf.unsafe_reinterpret_as_bytes()
+      },
+      (_, nread, sockaddr, _) => {
+        self.udp.recv_stop()
+        if nread > 0 {
+          let addr = uv_to_sockaddr(sockaddr)
+          let truncated = if use_fast_path {
+            // Fast path: update buffer position and calculate truncation
+            let available_space = recv_buf.length() - initial_widx
+            if nread > available_space {
+              buffer.set_position(recv_buf.length())
+              nread - available_space
+            } else {
+              buffer.set_position(initial_widx + nread)
+              0
+            }
+          } else {
+            // Slow path: transfer data and calculate truncation
+            let bytes_written = buffer.transfer_from(recv_buf.unsafe_reinterpret_as_bytes()[0:nread])
+            nread - bytes_written
+          }
+          resolve((addr, truncated))
+        } else {
+          reject(@net.NetworkError::ConnClose(msg="Connection closed"))
+        }
+      },
+      (_, err) => {
+        self.udp.recv_stop()
+        reject(@net.NetworkError::DeviceFailure(msg="Receive failed: \{err}"))
+      },
+    ) catch {
+      err => reject(@net.NetworkError::DeviceFailure(msg="Failed to start receive: \{err}"))
+    }
+    () => {
+      defer reject(@rt.CoroutineError::Cancelled)
+      self.udp.recv_stop()
+    }
+  })
 }
 
 ///|
@@ -339,6 +328,7 @@ struct UvDatagramConnection {
   rt : LibuvRuntime
   sockaddr : @net.SockAddr
   buffer : &@buffer.Buffer
+  socket : UvDatagramSocket
 }
 
 ///|
@@ -395,7 +385,7 @@ impl @io.Channel for UvDatagramConnection with is_closed(self) {
 
 ///|
 impl @net.DatagramConnection for UvDatagramConnection with socket(self) {
-  abort("DatagramConnection socket() not supported for dial connections")
+  self.socket
 }
 
 ///|
