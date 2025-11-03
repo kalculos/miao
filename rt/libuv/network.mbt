@@ -13,7 +13,7 @@ impl @net.Network for UvNetwork with dial(self, network, address, options) {
   let _ = options
   match network {
     "tcp" => {
-      let sockaddr = try parse_address(address) catch {
+      let sockaddr = try @net.SockAddr::parse(address) catch {
         _ => raise @net.NetworkError::InvalidAddress(msg="Invalid address: \{address}")
       }
       let tcp = @uv.Tcp::new(self.uv())
@@ -30,14 +30,14 @@ impl @net.Network for UvNetwork with dial(self, network, address, options) {
       })
     }
     "udp" => {
-      let sockaddr = try parse_address(address) catch {
+      let sockaddr = try @net.SockAddr::parse(address) catch {
         _ => raise @net.NetworkError::InvalidAddress(msg="Invalid address: \{address}")
       }
       let udp = @uv.Udp::new(self.uv())
       try udp.connect(sockaddr_to_uv(sockaddr)) catch {
         err => raise @net.NetworkError::DeviceFailure(msg="Failed to connect UDP: \{err}")
       }
-      UvDatagramConnection::{ udp, rt: self.rt, sockaddr, buffer: @buffer.Buffer::new() }
+      UvDatagramConnection::{ udp, rt: self.rt, sockaddr, buffer: @buffer.HeapByteBuf::new(65536) }
     }
     _ => raise @net.NetworkError::InvalidAddress(msg="Unsupported network type: \{network}")
   }
@@ -47,7 +47,7 @@ impl @net.Network for UvNetwork with dial(self, network, address, options) {
 impl @net.Network for UvNetwork with bind(self, network, address, options) {
   match network {
     "tcp" => {
-      let sockaddr = try parse_address(address) catch {
+      let sockaddr = try @net.SockAddr::parse(address) catch {
         _ => raise @net.NetworkError::InvalidAddress(msg="Invalid address: \{address}")
       }
       let tcp = @uv.Tcp::new(self.uv())
@@ -57,7 +57,7 @@ impl @net.Network for UvNetwork with bind(self, network, address, options) {
       UvTcpSocket::{ tcp, rt: self.rt, local: Some(sockaddr) }
     }
     "udp" => {
-      let sockaddr = try parse_address(address) catch {
+      let sockaddr = try @net.SockAddr::parse(address) catch {
         _ => raise @net.NetworkError::InvalidAddress(msg="Invalid address: \{address}")
       }
       let udp = @uv.Udp::new(self.uv())
@@ -241,32 +241,78 @@ impl @net.Socket for UvDatagramSocket with is_closed(self) {
 ///|
 impl @net.DatagramSocket for UvDatagramSocket with accept(self, buffer, timeout) {
   let _ = timeout
-  let recv_buffer = FixedArray::make(65536, 0)
-  uvrt_op_suspend((resolve, reject, _) => {
-    self.udp.recv_start(
-      (_, _) => recv_buffer.unsafe_reinterpret_as_bytes(),
-      (_, nread, sockaddr, _) => {
-        self.udp.recv_stop()
-        if nread > 0 {
-          buffer.write_bytes(recv_buffer.unsafe_reinterpret_as_bytes()[0:nread])
-          let addr = uv_to_sockaddr(sockaddr)
-          resolve((addr, nread))
-        } else {
-          reject(@net.NetworkError::ConnClose(msg="Connection closed"))
+  // Fast path: if buffer has direct array access, use it directly
+  match buffer.array() {
+    Some(backing_array) => {
+      let buffer_capacity = backing_array.length()
+      let initial_widx = buffer.widx()
+      uvrt_op_suspend((resolve, reject, _) => {
+        self.udp.recv_start(
+          (_, _) => backing_array.unsafe_reinterpret_as_bytes()[initial_widx:],
+          (_, nread, sockaddr, _) => {
+            self.udp.recv_stop()
+            if nread > 0 {
+              let addr = uv_to_sockaddr(sockaddr)
+              let available_space = buffer_capacity - initial_widx
+              let truncated = if nread > available_space {
+                // Update buffer's widx by the space we could write
+                buffer.set_position(buffer_capacity)
+                nread - available_space
+              } else {
+                // Update buffer's widx
+                buffer.set_position(initial_widx + nread)
+                0
+              }
+              resolve((addr, truncated))
+            } else {
+              reject(@net.NetworkError::ConnClose(msg="Connection closed"))
+            }
+          },
+          (_, err) => {
+            self.udp.recv_stop()
+            reject(@net.NetworkError::DeviceFailure(msg="Receive failed: \{err}"))
+          },
+        ) catch {
+          err => reject(@net.NetworkError::DeviceFailure(msg="Failed to start receive: \{err}"))
         }
-      },
-      (_, err) => {
-        self.udp.recv_stop()
-        reject(@net.NetworkError::DeviceFailure(msg="Receive failed: \{err}"))
-      },
-    ) catch {
-      err => reject(@net.NetworkError::DeviceFailure(msg="Failed to start receive: \{err}"))
+        () => {
+          defer reject(@rt.CoroutineError::Cancelled)
+          self.udp.recv_stop()
+        }
+      })
     }
-    () => {
-      defer reject(@rt.CoroutineError::Cancelled)
-      self.udp.recv_stop()
+    None => {
+      // Slow path: allocate temporary buffer and transfer
+      let recv_buffer = FixedArray::make(65536, 0)
+      uvrt_op_suspend((resolve, reject, _) => {
+        self.udp.recv_start(
+          (_, _) => recv_buffer.unsafe_reinterpret_as_bytes(),
+          (_, nread, sockaddr, _) => {
+            self.udp.recv_stop()
+            if nread > 0 {
+              let bytes_written = buffer.transfer_from(recv_buffer.unsafe_reinterpret_as_bytes()[0:nread])
+              let addr = uv_to_sockaddr(sockaddr)
+              // Return (addr, truncated) where truncated is bytes not written
+              let truncated = nread - bytes_written
+              resolve((addr, truncated))
+            } else {
+              reject(@net.NetworkError::ConnClose(msg="Connection closed"))
+            }
+          },
+          (_, err) => {
+            self.udp.recv_stop()
+            reject(@net.NetworkError::DeviceFailure(msg="Receive failed: \{err}"))
+          },
+        ) catch {
+          err => reject(@net.NetworkError::DeviceFailure(msg="Failed to start receive: \{err}"))
+        }
+        () => {
+          defer reject(@rt.CoroutineError::Cancelled)
+          self.udp.recv_stop()
+        }
+      })
     }
-  })
+  }
 }
 
 ///|
@@ -319,10 +365,10 @@ impl @io.Channel for UvDatagramConnection with read(self, buffer, offset, length
 
 ///|
 impl @io.Channel for UvDatagramConnection with write(self, buffer, offset, length) {
-  let stream_buffer = @buffer.Buffer::new()
-  stream_buffer.write_bytes(buffer.unsafe_reinterpret_as_bytes()[offset:offset + length])
+  let temp_buffer = @buffer.HeapByteBuf::new(length)
+  temp_buffer.transfer_from(buffer.unsafe_reinterpret_as_bytes()[offset:offset + length]) |> ignore
   uvrt_op_suspend((resolve, reject, _) => {
-    let data = stream_buffer.to_bytes()
+    let data = temp_buffer.to_bytes()
     let handle = self.udp.send(
       [data],
       sockaddr_to_uv(self.sockaddr),
@@ -358,58 +404,12 @@ impl @net.DatagramConnection for UvDatagramConnection with buffer(self) {
 }
 
 ///|
-fn parse_address(address : String) -> @net.SockAddr raise {
-  // Parse address in format "host:port" or "[ipv6]:port"
-  let parts = if address.has_prefix("[") {
-    // IPv6 format [host]:port
-    match address.index_of("]") {
-      Some(end_bracket) => {
-        let host = address[1:end_bracket].to_string()
-        let port_str = address[end_bracket + 2:].to_string()
-        (host, port_str)
-      }
-      None => raise @net.NetworkError::InvalidAddress(msg="Invalid IPv6 address format: \{address}")
-    }
-  } else {
-    // IPv4 format host:port
-    match address.last_index_of(":") {
-      Some(colon_idx) => (address[0:colon_idx].to_string(), address[colon_idx + 1:].to_string())
-      None => raise @net.NetworkError::InvalidAddress(msg="Missing port in address: \{address}")
-    }
-  }
-  let port = try @strconv.parse_int(parts.1) catch {
-    _ => raise @net.NetworkError::InvalidAddress(msg="Invalid port: \{parts.1}")
-  }
-  guard port >= 0 && port <= 65535 else {
-    raise @net.NetworkError::InvalidAddress(msg="Port out of range: \{port}")
-  }
-  @net.from_host_port(parts.0, port.to_uint16())
-}
-
-///|
 fn sockaddr_to_uv(addr : @net.SockAddr) -> @uv.SockAddr {
   match addr.inet {
-    @net.InetAddr::IPv4(host~) => {
-      let a = (host >> 24) & 0xFF
-      let b = (host >> 16) & 0xFF
-      let c = (host >> 8) & 0xFF
-      let d = host & 0xFF
-      @uv.SockAddrV4::new("\{a}.\{b}.\{c}.\{d}", addr.port.to_int())
-    }
-    @net.InetAddr::IPv6(msb~, lsb~) => {
-      let parts = [
-        (msb >> 48) & 0xFFFF,
-        (msb >> 32) & 0xFFFF,
-        (msb >> 16) & 0xFFFF,
-        msb & 0xFFFF,
-        (lsb >> 48) & 0xFFFF,
-        (lsb >> 32) & 0xFFFF,
-        (lsb >> 16) & 0xFFFF,
-        lsb & 0xFFFF,
-      ]
-      let ipv6_str = parts.map(fn(x) { @net.int64_to_hex(x).to_lower() }).join(":")
-      @uv.SockAddrV6::new(ipv6_str, addr.port.to_int())
-    }
+    @net.InetAddr::IPv4(_) as ipv4 => 
+      @uv.SockAddrV4::new(ipv4.to_string(), addr.port.to_int())
+    @net.InetAddr::IPv6(_) as ipv6 => 
+      @uv.SockAddrV6::new(ipv6.to_string(), addr.port.to_int())
   }
 }
 

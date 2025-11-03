@@ -538,3 +538,13 @@ pub fn &ByteSlice::write_array(
   let bytes = arr.unsafe_reinterpret_as_bytes()
   self.transfer_from(bytes[off:off + len])
 }
+
+///|
+pub fn &Buffer::has_array(self : &Buffer) -> Bool {
+  (self as &ByteSlice).has_array()
+}
+
+///|
+pub fn &Buffer::array(self : &Buffer) -> FixedArray[Byte]? {
+  (self as &ByteSlice).array()
+}

@@ -38,4 +38,8 @@ pub(open) trait Buffer: ByteSlice {
   /// Try to release unused spaces. Subsequent access to sank memories may cause an error 
   shrink(Self) -> Bool
   ensure_writeable(Self, Int) -> Unit
+  /// Check if this buffer has direct access to an underlying array
+  has_array(Self) -> Bool
+  /// Get the underlying array if available. Returns None if has_array() is false.
+  array(Self) -> FixedArray[Byte]?
 }

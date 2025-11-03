@@ -285,3 +285,11 @@ pub impl Buffer for HeapByteBuf with shrink(self) {
 pub impl Buffer for HeapByteBuf with ensure_writeable(self, min_writable) {
   self.expand_capacity(min_writable)
 }
+
+pub impl Buffer for HeapByteBuf with has_array(self) {
+  true
+}
+
+pub impl Buffer for HeapByteBuf with array(self) {
+  Some(self.array)
+}
