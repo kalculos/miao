@@ -200,3 +200,11 @@ pub impl Buffer for BufferSlice with ensure_writeable(self, min_writable) {
   ignore(min_writable)
   // Do nothing: slice cannot expand.
 }
+
+pub impl Buffer for BufferSlice with has_array(self) {
+  true
+}
+
+pub impl Buffer for BufferSlice with array(self) {
+  Some(self.buf_arr)
+}

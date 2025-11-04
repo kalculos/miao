@@ -36,20 +36,37 @@ pub fn from_host_port(host : String, port : UInt16) -> SockAddr raise {
 pub fn SockAddr::parse(address : String) -> SockAddr raise {
   let parts = if address.has_prefix("[") {
     // IPv6 format [host]:port
-    match address.index_of("]") {
-      Some(end_bracket) => {
-        let host = address[1:end_bracket].to_string()
-        let port_str = address[end_bracket + 2:].to_string()
-        (host, port_str)
+    // Find the closing bracket by checking character by character
+    let mut bracket_pos = -1
+    let mut i = 1
+    while i < address.length() {
+      if address[i] == ']' {
+        bracket_pos = i
+        break
       }
-      None => raise fail("Invalid IPv6 address format: \{address}")
+      i += 1
     }
+    guard bracket_pos > 0 else {
+      raise fail("Invalid IPv6 address format: \{address}")
+    }
+    let host = address[1:bracket_pos].to_string()
+    let port_str = address[bracket_pos + 2:].to_string()
+    (host, port_str)
   } else {
-    // IPv4 format host:port
-    match address.last_index_of(":") {
-      Some(colon_idx) => (address[0:colon_idx].to_string(), address[colon_idx + 1:].to_string())
-      None => raise fail("Missing port in address: \{address}")
+    // IPv4 format host:port - find last colon
+    let mut colon_pos = -1
+    let mut i = address.length() - 1
+    while i >= 0 {
+      if address[i] == ':' {
+        colon_pos = i
+        break
+      }
+      i -= 1
     }
+    guard colon_pos > 0 else {
+      raise fail("Missing port in address: \{address}")
+    }
+    (address[0:colon_pos].to_string(), address[colon_pos + 1:].to_string())
   }
   let port = try @strconv.parse_int(parts.1) catch {
     _ => raise fail("Invalid port: \{parts.1}")
