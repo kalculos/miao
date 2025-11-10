@@ -173,30 +173,6 @@ pub impl ByteSlice for BufferSlice with transfer_from(self, src) {
   to_copy
 }
 
-///|
-pub impl Buffer for BufferSlice with duplicate(self) {
-  let dup = BufferSlice::{
-    buf_arr: self.buf_arr,
-    start: self.start,
-    end: self.end,
-    ridx: self.ridx,
-    widx: self.widx,
-  }
-  dup as &Buffer
-}
-
-pub impl Buffer for BufferSlice with copy_buffer(self) {
-  self.copy() as &Buffer
-}
-
-pub impl Buffer for BufferSlice with shrink(self) {
-  ignore(self)
-  // No-op for slice; cannot reallocate underlying storage.
-  false
-}
-
-pub impl Buffer for BufferSlice with ensure_writeable(self, min_writable) {
-  ignore(self)
-  ignore(min_writable)
-  // Do nothing: slice cannot expand.
+pub impl ByteSlice for BufferSlice with array(self) {
+  None
 }
