@@ -65,6 +65,10 @@ pub(open) trait TcpSocket: Socket {
     &TcpConnection,
     NetworkError,
   ]
+  // gracefully close
+  async close(Self) -> Unit
+  // RST
+  async close_immediately(Self) -> Unit
 }
 
 ///|
