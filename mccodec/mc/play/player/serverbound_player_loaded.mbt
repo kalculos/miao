@@ -1,24 +1,24 @@
 ///|
 /// Player Loaded packet (0x2B)
 /// Indicates player has loaded
-struct PlayerLoadedC2S {}
+pub(all) struct PlayerLoadedC2S {}
 
 ///|
-impl @mc.Packet for PlayerLoadedC2S with clientbound(self) {
+pub impl @mc.Packet for PlayerLoadedC2S with clientbound(_) {
   false
 }
 
 ///|
-impl @mc.Packet for PlayerLoadedC2S with serialize(
-  self,
-  buf : &@buffer.Buffer,
+pub impl @mc.Packet for PlayerLoadedC2S with serialize(
+  _,
+  _ : &@buffer.Buffer,
 ) {
   // No fields to serialize
 }
 
 ///|
-impl @mc.Packet for PlayerLoadedC2S with deserialize(
-  buf : &@buffer.Buffer,
+pub impl @mc.Packet for PlayerLoadedC2S with deserialize(
+  _ : &@buffer.Buffer,
 ) {
   PlayerLoadedC2S::{  }
 }

@@ -1,18 +1,18 @@
 ///|
 /// Resource Pack Response (play) packet (0x30)
 /// Response to resource pack request
-struct ResourcePackResponsePlayC2S {
+pub(all) struct ResourcePackResponsePlayC2S {
   uuid : @uuid.UUID // Resource pack UUID
   result : Int // Result (0=accepted, 1=declined, 2=failed_download, 3=accepted_download_pack, 4=invalid_url, 5=failed_reload, 6=discarded)
 }
 
 ///|
-impl @mc.Packet for ResourcePackResponsePlayC2S with clientbound(self) {
+pub impl @mc.Packet for ResourcePackResponsePlayC2S with clientbound(_) {
   false
 }
 
 ///|
-impl @mc.Packet for ResourcePackResponsePlayC2S with serialize(
+pub impl @mc.Packet for ResourcePackResponsePlayC2S with serialize(
   self,
   buf : &@buffer.Buffer,
 ) {
@@ -21,7 +21,7 @@ impl @mc.Packet for ResourcePackResponsePlayC2S with serialize(
 }
 
 ///|
-impl @mc.Packet for ResourcePackResponsePlayC2S with deserialize(
+pub impl @mc.Packet for ResourcePackResponsePlayC2S with deserialize(
   buf : &@buffer.Buffer,
 ) {
   let uuid = @types.read_uuid(buf)

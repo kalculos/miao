@@ -1,17 +1,17 @@
 ///|
 /// Status Response packet (0x00)
 /// Sent in response to Status Request, contains server information as JSON
-struct StatusResponseS2C {
+pub(all) struct StatusResponseS2C {
   json_response : Json
 }
 
 ///|
-impl @mc.Packet for StatusResponseS2C with clientbound(self) {
+pub impl @mc.Packet for StatusResponseS2C with clientbound(_) {
   true
 }
 
 ///|
-impl @mc.Packet for StatusResponseS2C with serialize(
+pub impl @mc.Packet for StatusResponseS2C with serialize(
   self,
   buf : &@buffer.Buffer,
 ) {
@@ -19,7 +19,7 @@ impl @mc.Packet for StatusResponseS2C with serialize(
 }
 
 ///|
-impl @mc.Packet for StatusResponseS2C with deserialize(buf : &@buffer.Buffer) {
+pub impl @mc.Packet for StatusResponseS2C with deserialize(buf : &@buffer.Buffer) {
   let json_str = @types.read_string(buf)
   { json_response: @json.parse(json_str) }
 }

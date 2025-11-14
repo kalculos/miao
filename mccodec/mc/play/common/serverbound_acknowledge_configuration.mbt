@@ -1,24 +1,24 @@
 ///|
 /// Acknowledge Configuration packet (0x0F)
 /// Acknowledges configuration completion
-struct AcknowledgeConfigurationC2S {}
+pub(all) struct AcknowledgeConfigurationC2S {}
 
 ///|
-impl @mc.Packet for AcknowledgeConfigurationC2S with clientbound(self) {
+pub impl @mc.Packet for AcknowledgeConfigurationC2S with clientbound(_) {
   false
 }
 
 ///|
-impl @mc.Packet for AcknowledgeConfigurationC2S with serialize(
-  self,
-  buf : &@buffer.Buffer,
+pub impl @mc.Packet for AcknowledgeConfigurationC2S with serialize(
+  _,
+  _ : &@buffer.Buffer,
 ) {
   // No fields to serialize
 }
 
 ///|
-impl @mc.Packet for AcknowledgeConfigurationC2S with deserialize(
-  buf : &@buffer.Buffer,
+pub impl @mc.Packet for AcknowledgeConfigurationC2S with deserialize(
+  _ : &@buffer.Buffer,
 ) {
   AcknowledgeConfigurationC2S::{  }
 }

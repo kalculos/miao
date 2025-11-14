@@ -1,17 +1,17 @@
 ///|
 /// Teleport To Entity packet (0x3D)
 /// Teleports to entity (spectator mode)
-struct TeleportToEntityC2S {
+pub(all) struct TeleportToEntityC2S {
   target_player : @uuid.UUID // Target player UUID
 }
 
 ///|
-impl @mc.Packet for TeleportToEntityC2S with clientbound(self) {
+pub impl @mc.Packet for TeleportToEntityC2S with clientbound(_) {
   false
 }
 
 ///|
-impl @mc.Packet for TeleportToEntityC2S with serialize(
+pub impl @mc.Packet for TeleportToEntityC2S with serialize(
   self,
   buf : &@buffer.Buffer,
 ) {
@@ -19,7 +19,7 @@ impl @mc.Packet for TeleportToEntityC2S with serialize(
 }
 
 ///|
-impl @mc.Packet for TeleportToEntityC2S with deserialize(
+pub impl @mc.Packet for TeleportToEntityC2S with deserialize(
   buf : &@buffer.Buffer,
 ) {
   { target_player: @types.read_uuid(buf) }

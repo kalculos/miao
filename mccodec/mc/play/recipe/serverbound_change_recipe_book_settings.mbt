@@ -1,19 +1,19 @@
 ///|
 /// Change Recipe Book Settings packet (0x2D)
 /// Changes recipe book settings
-struct ChangeRecipeBookSettingsC2S {
+pub(all) struct ChangeRecipeBookSettingsC2S {
   book_id : Int // Book type, enum(0=crafting, 1=furnace, 2=blast_furnace, 3=smoker)
   book_open : Bool // Whether book is open
   filter_active : Bool // Whether filter is active
 }
 
 ///|
-impl @mc.Packet for ChangeRecipeBookSettingsC2S with clientbound(self) {
+pub impl @mc.Packet for ChangeRecipeBookSettingsC2S with clientbound(_) {
   false
 }
 
 ///|
-impl @mc.Packet for ChangeRecipeBookSettingsC2S with serialize(
+pub impl @mc.Packet for ChangeRecipeBookSettingsC2S with serialize(
   self,
   buf : &@buffer.Buffer,
 ) {
@@ -23,7 +23,7 @@ impl @mc.Packet for ChangeRecipeBookSettingsC2S with serialize(
 }
 
 ///|
-impl @mc.Packet for ChangeRecipeBookSettingsC2S with deserialize(
+pub impl @mc.Packet for ChangeRecipeBookSettingsC2S with deserialize(
   buf : &@buffer.Buffer,
 ) {
   let book_id = @types.read_varint(buf)

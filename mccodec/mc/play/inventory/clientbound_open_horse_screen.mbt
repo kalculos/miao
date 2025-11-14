@@ -1,19 +1,19 @@
 ///|
 /// Open Horse Screen packet (0x23)
 /// Opens horse inventory
-struct OpenHorseScreenS2C {
+pub(all) struct OpenHorseScreenS2C {
   window_id : Int // Window ID
   slot_count : Int // Number of slots
   entity_id : Int // Horse entity ID
 }
 
 ///|
-impl @mc.Packet for OpenHorseScreenS2C with clientbound(self) {
+pub impl @mc.Packet for OpenHorseScreenS2C with clientbound(_) {
   true
 }
 
 ///|
-impl @mc.Packet for OpenHorseScreenS2C with serialize(
+pub impl @mc.Packet for OpenHorseScreenS2C with serialize(
   self,
   buf : &@buffer.Buffer,
 ) {
@@ -23,7 +23,7 @@ impl @mc.Packet for OpenHorseScreenS2C with serialize(
 }
 
 ///|
-impl @mc.Packet for OpenHorseScreenS2C with deserialize(buf : &@buffer.Buffer) {
+pub impl @mc.Packet for OpenHorseScreenS2C with deserialize(buf : &@buffer.Buffer) {
   let window_id = @types.read_varint(buf)
   let slot_count = @types.read_varint(buf)
   let entity_id = buf.read_int()

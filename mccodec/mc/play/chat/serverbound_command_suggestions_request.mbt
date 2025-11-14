@@ -1,18 +1,18 @@
 ///|
 /// Command Suggestions Request packet (0x0E)
 /// Requests tab completion
-struct CommandSuggestionsRequestC2S {
+pub(all) struct CommandSuggestionsRequestC2S {
   transaction_id : Int // Transaction ID
   text : String // Command text to complete
 }
 
 ///|
-impl @mc.Packet for CommandSuggestionsRequestC2S with clientbound(self) {
+pub impl @mc.Packet for CommandSuggestionsRequestC2S with clientbound(_) {
   false
 }
 
 ///|
-impl @mc.Packet for CommandSuggestionsRequestC2S with serialize(
+pub impl @mc.Packet for CommandSuggestionsRequestC2S with serialize(
   self,
   buf : &@buffer.Buffer,
 ) {
@@ -21,7 +21,7 @@ impl @mc.Packet for CommandSuggestionsRequestC2S with serialize(
 }
 
 ///|
-impl @mc.Packet for CommandSuggestionsRequestC2S with deserialize(
+pub impl @mc.Packet for CommandSuggestionsRequestC2S with deserialize(
   buf : &@buffer.Buffer,
 ) {
   let transaction_id = @types.read_varint(buf)

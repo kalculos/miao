@@ -1,19 +1,19 @@
 ///|
 /// Change Container Slot State packet (0x13)
 /// Changes container slot state
-struct ChangeContainerSlotStateC2S {
+pub(all) struct ChangeContainerSlotStateC2S {
   slot_id : Int // Slot ID
   window_id : Int // Window ID
   state : Bool // New state
 }
 
 ///|
-impl @mc.Packet for ChangeContainerSlotStateC2S with clientbound(self) {
+pub impl @mc.Packet for ChangeContainerSlotStateC2S with clientbound(_) {
   false
 }
 
 ///|
-impl @mc.Packet for ChangeContainerSlotStateC2S with serialize(
+pub impl @mc.Packet for ChangeContainerSlotStateC2S with serialize(
   self,
   buf : &@buffer.Buffer,
 ) {
@@ -23,7 +23,7 @@ impl @mc.Packet for ChangeContainerSlotStateC2S with serialize(
 }
 
 ///|
-impl @mc.Packet for ChangeContainerSlotStateC2S with deserialize(
+pub impl @mc.Packet for ChangeContainerSlotStateC2S with deserialize(
   buf : &@buffer.Buffer,
 ) {
   let slot_id = @types.read_varint(buf)

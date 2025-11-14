@@ -1,18 +1,18 @@
 ///|
 /// Cookie Response (configuration) packet (0x01)
 /// Response to cookie request from server
-struct CookieResponseConfigC2S {
+pub(all) struct CookieResponseConfigC2S {
   key : @types.Identifier // Cookie identifier
   payload : FixedArray[Byte]? // Cookie data (up to 5 kiB)
 }
 
 ///|
-impl @mc.Packet for CookieResponseConfigC2S with clientbound(self) {
+pub impl @mc.Packet for CookieResponseConfigC2S with clientbound(_) {
   false
 }
 
 ///|
-impl @mc.Packet for CookieResponseConfigC2S with serialize(
+pub impl @mc.Packet for CookieResponseConfigC2S with serialize(
   self,
   buf : &@buffer.Buffer,
 ) {
@@ -25,7 +25,7 @@ impl @mc.Packet for CookieResponseConfigC2S with serialize(
 }
 
 ///|
-impl @mc.Packet for CookieResponseConfigC2S with deserialize(
+pub impl @mc.Packet for CookieResponseConfigC2S with deserialize(
   buf : &@buffer.Buffer,
 ) {
   let key = @types.read_identifier(buf)

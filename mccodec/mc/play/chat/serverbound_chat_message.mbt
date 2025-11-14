@@ -1,7 +1,7 @@
 ///|
 /// Chat Message packet (0x08)
 /// Sends chat message
-struct ChatMessageC2S {
+pub(all) struct ChatMessageC2S {
   message : String // Chat message content
   timestamp : Int64 // Message timestamp
   salt : Int64 // Random salt
@@ -12,12 +12,12 @@ struct ChatMessageC2S {
 }
 
 ///|
-impl @mc.Packet for ChatMessageC2S with clientbound(self) {
+pub impl @mc.Packet for ChatMessageC2S with clientbound(_) {
   false
 }
 
 ///|
-impl @mc.Packet for ChatMessageC2S with serialize(self, buf : &@buffer.Buffer) {
+pub impl @mc.Packet for ChatMessageC2S with serialize(self, buf : &@buffer.Buffer) {
   @types.write_string(buf, self.message)
   buf.write_int64(self.timestamp)
   buf.write_int64(self.salt)
@@ -30,7 +30,7 @@ impl @mc.Packet for ChatMessageC2S with serialize(self, buf : &@buffer.Buffer) {
 }
 
 ///|
-impl @mc.Packet for ChatMessageC2S with deserialize(buf : &@buffer.Buffer) {
+pub impl @mc.Packet for ChatMessageC2S with deserialize(buf : &@buffer.Buffer) {
   let message = @types.read_string(buf)
   let timestamp = buf.read_int64()
   let salt = buf.read_int64()

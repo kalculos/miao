@@ -1,18 +1,18 @@
 ///|
 /// Login Plugin Response packet (0x02)
 /// Response to login plugin request
-struct LoginPluginResponseC2S {
+pub(all) struct LoginPluginResponseC2S {
   message_id : Int // Should match ID from server
   data : FixedArray[Byte]? // Plugin data if client understood the request
 }
 
 ///|
-impl @mc.Packet for LoginPluginResponseC2S with clientbound(self) {
+pub impl @mc.Packet for LoginPluginResponseC2S with clientbound(_) {
   false
 }
 
 ///|
-impl @mc.Packet for LoginPluginResponseC2S with serialize(
+pub impl @mc.Packet for LoginPluginResponseC2S with serialize(
   self,
   buf : &@buffer.Buffer,
 ) {
@@ -21,7 +21,7 @@ impl @mc.Packet for LoginPluginResponseC2S with serialize(
 }
 
 ///|
-impl @mc.Packet for LoginPluginResponseC2S with deserialize(
+pub impl @mc.Packet for LoginPluginResponseC2S with deserialize(
   buf : &@buffer.Buffer,
 ) {
   let message_id = @types.read_varint(buf)

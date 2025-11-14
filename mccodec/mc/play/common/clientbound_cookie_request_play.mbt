@@ -1,17 +1,17 @@
 ///|
 /// Cookie Request (play) packet (0x15)
 /// Requests a stored cookie
-struct CookieRequestPlayS2C {
+pub(all) struct CookieRequestPlayS2C {
   key : @types.Identifier // Cookie identifier
 }
 
 ///|
-impl @mc.Packet for CookieRequestPlayS2C with clientbound(self) {
+pub impl @mc.Packet for CookieRequestPlayS2C with clientbound(_) {
   true
 }
 
 ///|
-impl @mc.Packet for CookieRequestPlayS2C with serialize(
+pub impl @mc.Packet for CookieRequestPlayS2C with serialize(
   self,
   buf : &@buffer.Buffer,
 ) raise {
@@ -19,7 +19,7 @@ impl @mc.Packet for CookieRequestPlayS2C with serialize(
 }
 
 ///|
-impl @mc.Packet for CookieRequestPlayS2C with deserialize(
+pub impl @mc.Packet for CookieRequestPlayS2C with deserialize(
   buf : &@buffer.Buffer,
 ) raise {
   let key = @types.read_identifier(buf)

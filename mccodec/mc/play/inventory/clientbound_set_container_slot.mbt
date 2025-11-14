@@ -1,7 +1,7 @@
 ///|
 /// Set Container Slot packet (0x14)
 /// Updates single container slot
-struct SetContainerSlotS2C {
+pub(all) struct SetContainerSlotS2C {
   window_id : Int // Window ID
   state_id : Int // State ID
   slot : Int16 // Slot index
@@ -9,12 +9,12 @@ struct SetContainerSlotS2C {
 }
 
 ///|
-impl @mc.Packet for SetContainerSlotS2C with clientbound(self) {
+pub impl @mc.Packet for SetContainerSlotS2C with clientbound(_) {
   true
 }
 
 ///|
-impl @mc.Packet for SetContainerSlotS2C with serialize(
+pub impl @mc.Packet for SetContainerSlotS2C with serialize(
   self,
   buf : &@buffer.Buffer,
 ) {
@@ -25,7 +25,7 @@ impl @mc.Packet for SetContainerSlotS2C with serialize(
 }
 
 ///|
-impl @mc.Packet for SetContainerSlotS2C with deserialize(buf : &@buffer.Buffer) {
+pub impl @mc.Packet for SetContainerSlotS2C with deserialize(buf : &@buffer.Buffer) {
   let window_id = @types.read_varint(buf)
   let state_id = @types.read_varint(buf)
   let slot = buf.read_int16()

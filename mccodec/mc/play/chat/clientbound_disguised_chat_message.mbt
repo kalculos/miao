@@ -1,18 +1,18 @@
 ///|
 /// Disguised Chat Message packet (0x1D)
 /// Chat message that appears as system message
-struct DisguisedChatMessageS2C {
+pub(all) struct DisguisedChatMessageS2C {
   message : String // Chat message content, TODO: Text Component
   chat_type : @types.Holder[@types.ChatType] // Chat type ID
   sender_name : String // Display name of sender, TODO: Text Component
   target_name : String? // Target name (for targeted messages), TODO: Text Component
 }
 ///|
-impl @mc.Packet for DisguisedChatMessageS2C with clientbound(self) {
+pub impl @mc.Packet for DisguisedChatMessageS2C with clientbound(_) {
   true
 }
 
-impl @mc.Packet for DisguisedChatMessageS2C with serialize(
+pub impl @mc.Packet for DisguisedChatMessageS2C with serialize(
   self,
   buf : &@buffer.Buffer,
 ) {
@@ -22,7 +22,7 @@ impl @mc.Packet for DisguisedChatMessageS2C with serialize(
   @types.write_optional(buf, self.target_name, @types.write_string)
 }
 
-impl @mc.Packet for DisguisedChatMessageS2C with deserialize(
+pub impl @mc.Packet for DisguisedChatMessageS2C with deserialize(
   buf : &@buffer.Buffer,
 ) {
   let message = @types.read_string(buf)

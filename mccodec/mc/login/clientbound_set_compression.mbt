@@ -1,17 +1,17 @@
 ///|
 /// Set Compression packet (0x03)
 /// Enables compression for all following packets (optional)
-struct SetCompressionS2C {
+pub(all) struct SetCompressionS2C {
   threshold : Int // Maximum packet size before compression
 }
 
 ///|
-impl @mc.Packet for SetCompressionS2C with clientbound(self) {
+pub impl @mc.Packet for SetCompressionS2C with clientbound(_) {
   true
 }
 
 ///|
-impl @mc.Packet for SetCompressionS2C with serialize(
+pub impl @mc.Packet for SetCompressionS2C with serialize(
   self,
   buf : &@buffer.Buffer,
 ) {
@@ -19,7 +19,7 @@ impl @mc.Packet for SetCompressionS2C with serialize(
 }
 
 ///|
-impl @mc.Packet for SetCompressionS2C with deserialize(buf : &@buffer.Buffer) {
+pub impl @mc.Packet for SetCompressionS2C with deserialize(buf : &@buffer.Buffer) {
   let threshold = @types.read_varint(buf)
   { threshold, }
 }

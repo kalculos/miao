@@ -1,7 +1,7 @@
 ///|
 /// Teleport Entity packet (0x1F)
 /// Teleports entity to position
-struct TeleportEntityS2C {
+pub(all) struct TeleportEntityS2C {
   entity_id : Int // Entity ID
   x : Double // X position
   y : Double // Y position
@@ -11,6 +11,6 @@ struct TeleportEntityS2C {
   on_ground : Bool // Whether on ground
 }
 ///|
-impl @mc.Packet for TeleportEntityS2C with clientbound(self) {
+pub impl @mc.Packet for TeleportEntityS2C with clientbound(_) {
   true
 }

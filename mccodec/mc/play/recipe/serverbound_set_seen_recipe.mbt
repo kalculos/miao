@@ -1,17 +1,17 @@
 ///|
 /// Set Seen Recipe packet (0x2E)
 /// Marks recipe as seen
-struct SetSeenRecipeC2S {
+pub(all) struct SetSeenRecipeC2S {
   recipe_id : Int // Recipe identifier
 }
 
 ///|
-impl @mc.Packet for SetSeenRecipeC2S with clientbound(self) {
+pub impl @mc.Packet for SetSeenRecipeC2S with clientbound(_) {
   false
 }
 
 ///|
-impl @mc.Packet for SetSeenRecipeC2S with serialize(
+pub impl @mc.Packet for SetSeenRecipeC2S with serialize(
   self,
   buf : &@buffer.Buffer,
 ) {
@@ -19,7 +19,7 @@ impl @mc.Packet for SetSeenRecipeC2S with serialize(
 }
 
 ///|
-impl @mc.Packet for SetSeenRecipeC2S with deserialize(
+pub impl @mc.Packet for SetSeenRecipeC2S with deserialize(
   buf : &@buffer.Buffer,
 ) {
   { recipe_id: @types.read_varint(buf) }

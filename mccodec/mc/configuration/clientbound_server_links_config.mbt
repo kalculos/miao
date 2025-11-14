@@ -56,17 +56,17 @@ struct ServerLink {
 ///|
 /// Server Links (configuration) packet (0x10)
 /// Contains server links for pause menu
-struct ServerLinksConfigS2C {
+pub(all) struct ServerLinksConfigS2C {
   links : FixedArray[ServerLink]
 }
 
 ///|
-impl @mc.Packet for ServerLinksConfigS2C with clientbound(self) {
+pub impl @mc.Packet for ServerLinksConfigS2C with clientbound(_) {
   true
 }
 
 ///|
-impl @mc.Packet for ServerLinksConfigS2C with serialize(
+pub impl @mc.Packet for ServerLinksConfigS2C with serialize(
   self,
   buf : &@buffer.Buffer,
 ) {
@@ -83,7 +83,7 @@ impl @mc.Packet for ServerLinksConfigS2C with serialize(
 }
 
 ///|
-impl @mc.Packet for ServerLinksConfigS2C with deserialize(
+pub impl @mc.Packet for ServerLinksConfigS2C with deserialize(
   buf : &@buffer.Buffer,
 ) {
   let links = @types.read_prefix_array(buf, b => {

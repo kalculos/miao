@@ -1,19 +1,19 @@
 ///|
 /// Player Command packet (0x29)
 /// Player entity command
-struct PlayerCommandC2S {
+pub(all) struct PlayerCommandC2S {
   entity_id : Int // Entity ID
   action_id : Int // Action enum(0=crouch, 1=uncrouch, 2=leave_bed, 3=start_sprinting, 4=stop_sprinting, 5=start_horse_jump, 6=stop_horse_jump, 7=open_vehicle_inventory, 8=start_flying_elytra)
   jump_boost : Int // Jump boost (for horse jumping)
 }
 
 ///|
-impl @mc.Packet for PlayerCommandC2S with clientbound(self) {
+pub impl @mc.Packet for PlayerCommandC2S with clientbound(_) {
   false
 }
 
 ///|
-impl @mc.Packet for PlayerCommandC2S with serialize(
+pub impl @mc.Packet for PlayerCommandC2S with serialize(
   self,
   buf : &@buffer.Buffer,
 ) {
@@ -23,7 +23,7 @@ impl @mc.Packet for PlayerCommandC2S with serialize(
 }
 
 ///|
-impl @mc.Packet for PlayerCommandC2S with deserialize(
+pub impl @mc.Packet for PlayerCommandC2S with deserialize(
   buf : &@buffer.Buffer,
 ) {
   let entity_id = @types.read_varint(buf)

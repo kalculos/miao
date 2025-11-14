@@ -1,7 +1,7 @@
 ///|
 /// Move Vehicle (serverbound) packet (0x21)
 /// Moves vehicle entity
-struct MoveVehicleC2S {
+pub(all) struct MoveVehicleC2S {
   x : Double // X position
   y : Double // Y position
   z : Double // Z position
@@ -11,12 +11,12 @@ struct MoveVehicleC2S {
 }
 
 ///|
-impl @mc.Packet for MoveVehicleC2S with clientbound(self) {
+pub impl @mc.Packet for MoveVehicleC2S with clientbound(_) {
   false
 }
 
 ///|
-impl @mc.Packet for MoveVehicleC2S with serialize(
+pub impl @mc.Packet for MoveVehicleC2S with serialize(
   self,
   buf : &@buffer.Buffer,
 ) {
@@ -29,7 +29,7 @@ impl @mc.Packet for MoveVehicleC2S with serialize(
 }
 
 ///|
-impl @mc.Packet for MoveVehicleC2S with deserialize(
+pub impl @mc.Packet for MoveVehicleC2S with deserialize(
   buf : &@buffer.Buffer,
 ) {
   let x = buf.read_double()

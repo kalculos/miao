@@ -1,7 +1,7 @@
 ///|
 /// Boss Bar packet (0x09)
 /// Manages boss bars
-struct BossBarS2C {
+pub(all) struct BossBarS2C {
   uuid : String // Boss bar UUID
   action : Int // Action type (0=add, 1=remove, 2=update_health, etc)
   title : String? // Boss bar title (for add/update_title)
@@ -11,6 +11,6 @@ struct BossBarS2C {
   flags : Byte? // Flags (for add/update_flags)
 }
 ///|
-impl @mc.Packet for BossBarS2C with clientbound(self) {
+pub impl @mc.Packet for BossBarS2C with clientbound(_) {
   true
 }

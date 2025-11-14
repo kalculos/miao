@@ -1,11 +1,11 @@
 ///|
 /// Place Ghost Recipe packet (0x38)
 /// Places ghost recipe items
-struct PlaceGhostRecipeS2C {
+pub(all) struct PlaceGhostRecipeS2C {
   window_id : Byte // Window ID
   recipe : String // Recipe identifier
 }
 ///|
-impl @mc.Packet for PlaceGhostRecipeS2C with clientbound(self) {
+pub impl @mc.Packet for PlaceGhostRecipeS2C with clientbound(_) {
   true
 }

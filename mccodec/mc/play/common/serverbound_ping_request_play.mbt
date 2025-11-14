@@ -1,17 +1,17 @@
 ///|
 /// Ping Request (play) packet (0x25)
 /// Sends ping to server
-struct PingRequestPlayC2S {
+pub(all) struct PingRequestPlayC2S {
   payload : Int64 // Ping payload
 }
 
 ///|
-impl @mc.Packet for PingRequestPlayC2S with clientbound(self) {
+pub impl @mc.Packet for PingRequestPlayC2S with clientbound(_) {
   false
 }
 
 ///|
-impl @mc.Packet for PingRequestPlayC2S with serialize(
+pub impl @mc.Packet for PingRequestPlayC2S with serialize(
   self,
   buf : &@buffer.Buffer,
 ) {
@@ -19,7 +19,7 @@ impl @mc.Packet for PingRequestPlayC2S with serialize(
 }
 
 ///|
-impl @mc.Packet for PingRequestPlayC2S with deserialize(
+pub impl @mc.Packet for PingRequestPlayC2S with deserialize(
   buf : &@buffer.Buffer,
 ) {
   { payload: buf.read_int64() }

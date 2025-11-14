@@ -1,19 +1,19 @@
 ///|
 /// Edit Book packet (0x17)
 /// Edits book content
-struct EditBookC2S {
+pub(all) struct EditBookC2S {
   slot : Int // Slot containing book
   entries : FixedArray[String] // Book page contents
   title : String? // Book title (if signing)
 }
 
 ///|
-impl @mc.Packet for EditBookC2S with clientbound(self) {
+pub impl @mc.Packet for EditBookC2S with clientbound(_) {
   false
 }
 
 ///|
-impl @mc.Packet for EditBookC2S with serialize(
+pub impl @mc.Packet for EditBookC2S with serialize(
   self,
   buf : &@buffer.Buffer,
 ) {
@@ -23,7 +23,7 @@ impl @mc.Packet for EditBookC2S with serialize(
 }
 
 ///|
-impl @mc.Packet for EditBookC2S with deserialize(
+pub impl @mc.Packet for EditBookC2S with deserialize(
   buf : &@buffer.Buffer,
 ) {
   let slot = @types.read_varint(buf)

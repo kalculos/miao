@@ -1,17 +1,17 @@
 ///|
 /// Acknowledge Message packet (0x05)
 /// Acknowledges chat message receipt
-struct AcknowledgeMessageC2S {
+pub(all) struct AcknowledgeMessageC2S {
   message_count : Int // Number of messages acknowledged
 }
 
 ///|
-impl @mc.Packet for AcknowledgeMessageC2S with clientbound(self) {
+pub impl @mc.Packet for AcknowledgeMessageC2S with clientbound(_) {
   false
 }
 
 ///|
-impl @mc.Packet for AcknowledgeMessageC2S with serialize(
+pub impl @mc.Packet for AcknowledgeMessageC2S with serialize(
   self,
   buf : &@buffer.Buffer,
 ) {
@@ -19,7 +19,7 @@ impl @mc.Packet for AcknowledgeMessageC2S with serialize(
 }
 
 ///|
-impl @mc.Packet for AcknowledgeMessageC2S with deserialize(
+pub impl @mc.Packet for AcknowledgeMessageC2S with deserialize(
   buf : &@buffer.Buffer,
 ) {
   { message_count: @types.read_varint(buf) }

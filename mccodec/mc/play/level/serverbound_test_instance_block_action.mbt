@@ -1,7 +1,7 @@
 ///|
 /// Test Instance Block Action packet (0x3E)
 /// Performs test block action
-struct TestInstanceBlockActionC2S {
+pub(all) struct TestInstanceBlockActionC2S {
   location : @types.Position // Block position
   action : Int // Test action type enum(0=init, 1=query, 2=set, 3=reset, 4=save, 5=export, 6=run)
   test_id: @types.Identifier // Test identifier
@@ -15,12 +15,12 @@ struct TestInstanceBlockActionC2S {
 }
 
 ///|
-impl @mc.Packet for TestInstanceBlockActionC2S with clientbound(self) {
+pub impl @mc.Packet for TestInstanceBlockActionC2S with clientbound(_) {
   false
 }
 
 ///|
-impl @mc.Packet for TestInstanceBlockActionC2S with serialize(
+pub impl @mc.Packet for TestInstanceBlockActionC2S with serialize(
   self,
   buf : &@buffer.Buffer,
 ) {
@@ -38,7 +38,7 @@ impl @mc.Packet for TestInstanceBlockActionC2S with serialize(
 }
 
 ///|
-impl @mc.Packet for TestInstanceBlockActionC2S with deserialize(
+pub impl @mc.Packet for TestInstanceBlockActionC2S with deserialize(
   buf : &@buffer.Buffer,
 ) {
   let location = @types.read_position(buf)

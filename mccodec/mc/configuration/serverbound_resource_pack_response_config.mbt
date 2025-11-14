@@ -1,18 +1,18 @@
 ///|
 /// Resource Pack Response (configuration) packet (0x06)
 /// Client's response to resource pack requests
-struct ResourcePackResponseConfigC2S {
+pub(all) struct ResourcePackResponseConfigC2S {
   uuid : @uuid.UUID // UUID of the resource pack
   result : Int // Result ID (0-7, see protocol docs), TODO: enum
 }
 
 ///|
-impl @mc.Packet for ResourcePackResponseConfigC2S with clientbound(self) {
+pub impl @mc.Packet for ResourcePackResponseConfigC2S with clientbound(_) {
   false
 }
 
 ///|
-impl @mc.Packet for ResourcePackResponseConfigC2S with serialize(
+pub impl @mc.Packet for ResourcePackResponseConfigC2S with serialize(
   self,
   buf : &@buffer.Buffer,
 ) {
@@ -21,7 +21,7 @@ impl @mc.Packet for ResourcePackResponseConfigC2S with serialize(
 }
 
 ///|
-impl @mc.Packet for ResourcePackResponseConfigC2S with deserialize(
+pub impl @mc.Packet for ResourcePackResponseConfigC2S with deserialize(
   buf : &@buffer.Buffer,
 ) {
   let uuid = @types.read_uuid(buf)

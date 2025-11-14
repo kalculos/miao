@@ -1,7 +1,7 @@
 ///|
 /// Program Structure Block packet (0x39)
 /// Programs structure block
-struct ProgramStructureBlockC2S {
+pub(all) struct ProgramStructureBlockC2S {
   location : @types.Position // Structure block position
   action : Int // Action type, TODO: enum
   mode : Int // Structure mode, TODO: enum
@@ -21,12 +21,12 @@ struct ProgramStructureBlockC2S {
 }
 
 ///|
-impl @mc.Packet for ProgramStructureBlockC2S with clientbound(self) {
+pub impl @mc.Packet for ProgramStructureBlockC2S with clientbound(_) {
   false
 }
 
 ///|
-impl @mc.Packet for ProgramStructureBlockC2S with serialize(
+pub impl @mc.Packet for ProgramStructureBlockC2S with serialize(
   self,
   buf : &@buffer.Buffer,
 ) {
@@ -49,7 +49,7 @@ impl @mc.Packet for ProgramStructureBlockC2S with serialize(
 }
 
 ///|
-impl @mc.Packet for ProgramStructureBlockC2S with deserialize(
+pub impl @mc.Packet for ProgramStructureBlockC2S with deserialize(
   buf : &@buffer.Buffer,
 ) {
   let location = @types.read_position(buf)

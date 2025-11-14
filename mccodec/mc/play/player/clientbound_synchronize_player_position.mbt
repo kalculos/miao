@@ -1,7 +1,7 @@
 ///|
 /// Synchronize Player Position packet (0x41)
 /// Synchronizes player position
-struct SynchronizePlayerPositionS2C {
+pub(all) struct SynchronizePlayerPositionS2C {
   x : Double // X position
   y : Double // Y position
   z : Double // Z position
@@ -11,6 +11,6 @@ struct SynchronizePlayerPositionS2C {
   teleport_id : Int // Teleport ID
 }
 ///|
-impl @mc.Packet for SynchronizePlayerPositionS2C with clientbound(self) {
+pub impl @mc.Packet for SynchronizePlayerPositionS2C with clientbound(_) {
   true
 }

@@ -1,7 +1,7 @@
 ///|
 /// Entity Effect packet (0x7D)
 /// Applies entity effect
-struct EntityEffectS2C {
+pub(all) struct EntityEffectS2C {
   entity_id : Int // Entity ID
   effect_id : Int // Effect ID
   amplifier : Int // Effect amplifier
@@ -10,6 +10,6 @@ struct EntityEffectS2C {
   factor_data : String? // Factor calculation data
 }
 ///|
-impl @mc.Packet for EntityEffectS2C with clientbound(self) {
+pub impl @mc.Packet for EntityEffectS2C with clientbound(_) {
   true
 }

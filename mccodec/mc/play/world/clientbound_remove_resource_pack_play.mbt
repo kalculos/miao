@@ -1,10 +1,10 @@
 ///|
 /// Remove Resource Pack (play) packet (0x49)
 /// Removes resource pack
-struct RemoveResourcePackPlayS2C {
+pub(all) struct RemoveResourcePackPlayS2C {
   uuid : String? // Pack UUID (null for all)
 }
 ///|
-impl @mc.Packet for RemoveResourcePackPlayS2C with clientbound(self) {
+pub impl @mc.Packet for RemoveResourcePackPlayS2C with clientbound(_) {
   true
 }

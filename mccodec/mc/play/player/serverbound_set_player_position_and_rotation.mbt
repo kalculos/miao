@@ -1,7 +1,7 @@
 ///|
 /// Set Player Position and Rotation packet (0x1E)
 /// Updates player position and look direction
-struct SetPlayerPositionAndRotationC2S {
+pub(all) struct SetPlayerPositionAndRotationC2S {
   x : Double // X position
   feet_y : Double // Y position at feet
   z : Double // Z position
@@ -11,12 +11,12 @@ struct SetPlayerPositionAndRotationC2S {
 }
 
 ///|
-impl @mc.Packet for SetPlayerPositionAndRotationC2S with clientbound(self) {
+pub impl @mc.Packet for SetPlayerPositionAndRotationC2S with clientbound(_) {
   false
 }
 
 ///|
-impl @mc.Packet for SetPlayerPositionAndRotationC2S with serialize(
+pub impl @mc.Packet for SetPlayerPositionAndRotationC2S with serialize(
   self,
   buf : &@buffer.Buffer,
 ) {
@@ -29,7 +29,7 @@ impl @mc.Packet for SetPlayerPositionAndRotationC2S with serialize(
 }
 
 ///|
-impl @mc.Packet for SetPlayerPositionAndRotationC2S with deserialize(
+pub impl @mc.Packet for SetPlayerPositionAndRotationC2S with deserialize(
   buf : &@buffer.Buffer,
 ) {
   let x = buf.read_double()

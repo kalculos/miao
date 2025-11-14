@@ -1,18 +1,18 @@
 ///|
 /// Update Tags (configuration) packet (0x0D)
 /// Updates tags on client
-struct UpdateTagsConfigS2C {
+pub(all) struct UpdateTagsConfigS2C {
   // Registry -> (Tag name -> Entry IDs)
   tags : Map[@types.Identifier, Map[@types.Identifier, FixedArray[Int]]]
 }
 
 ///|
-impl @mc.Packet for UpdateTagsConfigS2C with clientbound(self) {
+pub impl @mc.Packet for UpdateTagsConfigS2C with clientbound(_) {
   true
 }
 
 ///|
-impl @mc.Packet for UpdateTagsConfigS2C with serialize(
+pub impl @mc.Packet for UpdateTagsConfigS2C with serialize(
   self,
   buf : &@buffer.Buffer,
 ) {
@@ -27,7 +27,7 @@ impl @mc.Packet for UpdateTagsConfigS2C with serialize(
 }
 
 ///|
-impl @mc.Packet for UpdateTagsConfigS2C with deserialize(
+pub impl @mc.Packet for UpdateTagsConfigS2C with deserialize(
   buf : &@buffer.Buffer,
 ) {
   let tags = @types.read_map(buf, @types.read_identifier, buf => @types.read_map(

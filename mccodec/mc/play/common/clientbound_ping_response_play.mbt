@@ -1,17 +1,17 @@
 ///|
 /// Ping Response (play) packet (0x37)
 /// Server ping response
-struct PingResponsePlayS2C {
+pub(all) struct PingResponsePlayS2C {
   payload : Int64 // Ping payload
 }
 
 ///|
-impl @mc.Packet for PingResponsePlayS2C with clientbound(self) {
+pub impl @mc.Packet for PingResponsePlayS2C with clientbound(_) {
   true
 }
 
 ///|
-impl @mc.Packet for PingResponsePlayS2C with serialize(
+pub impl @mc.Packet for PingResponsePlayS2C with serialize(
   self,
   buf : &@buffer.Buffer,
 ) raise {
@@ -19,7 +19,7 @@ impl @mc.Packet for PingResponsePlayS2C with serialize(
 }
 
 ///|
-impl @mc.Packet for PingResponsePlayS2C with deserialize(buf : &@buffer.Buffer) raise {
+pub impl @mc.Packet for PingResponsePlayS2C with deserialize(buf : &@buffer.Buffer) raise {
   let payload = buf.read_int64()
   { payload, }
 }

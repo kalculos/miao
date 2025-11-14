@@ -1,7 +1,7 @@
 ///|
 /// Login (play) packet (0x2B)
 /// Initial login data for play state
-struct LoginPlayS2C {
+pub(all) struct LoginPlayS2C {
   entity_id : Int // Player entity ID
   is_hardcore : Bool // Hardcore mode
   dimensions : Array[String] // Available dimensions
@@ -24,6 +24,6 @@ struct LoginPlayS2C {
   enforces_secure_chat : Bool // Secure chat enforcement
 }
 ///|
-impl @mc.Packet for LoginPlayS2C with clientbound(self) {
+pub impl @mc.Packet for LoginPlayS2C with clientbound(_) {
   true
 }

@@ -167,7 +167,7 @@ pub fn[T : Eq + Hash, U] write_map(
   key_writer : (&@buffer.Buffer, T) -> Unit,
   value_writer : (&@buffer.Buffer, U) -> Unit,
 ) -> Unit {
-  write_varint(buf, map.size())
+  write_varint(buf, map.length())
   map.each((key, value) => {
     key_writer(buf, key)
     value_writer(buf, value)

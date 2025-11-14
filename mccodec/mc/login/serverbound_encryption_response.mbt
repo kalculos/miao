@@ -1,18 +1,18 @@
 ///|
 /// Encryption Response packet (0x01)
 /// Client's response to encryption request
-struct EncryptionResponseC2S {
+pub(all) struct EncryptionResponseC2S {
   shared_secret : FixedArray[Byte] // Shared secret encrypted with server's public key
   verify_token : FixedArray[Byte] // Verify token encrypted with same public key
 }
 
 ///|
-impl @mc.Packet for EncryptionResponseC2S with clientbound(self) {
+pub impl @mc.Packet for EncryptionResponseC2S with clientbound(_) {
   false
 }
 
 ///|
-impl @mc.Packet for EncryptionResponseC2S with serialize(
+pub impl @mc.Packet for EncryptionResponseC2S with serialize(
   self,
   buf : &@buffer.Buffer,
 ) {
@@ -29,7 +29,7 @@ impl @mc.Packet for EncryptionResponseC2S with serialize(
 }
 
 ///|
-impl @mc.Packet for EncryptionResponseC2S with deserialize(
+pub impl @mc.Packet for EncryptionResponseC2S with deserialize(
   buf : &@buffer.Buffer,
 ) {
   let shared_secret = @types.read_prefix_array(buf, b => b

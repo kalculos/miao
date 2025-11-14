@@ -1,7 +1,7 @@
 ///|
 /// Sound Effect packet (0x6E)
 /// Plays positioned sound
-struct SoundEffectS2C {
+pub(all) struct SoundEffectS2C {
   sound_id : Int // Sound ID
   sound_category : Int // Sound category
   x : Int // X position (*8)
@@ -12,6 +12,6 @@ struct SoundEffectS2C {
   seed : Int64 // Random seed
 }
 ///|
-impl @mc.Packet for SoundEffectS2C with clientbound(self) {
+pub impl @mc.Packet for SoundEffectS2C with clientbound(_) {
   true
 }

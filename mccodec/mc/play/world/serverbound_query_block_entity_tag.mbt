@@ -1,18 +1,18 @@
 ///|
 /// Query Block Entity Tag packet (0x01)
 /// Queries block entity NBT data
-struct QueryBlockEntityTagC2S {
+pub(all) struct QueryBlockEntityTagC2S {
   transaction_id : Int // Transaction ID
   location : @types.Position // Block position
 }
 
 ///|
-impl @mc.Packet for QueryBlockEntityTagC2S with clientbound(self) {
+pub impl @mc.Packet for QueryBlockEntityTagC2S with clientbound(_) {
   false
 }
 
 ///|
-impl @mc.Packet for QueryBlockEntityTagC2S with serialize(
+pub impl @mc.Packet for QueryBlockEntityTagC2S with serialize(
   self,
   buf : &@buffer.Buffer,
 ) {
@@ -21,7 +21,7 @@ impl @mc.Packet for QueryBlockEntityTagC2S with serialize(
 }
 
 ///|
-impl @mc.Packet for QueryBlockEntityTagC2S with deserialize(
+pub impl @mc.Packet for QueryBlockEntityTagC2S with deserialize(
   buf : &@buffer.Buffer,
 ) {
   let transaction_id = @types.read_varint(buf)

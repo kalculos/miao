@@ -1,17 +1,17 @@
 ///|
 /// Change Game Mode packet (0x04)
 /// Requests game mode change (creative mode only)
-struct ChangeGameModeC2S {
+pub(all) struct ChangeGameModeC2S {
   game_mode : Int // Requested game mode, TODO: enum
 }
 
 ///|
-impl @mc.Packet for ChangeGameModeC2S with clientbound(self) {
+pub impl @mc.Packet for ChangeGameModeC2S with clientbound(_) {
   false
 }
 
 ///|
-impl @mc.Packet for ChangeGameModeC2S with serialize(
+pub impl @mc.Packet for ChangeGameModeC2S with serialize(
   self,
   buf : &@buffer.Buffer,
 ) {
@@ -19,7 +19,7 @@ impl @mc.Packet for ChangeGameModeC2S with serialize(
 }
 
 ///|
-impl @mc.Packet for ChangeGameModeC2S with deserialize(
+pub impl @mc.Packet for ChangeGameModeC2S with deserialize(
   buf : &@buffer.Buffer,
 ) {
   { game_mode: @types.read_varint(buf) }

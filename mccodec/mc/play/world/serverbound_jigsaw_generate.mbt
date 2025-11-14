@@ -1,19 +1,19 @@
 ///|
 /// Jigsaw Generate packet (0x1A)
 /// Generates jigsaw structure
-struct JigsawGenerateC2S {
+pub(all) struct JigsawGenerateC2S {
   location : @types.Position // Jigsaw block position
   levels : Int // Generation levels
   keep_jigsaws : Bool // Keep jigsaw blocks
 }
 
 ///|
-impl @mc.Packet for JigsawGenerateC2S with clientbound(self) {
+pub impl @mc.Packet for JigsawGenerateC2S with clientbound(_) {
   false
 }
 
 ///|
-impl @mc.Packet for JigsawGenerateC2S with serialize(
+pub impl @mc.Packet for JigsawGenerateC2S with serialize(
   self,
   buf : &@buffer.Buffer,
 ) {
@@ -23,7 +23,7 @@ impl @mc.Packet for JigsawGenerateC2S with serialize(
 }
 
 ///|
-impl @mc.Packet for JigsawGenerateC2S with deserialize(
+pub impl @mc.Packet for JigsawGenerateC2S with deserialize(
   buf : &@buffer.Buffer,
 ) {
   let location = @types.read_position(buf);

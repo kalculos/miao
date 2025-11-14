@@ -1,7 +1,7 @@
 ///|
 /// Client Information (play) packet (0x0D)
 /// Updates client settings
-struct ClientInformationPlayC2S {
+pub(all) struct ClientInformationPlayC2S {
   locale : String // Locale (e.g. "en_us")
   view_distance : Byte // Render distance
   chat_mode : Int // Chat visibility enum(0=enabled, 1=commands_only, 2=hidden)
@@ -14,12 +14,12 @@ struct ClientInformationPlayC2S {
 }
 
 ///|
-impl @mc.Packet for ClientInformationPlayC2S with clientbound(self) {
+pub impl @mc.Packet for ClientInformationPlayC2S with clientbound(_) {
   false
 }
 
 ///|
-impl @mc.Packet for ClientInformationPlayC2S with serialize(
+pub impl @mc.Packet for ClientInformationPlayC2S with serialize(
   self,
   buf : &@buffer.Buffer,
 ) {
@@ -35,7 +35,7 @@ impl @mc.Packet for ClientInformationPlayC2S with serialize(
 }
 
 ///|
-impl @mc.Packet for ClientInformationPlayC2S with deserialize(
+pub impl @mc.Packet for ClientInformationPlayC2S with deserialize(
   buf : &@buffer.Buffer,
 ) {
   let locale = @types.read_string(buf)

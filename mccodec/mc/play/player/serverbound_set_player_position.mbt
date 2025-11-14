@@ -1,7 +1,7 @@
 ///|
 /// Set Player Position packet (0x1D)
 /// Updates player position
-struct SetPlayerPositionC2S {
+pub(all) struct SetPlayerPositionC2S {
   x : Double // X position
   feet_y : Double // Y position at feet
   z : Double // Z position
@@ -9,12 +9,12 @@ struct SetPlayerPositionC2S {
 }
 
 ///|
-impl @mc.Packet for SetPlayerPositionC2S with clientbound(self) {
+pub impl @mc.Packet for SetPlayerPositionC2S with clientbound(_) {
   false
 }
 
 ///|
-impl @mc.Packet for SetPlayerPositionC2S with serialize(
+pub impl @mc.Packet for SetPlayerPositionC2S with serialize(
   self,
   buf : &@buffer.Buffer,
 ) {
@@ -25,7 +25,7 @@ impl @mc.Packet for SetPlayerPositionC2S with serialize(
 }
 
 ///|
-impl @mc.Packet for SetPlayerPositionC2S with deserialize(
+pub impl @mc.Packet for SetPlayerPositionC2S with deserialize(
   buf : &@buffer.Buffer,
 ) {
   let x = buf.read_double()

@@ -6,7 +6,7 @@ struct ArgumentSignature {
 ///|
 /// Signed Chat Command packet (0x07)
 /// Sends signed chat command
-struct SignedChatCommandC2S {
+pub(all) struct SignedChatCommandC2S {
   command : String // Command text
   timestamp : Int64 // Command timestamp
   salt : Int64 // Random salt
@@ -17,12 +17,12 @@ struct SignedChatCommandC2S {
 }
 
 ///|
-impl @mc.Packet for SignedChatCommandC2S with clientbound(self) {
+pub impl @mc.Packet for SignedChatCommandC2S with clientbound(_) {
   false
 }
 
 
-impl @mc.Packet for SignedChatCommandC2S with serialize(
+pub impl @mc.Packet for SignedChatCommandC2S with serialize(
   self,
   buf : &@buffer.Buffer,
 ) {
@@ -38,7 +38,7 @@ impl @mc.Packet for SignedChatCommandC2S with serialize(
   buf.write_byte(self.checksum)
 }
 
-impl @mc.Packet for SignedChatCommandC2S with deserialize(
+pub impl @mc.Packet for SignedChatCommandC2S with deserialize(
   buf : &@buffer.Buffer,
 ) {
   let command = @types.read_string(buf)

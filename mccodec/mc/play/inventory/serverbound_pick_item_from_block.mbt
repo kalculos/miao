@@ -1,18 +1,18 @@
 ///|
 /// Pick Item From Block packet (0x23)
 /// Picks item from block (middle click)
-struct PickItemFromBlockC2S {
+pub(all) struct PickItemFromBlockC2S {
   location : @types.Position // Block position
   include_nbt : Bool // Include NBT data
 }
 
 ///|
-impl @mc.Packet for PickItemFromBlockC2S with clientbound(self) {
+pub impl @mc.Packet for PickItemFromBlockC2S with clientbound(_) {
   false
 }
 
 ///|
-impl @mc.Packet for PickItemFromBlockC2S with serialize(
+pub impl @mc.Packet for PickItemFromBlockC2S with serialize(
   self,
   buf : &@buffer.Buffer,
 ) {
@@ -21,7 +21,7 @@ impl @mc.Packet for PickItemFromBlockC2S with serialize(
 }
 
 ///|
-impl @mc.Packet for PickItemFromBlockC2S with deserialize(
+pub impl @mc.Packet for PickItemFromBlockC2S with deserialize(
   buf : &@buffer.Buffer,
 ) {
   let location = @types.read_position(buf)

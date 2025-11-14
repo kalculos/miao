@@ -1,17 +1,17 @@
 ///|
 /// Client Status packet (0x0B)
 /// Reports client status
-struct ClientStatusC2S {
+pub(all) struct ClientStatusC2S {
   action_id : Int // Action (0=respawn, 1=request_stats), TODO: enum
 }
 
 ///|
-impl @mc.Packet for ClientStatusC2S with clientbound(self) {
+pub impl @mc.Packet for ClientStatusC2S with clientbound(_) {
   false
 }
 
 ///|
-impl @mc.Packet for ClientStatusC2S with serialize(
+pub impl @mc.Packet for ClientStatusC2S with serialize(
   self,
   buf : &@buffer.Buffer,
 ) {
@@ -19,7 +19,7 @@ impl @mc.Packet for ClientStatusC2S with serialize(
 }
 
 ///|
-impl @mc.Packet for ClientStatusC2S with deserialize(
+pub impl @mc.Packet for ClientStatusC2S with deserialize(
   buf : &@buffer.Buffer,
 ) {
   { action_id: @types.read_varint(buf) }

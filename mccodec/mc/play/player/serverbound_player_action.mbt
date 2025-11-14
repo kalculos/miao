@@ -1,7 +1,7 @@
 ///|
 /// Player Action packet (0x28)
 /// Player performs block action
-struct PlayerActionC2S {
+pub(all) struct PlayerActionC2S {
   status : Int // Action status, TODO: enum
   location : @types.Position // Block position
   face : Byte // Block face, TODO: enum
@@ -9,12 +9,12 @@ struct PlayerActionC2S {
 }
 
 ///|
-impl @mc.Packet for PlayerActionC2S with clientbound(self) {
+pub impl @mc.Packet for PlayerActionC2S with clientbound(_) {
   false
 }
 
 ///|
-impl @mc.Packet for PlayerActionC2S with serialize(
+pub impl @mc.Packet for PlayerActionC2S with serialize(
   self,
   buf : &@buffer.Buffer,
 ) {
@@ -25,7 +25,7 @@ impl @mc.Packet for PlayerActionC2S with serialize(
 }
 
 ///|
-impl @mc.Packet for PlayerActionC2S with deserialize(
+pub impl @mc.Packet for PlayerActionC2S with deserialize(
   buf : &@buffer.Buffer,
 ) {
   let status = @types.read_varint(buf)

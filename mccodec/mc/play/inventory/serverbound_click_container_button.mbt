@@ -1,18 +1,18 @@
 ///|
 /// Click Container Button packet (0x10)
 /// Clicks interface button
-struct ClickContainerButtonC2S {
+pub(all) struct ClickContainerButtonC2S {
   window_id : Int // Window ID
   button_id : Int // Button ID
 }
 
 ///|
-impl @mc.Packet for ClickContainerButtonC2S with clientbound(self) {
+pub impl @mc.Packet for ClickContainerButtonC2S with clientbound(_) {
   false
 }
 
 ///|
-impl @mc.Packet for ClickContainerButtonC2S with serialize(
+pub impl @mc.Packet for ClickContainerButtonC2S with serialize(
   self,
   buf : &@buffer.Buffer,
 ) {
@@ -21,7 +21,7 @@ impl @mc.Packet for ClickContainerButtonC2S with serialize(
 }
 
 ///|
-impl @mc.Packet for ClickContainerButtonC2S with deserialize(
+pub impl @mc.Packet for ClickContainerButtonC2S with deserialize(
   buf : &@buffer.Buffer,
 ) {
   let window_id = @types.read_varint(buf)

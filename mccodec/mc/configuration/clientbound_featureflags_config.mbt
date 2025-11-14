@@ -1,17 +1,17 @@
 ///|
 /// Feature Flags packet (0x0C)
 /// Enables and disables features on client
-struct FeatureFlagsS2C {
+pub(all) struct FeatureFlagsS2C {
   feature_flags : FixedArray[@types.Identifier] // Array of feature flag identifiers
 }
 
 ///|
-impl @mc.Packet for FeatureFlagsS2C with clientbound(self) {
+pub impl @mc.Packet for FeatureFlagsS2C with clientbound(_) {
   true
 }
 
 ///|
-impl @mc.Packet for FeatureFlagsS2C with serialize(
+pub impl @mc.Packet for FeatureFlagsS2C with serialize(
   self,
   buf : &@buffer.Buffer,
 ) {
@@ -19,7 +19,7 @@ impl @mc.Packet for FeatureFlagsS2C with serialize(
 }
 
 ///|
-impl @mc.Packet for FeatureFlagsS2C with deserialize(buf : &@buffer.Buffer) {
+pub impl @mc.Packet for FeatureFlagsS2C with deserialize(buf : &@buffer.Buffer) {
   let feature_flags = @types.read_prefix_array(buf, @types.read_identifier)
   { feature_flags, }
 }

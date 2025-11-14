@@ -1,17 +1,17 @@
 ///|
 /// Serverbound Keep Alive (play) packet (0x1B)
 /// Keep alive response
-struct ServerboundKeepAlivePlayC2S {
+pub(all) struct ServerboundKeepAlivePlayC2S {
   keep_alive_id : Int64 // Keep alive ID from server
 }
 
 ///|
-impl @mc.Packet for ServerboundKeepAlivePlayC2S with clientbound(self) {
+pub impl @mc.Packet for ServerboundKeepAlivePlayC2S with clientbound(_) {
   false
 }
 
 ///|
-impl @mc.Packet for ServerboundKeepAlivePlayC2S with serialize(
+pub impl @mc.Packet for ServerboundKeepAlivePlayC2S with serialize(
   self,
   buf : &@buffer.Buffer,
 ) {
@@ -19,7 +19,7 @@ impl @mc.Packet for ServerboundKeepAlivePlayC2S with serialize(
 }
 
 ///|
-impl @mc.Packet for ServerboundKeepAlivePlayC2S with deserialize(
+pub impl @mc.Packet for ServerboundKeepAlivePlayC2S with deserialize(
   buf : &@buffer.Buffer,
 ) {
   { keep_alive_id: buf.read_int64() }

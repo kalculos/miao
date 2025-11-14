@@ -1,19 +1,19 @@
 ///|
 /// Program Command Block Minecart packet (0x36)
 /// Programs command block minecart
-struct ProgramCommandBlockMinecartC2S {
+pub(all) struct ProgramCommandBlockMinecartC2S {
   entity_id : Int // Minecart entity ID
   command : String // Command text
   track_output : Bool // Track output
 }
 
 ///|
-impl @mc.Packet for ProgramCommandBlockMinecartC2S with clientbound(self) {
+pub impl @mc.Packet for ProgramCommandBlockMinecartC2S with clientbound(_) {
   false
 }
 
 ///|
-impl @mc.Packet for ProgramCommandBlockMinecartC2S with serialize(
+pub impl @mc.Packet for ProgramCommandBlockMinecartC2S with serialize(
   self,
   buf : &@buffer.Buffer,
 ) {
@@ -23,7 +23,7 @@ impl @mc.Packet for ProgramCommandBlockMinecartC2S with serialize(
 }
 
 ///|
-impl @mc.Packet for ProgramCommandBlockMinecartC2S with deserialize(
+pub impl @mc.Packet for ProgramCommandBlockMinecartC2S with deserialize(
   buf : &@buffer.Buffer,
 ) {
   let entity_id = @types.read_varint(buf)

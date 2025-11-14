@@ -1,17 +1,17 @@
 ///|
 /// Cookie Request (configuration) packet (0x00)
 /// Requests a cookie that was previously stored
-struct CookieRequestConfigS2C {
+pub(all) struct CookieRequestConfigS2C {
   key : @types.Identifier // Identifier of the cookie
 }
 
 ///|
-impl @mc.Packet for CookieRequestConfigS2C with clientbound(self) {
+pub impl @mc.Packet for CookieRequestConfigS2C with clientbound(_) {
   true
 }
 
 ///|
-impl @mc.Packet for CookieRequestConfigS2C with serialize(
+pub impl @mc.Packet for CookieRequestConfigS2C with serialize(
   self,
   buf : &@buffer.Buffer,
 ) {
@@ -19,7 +19,7 @@ impl @mc.Packet for CookieRequestConfigS2C with serialize(
 }
 
 ///|
-impl @mc.Packet for CookieRequestConfigS2C with deserialize(
+pub impl @mc.Packet for CookieRequestConfigS2C with deserialize(
   buf : &@buffer.Buffer,
 ) {
   { key: @types.read_identifier(buf) }

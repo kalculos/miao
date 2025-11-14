@@ -1,7 +1,7 @@
 ///|
 /// Client Information (configuration) packet (0x00)
 /// Sent when player connects or settings change
-struct ClientInformationConfigC2S {
+pub(all) struct ClientInformationConfigC2S {
   locale : String // e.g. "en_GB" (max 16 chars)
   view_distance : Byte // Client-side render distance in chunks
   chat_mode : Int // 0: enabled, 1: commands only, 2: hidden
@@ -14,12 +14,12 @@ struct ClientInformationConfigC2S {
 }
 
 ///|
-impl @mc.Packet for ClientInformationConfigC2S with clientbound(self) {
+pub impl @mc.Packet for ClientInformationConfigC2S with clientbound(_) {
   false
 }
 
 ///|
-impl @mc.Packet for ClientInformationConfigC2S with serialize(
+pub impl @mc.Packet for ClientInformationConfigC2S with serialize(
   self,
   buf : &@buffer.Buffer,
 ) {
@@ -35,7 +35,7 @@ impl @mc.Packet for ClientInformationConfigC2S with serialize(
 }
 
 ///|
-impl @mc.Packet for ClientInformationConfigC2S with deserialize(
+pub impl @mc.Packet for ClientInformationConfigC2S with deserialize(
   buf : &@buffer.Buffer,
 ) {
   let locale = @types.read_string(buf)

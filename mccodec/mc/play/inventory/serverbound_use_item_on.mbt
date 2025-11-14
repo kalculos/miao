@@ -1,7 +1,7 @@
 ///|
 /// Use Item On packet (0x3F)
 /// Uses item on block
-struct UseItemOnC2S {
+pub(all) struct UseItemOnC2S {
   hand : Int // Hand used enum(0=main, 1=off)
   location : @types.Position // Block position
   direction : Int // Block face, TODO: enum
@@ -14,12 +14,12 @@ struct UseItemOnC2S {
 }
 
 ///|
-impl @mc.Packet for UseItemOnC2S with clientbound(self) {
+pub impl @mc.Packet for UseItemOnC2S with clientbound(_) {
   false
 }
 
 ///|
-impl @mc.Packet for UseItemOnC2S with serialize(
+pub impl @mc.Packet for UseItemOnC2S with serialize(
   self,
   buf : &@buffer.Buffer,
 ) {
@@ -35,7 +35,7 @@ impl @mc.Packet for UseItemOnC2S with serialize(
 }
 
 ///|
-impl @mc.Packet for UseItemOnC2S with deserialize(
+pub impl @mc.Packet for UseItemOnC2S with deserialize(
   buf : &@buffer.Buffer,
 ) {
   let hand = @types.read_varint(buf)

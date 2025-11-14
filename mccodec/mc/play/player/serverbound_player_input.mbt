@@ -1,17 +1,17 @@
 ///|
 /// Player Input packet (0x2A)
 /// Player input controls
-struct PlayerInputC2S {
+pub(all) struct PlayerInputC2S {
   flags : Byte // Input flags, TODO: bit mask
 }
 
 ///|
-impl @mc.Packet for PlayerInputC2S with clientbound(self) {
+pub impl @mc.Packet for PlayerInputC2S with clientbound(_) {
   false
 }
 
 ///|
-impl @mc.Packet for PlayerInputC2S with serialize(
+pub impl @mc.Packet for PlayerInputC2S with serialize(
   self,
   buf : &@buffer.Buffer,
 ) {
@@ -19,7 +19,7 @@ impl @mc.Packet for PlayerInputC2S with serialize(
 }
 
 ///|
-impl @mc.Packet for PlayerInputC2S with deserialize(
+pub impl @mc.Packet for PlayerInputC2S with deserialize(
   buf : &@buffer.Buffer,
 ) {
   let flags = buf.read_byte()

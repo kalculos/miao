@@ -1,18 +1,18 @@
 ///|
 /// Bundle Item Selected packet (0x02)  
 /// Selects item from bundle
-struct BundleItemSelectedC2S {
+pub(all) struct BundleItemSelectedC2S {
   slot_id : Int // Slot containing bundle
   selected_item_index : Int // Index of selected item
 }
 
 ///|
-impl @mc.Packet for BundleItemSelectedC2S with clientbound(self) {
+pub impl @mc.Packet for BundleItemSelectedC2S with clientbound(_) {
   false
 }
 
 ///|
-impl @mc.Packet for BundleItemSelectedC2S with serialize(
+pub impl @mc.Packet for BundleItemSelectedC2S with serialize(
   self,
   buf : &@buffer.Buffer,
 ) {
@@ -21,7 +21,7 @@ impl @mc.Packet for BundleItemSelectedC2S with serialize(
 }
 
 ///|
-impl @mc.Packet for BundleItemSelectedC2S with deserialize(
+pub impl @mc.Packet for BundleItemSelectedC2S with deserialize(
   buf : &@buffer.Buffer,
 ) {
   let slot_id = @types.read_varint(buf)

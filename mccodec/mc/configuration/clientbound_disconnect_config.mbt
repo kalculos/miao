@@ -1,17 +1,17 @@
 ///|
 /// Disconnect (configuration) packet (0x02)
 /// Sent when disconnecting during configuration
-struct DisconnectConfigS2C {
+pub(all) struct DisconnectConfigS2C {
   reason : String // Text Component - reason for disconnection, TODO: Component type
 }
 
 ///|
-impl @mc.Packet for DisconnectConfigS2C with clientbound(self) {
+pub impl @mc.Packet for DisconnectConfigS2C with clientbound(_) {
   true
 }
 
 ///|
-impl @mc.Packet for DisconnectConfigS2C with serialize(
+pub impl @mc.Packet for DisconnectConfigS2C with serialize(
   self,
   buf : &@buffer.Buffer,
 ) {
@@ -19,7 +19,7 @@ impl @mc.Packet for DisconnectConfigS2C with serialize(
 }
 
 ///|
-impl @mc.Packet for DisconnectConfigS2C with deserialize(
+pub impl @mc.Packet for DisconnectConfigS2C with deserialize(
   buf : &@buffer.Buffer,
 ) {
   { reason: @types.read_string(buf) }

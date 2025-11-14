@@ -1,17 +1,17 @@
 ///|
 /// Clientbound Keep Alive (play) packet (0x26)
 /// Keep connection alive
-struct ClientboundKeepAlivePlayS2C {
+pub(all) struct ClientboundKeepAlivePlayS2C {
   keep_alive_id : Int64 // Keep alive ID
 }
 
 ///|
-impl @mc.Packet for ClientboundKeepAlivePlayS2C with clientbound(self) {
+pub impl @mc.Packet for ClientboundKeepAlivePlayS2C with clientbound(_) {
   true
 }
 
 ///|
-impl @mc.Packet for ClientboundKeepAlivePlayS2C with serialize(
+pub impl @mc.Packet for ClientboundKeepAlivePlayS2C with serialize(
   self,
   buf : &@buffer.Buffer,
 ) raise {
@@ -19,7 +19,7 @@ impl @mc.Packet for ClientboundKeepAlivePlayS2C with serialize(
 }
 
 ///|
-impl @mc.Packet for ClientboundKeepAlivePlayS2C with deserialize(
+pub impl @mc.Packet for ClientboundKeepAlivePlayS2C with deserialize(
   buf : &@buffer.Buffer,
 ) raise {
   let keep_alive_id = buf.read_int64()

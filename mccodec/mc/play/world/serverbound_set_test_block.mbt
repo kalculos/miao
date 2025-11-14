@@ -1,19 +1,19 @@
 ///|
 /// Set Test Block packet (0x3A)
 /// Sets test block data (for test frameworks)
-struct SetTestBlockC2S {
+pub(all) struct SetTestBlockC2S {
   location : @types.Position // Block position
   block_type : Int // Block type, enum
   message : String // Block NBT data
 }
 
 ///|
-impl @mc.Packet for SetTestBlockC2S with clientbound(self) {
+pub impl @mc.Packet for SetTestBlockC2S with clientbound(_) {
   false
 }
 
 ///|
-impl @mc.Packet for SetTestBlockC2S with serialize(
+pub impl @mc.Packet for SetTestBlockC2S with serialize(
   self,
   buf : &@buffer.Buffer,
 ) {
@@ -23,7 +23,7 @@ impl @mc.Packet for SetTestBlockC2S with serialize(
 }
 
 ///|
-impl @mc.Packet for SetTestBlockC2S with deserialize(
+pub impl @mc.Packet for SetTestBlockC2S with deserialize(
   buf : &@buffer.Buffer,
 ) {
   let location = @types.read_position(buf)

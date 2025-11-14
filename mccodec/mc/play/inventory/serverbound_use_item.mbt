@@ -1,7 +1,7 @@
 ///|
 /// Use Item packet (0x40)
 /// Uses held item
-struct UseItemC2S {
+pub(all) struct UseItemC2S {
   hand : Int // Hand used enum(0=main, 1=off)
   sequence : Int // Action sequence
   yaw : Float // Player yaw
@@ -9,12 +9,12 @@ struct UseItemC2S {
 }
 
 ///|
-impl @mc.Packet for UseItemC2S with clientbound(self) {
+pub impl @mc.Packet for UseItemC2S with clientbound(_) {
   false
 }
 
 ///|
-impl @mc.Packet for UseItemC2S with serialize(
+pub impl @mc.Packet for UseItemC2S with serialize(
   self,
   buf : &@buffer.Buffer,
 ) {
@@ -25,7 +25,7 @@ impl @mc.Packet for UseItemC2S with serialize(
 }
 
 ///|
-impl @mc.Packet for UseItemC2S with deserialize(
+pub impl @mc.Packet for UseItemC2S with deserialize(
   buf : &@buffer.Buffer,
 ) {
   let hand = @types.read_varint(buf)

@@ -1,7 +1,7 @@
 ///|
 /// Program Command Block packet (0x35)
 /// Programs command block
-struct ProgramCommandBlockC2S {
+pub(all) struct ProgramCommandBlockC2S {
   location : @types.Position // Command block position
   command : String // Command text
   mode : Int // Command block mode enum(0=chain, 1=repeat, 2=impulse)
@@ -9,12 +9,12 @@ struct ProgramCommandBlockC2S {
 }
 
 ///|
-impl @mc.Packet for ProgramCommandBlockC2S with clientbound(self) {
+pub impl @mc.Packet for ProgramCommandBlockC2S with clientbound(_) {
   false
 }
 
 ///|
-impl @mc.Packet for ProgramCommandBlockC2S with serialize(
+pub impl @mc.Packet for ProgramCommandBlockC2S with serialize(
   self,
   buf : &@buffer.Buffer,
 ) {
@@ -25,7 +25,7 @@ impl @mc.Packet for ProgramCommandBlockC2S with serialize(
 }
 
 ///|
-impl @mc.Packet for ProgramCommandBlockC2S with deserialize(
+pub impl @mc.Packet for ProgramCommandBlockC2S with deserialize(
   buf : &@buffer.Buffer,
 ) {
   let location = @types.read_position(buf)

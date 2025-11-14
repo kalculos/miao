@@ -1,7 +1,7 @@
 ///|
 /// Particle packet (0x29)
 /// Spawns particle effect
-struct ParticleS2C {
+pub(all) struct ParticleS2C {
   particle_id : Int // Particle type
   long_distance : Bool // Long distance rendering
   x : Double // X position
@@ -15,6 +15,6 @@ struct ParticleS2C {
   data : Array[Byte] // Particle-specific data
 }
 ///|
-impl @mc.Packet for ParticleS2C with clientbound(self) {
+pub impl @mc.Packet for ParticleS2C with clientbound(_) {
   true
 }

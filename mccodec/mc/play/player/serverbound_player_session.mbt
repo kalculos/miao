@@ -1,7 +1,7 @@
 ///|
 /// Player Session packet (0x09)
 /// Updates player session info
-struct PlayerSessionC2S {
+pub(all) struct PlayerSessionC2S {
   session_uuid : @uuid.UUID // Session UUID
   expires_at : Int64 // Expiration timestamp
   public_key : FixedArray[Byte] // Public key data
@@ -9,11 +9,11 @@ struct PlayerSessionC2S {
 }
 
 ///|
-impl @mc.Packet for PlayerSessionC2S with clientbound(self) {
+pub impl @mc.Packet for PlayerSessionC2S with clientbound(_) {
   false
 }
 
-impl @mc.Packet for PlayerSessionC2S with serialize(
+pub impl @mc.Packet for PlayerSessionC2S with serialize(
   self,
   buf : &@buffer.Buffer,
 ) {
@@ -23,7 +23,7 @@ impl @mc.Packet for PlayerSessionC2S with serialize(
   @types.write_prefix_array(buf, self.key_signature, @buffer.ByteSlice::write_byte)
 }
 
-impl @mc.Packet for PlayerSessionC2S with deserialize(
+pub impl @mc.Packet for PlayerSessionC2S with deserialize(
   buf : &@buffer.Buffer,
 ) {
   let session_uuid = @types.read_uuid(buf)

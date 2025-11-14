@@ -1,7 +1,7 @@
 ///|
 /// Player Chat Message packet (0x3A)
 /// Player chat message
-struct PlayerChatMessageS2C {
+pub(all) struct PlayerChatMessageS2C {
   // Header section
   global_index : Int
   sender : @uuid.UUID // Sender UUID
@@ -24,12 +24,12 @@ struct PlayerChatMessageS2C {
 }
 
 ///|
-impl @mc.Packet for PlayerChatMessageS2C with clientbound(self) {
+pub impl @mc.Packet for PlayerChatMessageS2C with clientbound(_) {
   true
 }
 
 ///|
-impl @mc.Packet for PlayerChatMessageS2C with serialize(
+pub impl @mc.Packet for PlayerChatMessageS2C with serialize(
   self,
   buf : &@buffer.Buffer,
 ) raise {
@@ -62,7 +62,7 @@ impl @mc.Packet for PlayerChatMessageS2C with serialize(
 }
 
 ///|
-impl @mc.Packet for PlayerChatMessageS2C with deserialize(
+pub impl @mc.Packet for PlayerChatMessageS2C with deserialize(
   buf : &@buffer.Buffer,
 ) raise {
   // Header section

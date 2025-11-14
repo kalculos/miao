@@ -1,7 +1,7 @@
 ///|
 /// Chunk Data and Update Light packet (0x27)
 /// Sends chunk data with lighting
-struct ChunkDataAndUpdateLightS2C {
+pub(all) struct ChunkDataAndUpdateLightS2C {
   chunk_x : Int // Chunk X
   chunk_z : Int // Chunk Z
   heightmaps : String // Heightmap NBT
@@ -15,6 +15,6 @@ struct ChunkDataAndUpdateLightS2C {
   block_light : Array[Array[Byte]] // Block light arrays
 }
 ///|
-impl @mc.Packet for ChunkDataAndUpdateLightS2C with clientbound(self) {
+pub impl @mc.Packet for ChunkDataAndUpdateLightS2C with clientbound(_) {
   true
 }

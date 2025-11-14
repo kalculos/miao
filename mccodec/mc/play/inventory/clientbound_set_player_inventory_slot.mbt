@@ -1,18 +1,18 @@
 ///|
 /// Set Player Inventory Slot packet (0x65)
 /// Sets player inventory slot
-struct SetPlayerInventorySlotS2C {
+pub(all) struct SetPlayerInventorySlotS2C {
   slot : Int // Slot index
   slot_data : @types.Slot // Item data
 }
 
 ///|
-impl @mc.Packet for SetPlayerInventorySlotS2C with clientbound(self) {
+pub impl @mc.Packet for SetPlayerInventorySlotS2C with clientbound(_) {
   true
 }
 
 ///|
-impl @mc.Packet for SetPlayerInventorySlotS2C with serialize(
+pub impl @mc.Packet for SetPlayerInventorySlotS2C with serialize(
   self,
   buf : &@buffer.Buffer,
 ) {
@@ -21,7 +21,7 @@ impl @mc.Packet for SetPlayerInventorySlotS2C with serialize(
 }
 
 ///|
-impl @mc.Packet for SetPlayerInventorySlotS2C with deserialize(
+pub impl @mc.Packet for SetPlayerInventorySlotS2C with deserialize(
   buf : &@buffer.Buffer,
 ) {
   let slot = @types.read_varint(buf)

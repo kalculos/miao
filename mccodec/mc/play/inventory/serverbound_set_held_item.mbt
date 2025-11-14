@@ -1,17 +1,17 @@
 ///|
 /// Set Held Item (serverbound) packet (0x34)
 /// Changes held item slot
-struct SetHeldItemC2S {
+pub(all) struct SetHeldItemC2S {
   slot : Int16 // Hotbar slot (0-8)
 }
 
 ///|
-impl @mc.Packet for SetHeldItemC2S with clientbound(self) {
+pub impl @mc.Packet for SetHeldItemC2S with clientbound(_) {
   false
 }
 
 ///|
-impl @mc.Packet for SetHeldItemC2S with serialize(
+pub impl @mc.Packet for SetHeldItemC2S with serialize(
   self,
   buf : &@buffer.Buffer,
 ) {
@@ -19,7 +19,7 @@ impl @mc.Packet for SetHeldItemC2S with serialize(
 }
 
 ///|
-impl @mc.Packet for SetHeldItemC2S with deserialize(
+pub impl @mc.Packet for SetHeldItemC2S with deserialize(
   buf : &@buffer.Buffer,
 ) {
   { slot: buf.read_int16() }

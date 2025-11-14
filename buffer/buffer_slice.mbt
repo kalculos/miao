@@ -106,7 +106,7 @@ pub impl ByteSlice for BufferSlice with to_bytes(self) {
   let len = self.readable_bytes()
   let new_array : FixedArray[Byte] = FixedArray::make(len, 0)
   self.buf_arr.blit_to(new_array, len~, src_offset=self.ridx, dst_offset=0)
-  Bytes::from_fixedarray(new_array, len~)
+  new_array.unsafe_reinterpret_as_bytes()
 }
 
 pub impl ByteSlice for BufferSlice with set_position(self, pos) {

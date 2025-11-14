@@ -1,19 +1,19 @@
 ///|
 /// Place Recipe packet (0x26)
 /// Places recipe in crafting grid
-struct PlaceRecipeC2S {
+pub(all) struct PlaceRecipeC2S {
   window_id : Int // Window ID
   recipe : String // Recipe identifier
   make_all : Bool // Make all possible
 }
 
 ///|
-impl @mc.Packet for PlaceRecipeC2S with clientbound(self) {
+pub impl @mc.Packet for PlaceRecipeC2S with clientbound(_) {
   false
 }
 
 ///|
-impl @mc.Packet for PlaceRecipeC2S with serialize(
+pub impl @mc.Packet for PlaceRecipeC2S with serialize(
   self,
   buf : &@buffer.Buffer,
 ) {
@@ -23,7 +23,7 @@ impl @mc.Packet for PlaceRecipeC2S with serialize(
 }
 
 ///|
-impl @mc.Packet for PlaceRecipeC2S with deserialize(
+pub impl @mc.Packet for PlaceRecipeC2S with deserialize(
   buf : &@buffer.Buffer,
 ) {
   let window_id = buf.read_int()

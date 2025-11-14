@@ -1,7 +1,7 @@
 ///|
 /// Entity Sound Effect packet (0x6D)
 /// Plays sound from entity
-struct EntitySoundEffectS2C {
+pub(all) struct EntitySoundEffectS2C {
   sound_id : Int // Sound ID
   sound_category : Int // Sound category
   entity_id : Int // Entity ID
@@ -10,6 +10,6 @@ struct EntitySoundEffectS2C {
   seed : Int64 // Random seed
 }
 ///|
-impl @mc.Packet for EntitySoundEffectS2C with clientbound(self) {
+pub impl @mc.Packet for EntitySoundEffectS2C with clientbound(_) {
   true
 }

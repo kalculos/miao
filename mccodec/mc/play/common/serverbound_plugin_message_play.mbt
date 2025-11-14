@@ -1,18 +1,18 @@
 ///|
 /// Serverbound Plugin Message (play) packet (0x15)
 /// Plugin message to server
-struct ServerboundPluginMessagePlayC2S {
+pub(all) struct ServerboundPluginMessagePlayC2S {
   channel : @types.Identifier // Plugin channel
   data : FixedArray[Byte] // Plugin data
 }
 
 ///|
-impl @mc.Packet for ServerboundPluginMessagePlayC2S with clientbound(self) {
+pub impl @mc.Packet for ServerboundPluginMessagePlayC2S with clientbound(_) {
   false
 }
 
 ///|
-impl @mc.Packet for ServerboundPluginMessagePlayC2S with serialize(
+pub impl @mc.Packet for ServerboundPluginMessagePlayC2S with serialize(
   self,
   buf : &@buffer.Buffer,
 ) {
@@ -21,7 +21,7 @@ impl @mc.Packet for ServerboundPluginMessagePlayC2S with serialize(
 }
 
 ///|
-impl @mc.Packet for ServerboundPluginMessagePlayC2S with deserialize(
+pub impl @mc.Packet for ServerboundPluginMessagePlayC2S with deserialize(
   buf : &@buffer.Buffer,
 ) {
   let channel = @types.read_identifier(buf)

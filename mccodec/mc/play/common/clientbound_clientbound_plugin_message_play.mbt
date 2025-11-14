@@ -1,18 +1,18 @@
 ///|
 /// Clientbound Plugin Message (play) packet (0x18)
 /// Plugin message from server
-struct ClientboundPluginMessagePlayS2C {
+pub(all) struct ClientboundPluginMessagePlayS2C {
   channel : @types.Identifier // Plugin channel
   data : &@buffer.Buffer // Plugin data
 }
 
 ///|
-impl @mc.Packet for ClientboundPluginMessagePlayS2C with clientbound(self) {
+pub impl @mc.Packet for ClientboundPluginMessagePlayS2C with clientbound(_) {
   true
 }
 
 ///|
-impl @mc.Packet for ClientboundPluginMessagePlayS2C with serialize(
+pub impl @mc.Packet for ClientboundPluginMessagePlayS2C with serialize(
   self,
   buf : &@buffer.Buffer,
 ) raise {
@@ -21,7 +21,7 @@ impl @mc.Packet for ClientboundPluginMessagePlayS2C with serialize(
 }
 
 ///|
-impl @mc.Packet for ClientboundPluginMessagePlayS2C with deserialize(
+pub impl @mc.Packet for ClientboundPluginMessagePlayS2C with deserialize(
   buf : &@buffer.Buffer,
 ) raise {
   let channel = @types.read_identifier(buf)

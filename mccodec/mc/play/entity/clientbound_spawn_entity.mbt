@@ -1,7 +1,7 @@
 ///|
 /// Spawn Entity packet (0x01)
 /// Sent when an entity is created
-struct SpawnEntityS2C {
+pub(all) struct SpawnEntityS2C {
   entity_id : Int // Unique entity ID
   entity_uuid : String // UUID of entity
   entity_type : Int // Entity type ID
@@ -17,6 +17,6 @@ struct SpawnEntityS2C {
   velocity_z : Int16 // Z velocity
 }
 ///|
-impl @mc.Packet for SpawnEntityS2C with clientbound(self) {
+pub impl @mc.Packet for SpawnEntityS2C with clientbound(_) {
   true
 }

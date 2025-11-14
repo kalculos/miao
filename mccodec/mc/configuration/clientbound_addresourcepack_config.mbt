@@ -1,7 +1,7 @@
 ///|
 /// Add Resource Pack (configuration) packet (0x09)
 /// Adds a resource pack to client
-struct AddResourcePackConfigS2C {
+pub(all) struct AddResourcePackConfigS2C {
   uuid : @uuid.UUID // Unique identifier of resource pack
   url : String // URL to the resource pack
   hash : String // SHA-1 hash (40 chars)
@@ -10,12 +10,12 @@ struct AddResourcePackConfigS2C {
 }
 
 ///|
-impl @mc.Packet for AddResourcePackConfigS2C with clientbound(self) {
+pub impl @mc.Packet for AddResourcePackConfigS2C with clientbound(_) {
   true
 }
 
 ///|
-impl @mc.Packet for AddResourcePackConfigS2C with serialize(
+pub impl @mc.Packet for AddResourcePackConfigS2C with serialize(
   self,
   buf : &@buffer.Buffer,
 ) {
@@ -27,7 +27,7 @@ impl @mc.Packet for AddResourcePackConfigS2C with serialize(
 }
 
 ///|
-impl @mc.Packet for AddResourcePackConfigS2C with deserialize(
+pub impl @mc.Packet for AddResourcePackConfigS2C with deserialize(
   buf : &@buffer.Buffer,
 ) {
   let uuid = @types.read_uuid(buf)

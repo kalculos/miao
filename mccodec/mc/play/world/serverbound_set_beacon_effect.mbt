@@ -1,18 +1,18 @@
 ///|
 /// Set Beacon Effect packet (0x33)
 /// Sets beacon effects
-struct SetBeaconEffectC2S {
+pub(all) struct SetBeaconEffectC2S {
   primary_effect : Int? // Primary effect ID  
   secondary_effect : Int? // Secondary effect ID
 }
 
 ///|
-impl @mc.Packet for SetBeaconEffectC2S with clientbound(self) {
+pub impl @mc.Packet for SetBeaconEffectC2S with clientbound(_) {
   false
 }
 
 ///|
-impl @mc.Packet for SetBeaconEffectC2S with serialize(
+pub impl @mc.Packet for SetBeaconEffectC2S with serialize(
   self,
   buf : &@buffer.Buffer,
 ) {
@@ -21,7 +21,7 @@ impl @mc.Packet for SetBeaconEffectC2S with serialize(
 }
 
 ///|
-impl @mc.Packet for SetBeaconEffectC2S with deserialize(
+pub impl @mc.Packet for SetBeaconEffectC2S with deserialize(
   buf : &@buffer.Buffer,
 ) {
   let primary_effect = @types.read_optional(buf, @types.read_varint)

@@ -2,18 +2,18 @@
 /// Custom Click Action (configuration) packet (0x08)
 /// Sent when the client clicks a Text Component with the minecraft:custom click action.
 /// This is meant as an alternative to running a command, but it will not have any effect on vanilla servers.
-struct CustomClickActionC2S {
+pub(all) struct CustomClickActionC2S {
   id : @types.Identifier // The identifier for the click action
   payload : @nbt.NBTTag // The data to send with the click action. May be a TAG_END (0).
 }
 
 ///|
-impl @mc.Packet for CustomClickActionC2S with clientbound(self) {
+pub impl @mc.Packet for CustomClickActionC2S with clientbound(_) {
   false
 }
 
 ///|
-impl @mc.Packet for CustomClickActionC2S with serialize(
+pub impl @mc.Packet for CustomClickActionC2S with serialize(
   self,
   buf : &@buffer.Buffer,
 ) {
@@ -23,10 +23,10 @@ impl @mc.Packet for CustomClickActionC2S with serialize(
 }
 
 ///|
-impl @mc.Packet for CustomClickActionC2S with deserialize(
+pub impl @mc.Packet for CustomClickActionC2S with deserialize(
   buf : &@buffer.Buffer,
 ) {
-  let id = @types.read_identifier(buf)
+  let _ = @types.read_identifier(buf)
   // TODO: Implement NBT reading
   panic()
 }

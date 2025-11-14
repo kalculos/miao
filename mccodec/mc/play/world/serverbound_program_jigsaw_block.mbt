@@ -1,7 +1,7 @@
 ///|
 /// Program Jigsaw Block packet (0x38)
 /// Programs jigsaw block
-struct ProgramJigsawBlockC2S {
+pub(all) struct ProgramJigsawBlockC2S {
   location : @types.Position // Jigsaw position
   name : @types.Identifier // Jigsaw name
   target : @types.Identifier // Target name
@@ -13,12 +13,12 @@ struct ProgramJigsawBlockC2S {
 }
 
 ///|
-impl @mc.Packet for ProgramJigsawBlockC2S with clientbound(self) {
+pub impl @mc.Packet for ProgramJigsawBlockC2S with clientbound(_) {
   false
 }
 
 ///|
-impl @mc.Packet for ProgramJigsawBlockC2S with serialize(
+pub impl @mc.Packet for ProgramJigsawBlockC2S with serialize(
   self,
   buf : &@buffer.Buffer,
 ) {
@@ -33,7 +33,7 @@ impl @mc.Packet for ProgramJigsawBlockC2S with serialize(
 }
 
 ///|
-impl @mc.Packet for ProgramJigsawBlockC2S with deserialize(
+pub impl @mc.Packet for ProgramJigsawBlockC2S with deserialize(
   buf : &@buffer.Buffer,
 ) {
   let location = @types.read_position(buf)

@@ -12,7 +12,7 @@ pub enum HandshakeIntent {
 /// Handshake packet (0x00)
 /// Initial packet sent by client to initiate connection
 /// This packet switches the protocol from Handshaking state to the specified next state
-struct HandshakeC2S {
+pub(all) struct HandshakeC2S {
   protocol_version : Int // Protocol version number (1.21.8 = 769)
   server_address : String // Server hostname or IP address (max 255 chars)
   server_port : UInt16 // Server port number
@@ -20,12 +20,12 @@ struct HandshakeC2S {
 }
 
 ///|
-impl @mc.Packet for HandshakeC2S with clientbound(self) {
+pub impl @mc.Packet for HandshakeC2S with clientbound(_) {
   false // Handshake is client-to-server
 }
 
 ///|
-impl @mc.Packet for HandshakeC2S with serialize(self, buf : &@buffer.Buffer) {
+pub impl @mc.Packet for HandshakeC2S with serialize(self, buf : &@buffer.Buffer) {
   @types.write_varint(buf, self.protocol_version)
   @types.write_string(buf, self.server_address)
   buf.write_uint16(self.server_port)
@@ -40,7 +40,7 @@ impl @mc.Packet for HandshakeC2S with serialize(self, buf : &@buffer.Buffer) {
 }
 
 ///|
-impl @mc.Packet for HandshakeC2S with deserialize(buf : &@buffer.Buffer) {
+pub impl @mc.Packet for HandshakeC2S with deserialize(buf : &@buffer.Buffer) {
   {
     protocol_version: @types.read_varint(buf),
     server_address: @types.read_string(buf),

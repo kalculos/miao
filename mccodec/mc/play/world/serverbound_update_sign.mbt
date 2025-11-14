@@ -1,7 +1,7 @@
 ///|
 /// Update Sign packet (0x3B)
 /// Updates sign text
-struct UpdateSignC2S {
+pub(all) struct UpdateSignC2S {
   location : @types.Position // Sign position
   is_front_text : Bool // Whether editing front text
   line1 : String // Line 1 text
@@ -11,12 +11,12 @@ struct UpdateSignC2S {
 }
 
 ///|
-impl @mc.Packet for UpdateSignC2S with clientbound(self) {
+pub impl @mc.Packet for UpdateSignC2S with clientbound(_) {
   false
 }
 
 ///|
-impl @mc.Packet for UpdateSignC2S with serialize(
+pub impl @mc.Packet for UpdateSignC2S with serialize(
   self,
   buf : &@buffer.Buffer,
 ) {
@@ -29,7 +29,7 @@ impl @mc.Packet for UpdateSignC2S with serialize(
 }
 
 ///|
-impl @mc.Packet for UpdateSignC2S with deserialize(
+pub impl @mc.Packet for UpdateSignC2S with deserialize(
   buf : &@buffer.Buffer,
 ) {
   let location = @types.read_position(buf)

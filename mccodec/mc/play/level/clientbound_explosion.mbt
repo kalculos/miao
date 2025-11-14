@@ -1,7 +1,7 @@
 ///|
 /// Explosion packet (0x20)
 /// Creates explosion effect
-struct ExplosionS2C {
+pub(all) struct ExplosionS2C {
   x : Double // Explosion X
   y : Double // Explosion Y
   z : Double // Explosion Z
@@ -16,6 +16,6 @@ struct ExplosionS2C {
   explosion_sound : String // Explosion sound
 }
 ///|
-impl @mc.Packet for ExplosionS2C with clientbound(self) {
+pub impl @mc.Packet for ExplosionS2C with clientbound(_) {
   true
 }

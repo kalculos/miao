@@ -1,18 +1,18 @@
 ///|
 /// Store Cookie (configuration) packet (0x0A)
 /// Stores arbitrary data on client
-struct StoreCookieConfigS2C {
+pub(all) struct StoreCookieConfigS2C {
   key : @types.Identifier // Cookie identifier
   payload : FixedArray[Byte] // Cookie data (up to 5 kiB)
 }
 
 ///|
-impl @mc.Packet for StoreCookieConfigS2C with clientbound(self) {
+pub impl @mc.Packet for StoreCookieConfigS2C with clientbound(_) {
   true
 }
 
 ///|
-impl @mc.Packet for StoreCookieConfigS2C with serialize(
+pub impl @mc.Packet for StoreCookieConfigS2C with serialize(
   self,
   buf : &@buffer.Buffer,
 ) {
@@ -21,7 +21,7 @@ impl @mc.Packet for StoreCookieConfigS2C with serialize(
 }
 
 ///|
-impl @mc.Packet for StoreCookieConfigS2C with deserialize(
+pub impl @mc.Packet for StoreCookieConfigS2C with deserialize(
   buf : &@buffer.Buffer,
 ) {
   let key = @types.read_identifier(buf)

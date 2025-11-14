@@ -1,7 +1,7 @@
 ///|
 /// Synchronize Vehicle Position packet (0x76)
 /// Synchronizes vehicle position
-struct SynchronizeVehiclePositionS2C {
+pub(all) struct SynchronizeVehiclePositionS2C {
   x : Double // X position
   y : Double // Y position
   z : Double // Z position
@@ -9,6 +9,6 @@ struct SynchronizeVehiclePositionS2C {
   pitch : Float // Pitch angle
 }
 ///|
-impl @mc.Packet for SynchronizeVehiclePositionS2C with clientbound(self) {
+pub impl @mc.Packet for SynchronizeVehiclePositionS2C with clientbound(_) {
   true
 }

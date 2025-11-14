@@ -1,17 +1,17 @@
 ///|
 /// Login Success packet (0x02)
 /// Sent when login is successful, switches to configuration state
-struct LoginSuccessS2C {
+pub(all) struct LoginSuccessS2C {
   profile : @types.GameProfile // Game Profile (contains UUID and username)
 }
 
 ///|
-impl @mc.Packet for LoginSuccessS2C with clientbound(self) {
+pub impl @mc.Packet for LoginSuccessS2C with clientbound(_) {
   true
 }
 
 ///|
-impl @mc.Packet for LoginSuccessS2C with serialize(
+pub impl @mc.Packet for LoginSuccessS2C with serialize(
   self,
   buf : &@buffer.Buffer,
 ) {
@@ -19,7 +19,7 @@ impl @mc.Packet for LoginSuccessS2C with serialize(
 }
 
 ///|
-impl @mc.Packet for LoginSuccessS2C with deserialize(buf : &@buffer.Buffer) {
+pub impl @mc.Packet for LoginSuccessS2C with deserialize(buf : &@buffer.Buffer) {
   let profile = @types.read_game_profile(buf)
   { profile, }
 }

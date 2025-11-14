@@ -1,17 +1,17 @@
 ///|
 /// Set Player Movement Flags packet (0x20)
 /// Sets player movement state flags
-struct SetPlayerMovementFlagsC2S {
+pub(all) struct SetPlayerMovementFlagsC2S {
   on_ground : Byte // Whether on ground, (0x01=on ground, 0x02=pushing against wall)
 }
 
 ///|
-impl @mc.Packet for SetPlayerMovementFlagsC2S with clientbound(self) {
+pub impl @mc.Packet for SetPlayerMovementFlagsC2S with clientbound(_) {
   false
 }
 
 ///|
-impl @mc.Packet for SetPlayerMovementFlagsC2S with serialize(
+pub impl @mc.Packet for SetPlayerMovementFlagsC2S with serialize(
   self,
   buf : &@buffer.Buffer,
 ) {
@@ -19,7 +19,7 @@ impl @mc.Packet for SetPlayerMovementFlagsC2S with serialize(
 }
 
 ///|
-impl @mc.Packet for SetPlayerMovementFlagsC2S with deserialize(
+pub impl @mc.Packet for SetPlayerMovementFlagsC2S with deserialize(
   buf : &@buffer.Buffer,
 ) {
   { on_ground: buf.read_byte() }

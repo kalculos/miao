@@ -1,18 +1,18 @@
 ///|
 /// Store Cookie (play) packet (0x71)
 /// Stores cookie on client
-struct StoreCookiePlayS2C {
+pub(all) struct StoreCookiePlayS2C {
   key : @types.Identifier // Cookie key
   payload : FixedArray[Byte] // Cookie payload
 }
 
 ///|
-impl @mc.Packet for StoreCookiePlayS2C with clientbound(self) {
+pub impl @mc.Packet for StoreCookiePlayS2C with clientbound(_) {
   true
 }
 
 ///|
-impl @mc.Packet for StoreCookiePlayS2C with serialize(
+pub impl @mc.Packet for StoreCookiePlayS2C with serialize(
   self,
   buf : &@buffer.Buffer,
 ) raise {
@@ -21,7 +21,7 @@ impl @mc.Packet for StoreCookiePlayS2C with serialize(
 }
 
 ///|
-impl @mc.Packet for StoreCookiePlayS2C with deserialize(buf : &@buffer.Buffer) raise {
+pub impl @mc.Packet for StoreCookiePlayS2C with deserialize(buf : &@buffer.Buffer) raise {
   let key = @types.read_identifier(buf)
   let payload = @types.read_prefix_array(buf, @buffer.ByteSlice::read_byte)
   { key, payload }

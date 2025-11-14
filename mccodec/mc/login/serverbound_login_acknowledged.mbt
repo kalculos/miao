@@ -1,24 +1,24 @@
 ///|
 /// Login Acknowledged packet (0x03)
 /// Acknowledges Login Success, switches to configuration state
-struct LoginAcknowledgedC2S {}
+pub(all) struct LoginAcknowledgedC2S {}
 
 ///|
-impl @mc.Packet for LoginAcknowledgedC2S with clientbound(self) {
+pub impl @mc.Packet for LoginAcknowledgedC2S with clientbound(_) {
   false
 }
 
 ///|
-impl @mc.Packet for LoginAcknowledgedC2S with serialize(
-  self,
-  buf : &@buffer.Buffer,
+pub impl @mc.Packet for LoginAcknowledgedC2S with serialize(
+  _,
+  _ : &@buffer.Buffer,
 ) {
   // No fields to serialize
 }
 
 ///|
-impl @mc.Packet for LoginAcknowledgedC2S with deserialize(
-  buf : &@buffer.Buffer,
+pub impl @mc.Packet for LoginAcknowledgedC2S with deserialize(
+  _ : &@buffer.Buffer,
 ) {
   LoginAcknowledgedC2S::{  } // No fields to deserialize
 }

@@ -1,7 +1,7 @@
 ///|
 /// Set Container Content packet (0x12)
 /// Sets all slots in container
-struct SetContainerContentS2C {
+pub(all) struct SetContainerContentS2C {
   window_id : Int // Window ID
   state_id : Int // State ID
   slots : FixedArray[@types.Slot] // Slot data (ItemStack format)
@@ -9,12 +9,12 @@ struct SetContainerContentS2C {
 }
 
 ///|
-impl @mc.Packet for SetContainerContentS2C with clientbound(self) {
+pub impl @mc.Packet for SetContainerContentS2C with clientbound(_) {
   true
 }
 
 ///|
-impl @mc.Packet for SetContainerContentS2C with serialize(
+pub impl @mc.Packet for SetContainerContentS2C with serialize(
   self,
   buf : &@buffer.Buffer,
 ) {
@@ -25,7 +25,7 @@ impl @mc.Packet for SetContainerContentS2C with serialize(
 }
 
 ///|
-impl @mc.Packet for SetContainerContentS2C with deserialize(
+pub impl @mc.Packet for SetContainerContentS2C with deserialize(
   buf : &@buffer.Buffer,
 ) {
   let window_id = @types.read_varint(buf)

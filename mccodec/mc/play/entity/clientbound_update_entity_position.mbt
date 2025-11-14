@@ -1,7 +1,7 @@
 ///|
 /// Update Entity Position packet (0x2E)
 /// Updates entity position
-struct UpdateEntityPositionS2C {
+pub(all) struct UpdateEntityPositionS2C {
   entity_id : Int // Entity ID
   delta_x : Int16 // X movement delta
   delta_y : Int16 // Y movement delta
@@ -9,6 +9,6 @@ struct UpdateEntityPositionS2C {
   on_ground : Bool // On ground flag
 }
 ///|
-impl @mc.Packet for UpdateEntityPositionS2C with clientbound(self) {
+pub impl @mc.Packet for UpdateEntityPositionS2C with clientbound(_) {
   true
 }

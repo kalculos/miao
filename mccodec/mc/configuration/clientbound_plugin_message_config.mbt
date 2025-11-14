@@ -1,18 +1,18 @@
 ///|
 /// Clientbound Plugin Message (configuration) packet (0x01)
 /// Mods and plugins can use this to send data
-struct ClientboundPluginMessageConfigS2C {
+pub(all) struct ClientboundPluginMessageConfigS2C {
   channel : String // Plugin channel identifier
   data : FixedArray[Byte] // Plugin data (max 1048576 bytes)
 }
 
 ///|
-impl @mc.Packet for ClientboundPluginMessageConfigS2C with clientbound(self) {
+pub impl @mc.Packet for ClientboundPluginMessageConfigS2C with clientbound(_) {
   true
 }
 
 ///|
-impl @mc.Packet for ClientboundPluginMessageConfigS2C with serialize(
+pub impl @mc.Packet for ClientboundPluginMessageConfigS2C with serialize(
   self,
   buf : &@buffer.Buffer,
 ) {
@@ -21,7 +21,7 @@ impl @mc.Packet for ClientboundPluginMessageConfigS2C with serialize(
 }
 
 ///|
-impl @mc.Packet for ClientboundPluginMessageConfigS2C with deserialize(
+pub impl @mc.Packet for ClientboundPluginMessageConfigS2C with deserialize(
   buf : &@buffer.Buffer,
 ) {
   let channel = @types.read_string(buf)

@@ -1,18 +1,18 @@
 ///|
 /// System Chat Message packet (0x72)
 /// System chat message
-struct SystemChatMessageS2C {
+pub(all) struct SystemChatMessageS2C {
   content : String // Message content, TODO: Text Component
   overlay : Bool // Display as overlay
 }
 
 ///|
-impl @mc.Packet for SystemChatMessageS2C with clientbound(self) {
+pub impl @mc.Packet for SystemChatMessageS2C with clientbound(_) {
   true
 }
 
 ///|
-impl @mc.Packet for SystemChatMessageS2C with serialize(
+pub impl @mc.Packet for SystemChatMessageS2C with serialize(
   self,
   buf : &@buffer.Buffer,
 ) {
@@ -21,7 +21,7 @@ impl @mc.Packet for SystemChatMessageS2C with serialize(
 }
 
 ///|
-impl @mc.Packet for SystemChatMessageS2C with deserialize(
+pub impl @mc.Packet for SystemChatMessageS2C with deserialize(
   buf : &@buffer.Buffer,
 ) {
   let content = @types.read_string(buf)

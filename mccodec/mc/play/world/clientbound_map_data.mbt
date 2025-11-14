@@ -1,7 +1,7 @@
 ///|
 /// Map Data packet (0x2C)
 /// Updates map display
-struct MapDataS2C {
+pub(all) struct MapDataS2C {
   map_id : Int // Map ID
   scale : Byte // Map scale
   locked : Bool // Map locked state
@@ -14,6 +14,6 @@ struct MapDataS2C {
   data : Array[Byte]? // Map pixel data (if columns > 0)
 }
 ///|
-impl @mc.Packet for MapDataS2C with clientbound(self) {
+pub impl @mc.Packet for MapDataS2C with clientbound(_) {
   true
 }

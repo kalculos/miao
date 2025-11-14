@@ -1,17 +1,17 @@
 ///|
 /// Close Container packet (0x11)
 /// Closes inventory interface
-struct CloseContainerS2C {
+pub(all) struct CloseContainerS2C {
   window_id : Int // Window ID
 }
 
 ///|
-impl @mc.Packet for CloseContainerS2C with clientbound(self) {
+pub impl @mc.Packet for CloseContainerS2C with clientbound(_) {
   true
 }
 
 ///|
-impl @mc.Packet for CloseContainerS2C with serialize(
+pub impl @mc.Packet for CloseContainerS2C with serialize(
   self,
   buf : &@buffer.Buffer,
 ) {
@@ -19,7 +19,7 @@ impl @mc.Packet for CloseContainerS2C with serialize(
 }
 
 ///|
-impl @mc.Packet for CloseContainerS2C with deserialize(buf : &@buffer.Buffer) {
+pub impl @mc.Packet for CloseContainerS2C with deserialize(buf : &@buffer.Buffer) {
   let window_id = @types.read_varint(buf)
   { window_id, }
 }

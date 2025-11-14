@@ -1,5 +1,5 @@
 ///|
-enum SkinPart {
+pub(all) enum SkinPart {
   CAPE
   JACKET
   LEFT_SLEEVE

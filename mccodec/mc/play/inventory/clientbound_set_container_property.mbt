@@ -1,19 +1,19 @@
 ///|
 /// Set Container Property packet (0x13)
 /// Updates container property
-struct SetContainerPropertyS2C {
+pub(all) struct SetContainerPropertyS2C {
   window_id : Int // Window ID
   property : Int16 // Property ID
   value : Int16 // Property value
 }
 
 ///|
-impl @mc.Packet for SetContainerPropertyS2C with clientbound(self) {
+pub impl @mc.Packet for SetContainerPropertyS2C with clientbound(_) {
   true
 }
 
 ///|
-impl @mc.Packet for SetContainerPropertyS2C with serialize(
+pub impl @mc.Packet for SetContainerPropertyS2C with serialize(
   self,
   buf : &@buffer.Buffer,
 ) {
@@ -23,7 +23,7 @@ impl @mc.Packet for SetContainerPropertyS2C with serialize(
 }
 
 ///|
-impl @mc.Packet for SetContainerPropertyS2C with deserialize(
+pub impl @mc.Packet for SetContainerPropertyS2C with deserialize(
   buf : &@buffer.Buffer,
 ) {
   let window_id = @types.read_varint(buf)

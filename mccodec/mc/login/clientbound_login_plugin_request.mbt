@@ -1,19 +1,19 @@
 ///|
 /// Login Plugin Request packet (0x04)
 /// Custom handshaking flow for plugin messages
-struct LoginPluginRequestS2C {
+pub(all) struct LoginPluginRequestS2C {
   message_id : Int // Unique to the connection
   channel : @types.Identifier // Plugin channel identifier
   data : FixedArray[Byte] // Plugin data
 }
 
 ///|
-impl @mc.Packet for LoginPluginRequestS2C with clientbound(self) {
+pub impl @mc.Packet for LoginPluginRequestS2C with clientbound(_) {
   true
 }
 
 ///|
-impl @mc.Packet for LoginPluginRequestS2C with serialize(
+pub impl @mc.Packet for LoginPluginRequestS2C with serialize(
   self,
   buf : &@buffer.Buffer,
 ) {
@@ -23,7 +23,7 @@ impl @mc.Packet for LoginPluginRequestS2C with serialize(
 }
 
 ///|
-impl @mc.Packet for LoginPluginRequestS2C with deserialize(
+pub impl @mc.Packet for LoginPluginRequestS2C with deserialize(
   buf : &@buffer.Buffer,
 ) {
   let message_id = @types.read_varint(buf)

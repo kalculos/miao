@@ -1,7 +1,7 @@
 ///|
 /// Initialize World Border packet (0x25)
 /// Initializes world border
-struct InitializeWorldBorderS2C {
+pub(all) struct InitializeWorldBorderS2C {
   x : Double // Center X
   z : Double // Center Z
   old_diameter : Double // Current diameter
@@ -12,6 +12,6 @@ struct InitializeWorldBorderS2C {
   warning_time : Int // Warning time
 }
 ///|
-impl @mc.Packet for InitializeWorldBorderS2C with clientbound(self) {
+pub impl @mc.Packet for InitializeWorldBorderS2C with clientbound(_) {
   true
 }

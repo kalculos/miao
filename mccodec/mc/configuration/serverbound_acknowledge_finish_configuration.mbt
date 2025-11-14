@@ -1,24 +1,24 @@
 ///|
 /// Acknowledge Finish Configuration packet (0x03)
 /// Acknowledges server's Finish Configuration packet
-struct AcknowledgeFinishConfigurationC2S {}
+pub(all) struct AcknowledgeFinishConfigurationC2S {}
 
 ///|
-impl @mc.Packet for AcknowledgeFinishConfigurationC2S with clientbound(self) {
+pub impl @mc.Packet for AcknowledgeFinishConfigurationC2S with clientbound(_) {
   false
 }
 
 ///|
-impl @mc.Packet for AcknowledgeFinishConfigurationC2S with serialize(
-  self,
-  buf : &@buffer.Buffer,
+pub impl @mc.Packet for AcknowledgeFinishConfigurationC2S with serialize(
+  _,
+  _ : &@buffer.Buffer,
 ) {
   // No fields to serialize
 }
 
 ///|
-impl @mc.Packet for AcknowledgeFinishConfigurationC2S with deserialize(
-  buf : &@buffer.Buffer,
+pub impl @mc.Packet for AcknowledgeFinishConfigurationC2S with deserialize(
+  _ : &@buffer.Buffer,
 ) {
   AcknowledgeFinishConfigurationC2S::{  }
 }

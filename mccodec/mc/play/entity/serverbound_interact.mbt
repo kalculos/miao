@@ -1,7 +1,7 @@
 ///|
 /// Interact packet (0x19)
 /// Interacts with entity
-struct InteractC2S {
+pub(all) struct InteractC2S {
   entity_id : Int // Target entity ID
   interaction_type : Int // Interaction type enum(0=interact, 1=attack, 2=interact_at)
   target_x : Float? // Target X (for at interaction)
@@ -12,11 +12,11 @@ struct InteractC2S {
 }
 
 ///|
-impl @mc.Packet for InteractC2S with clientbound(self) {
+pub impl @mc.Packet for InteractC2S with clientbound(_) {
   false
 }
 
-impl @mc.Packet for InteractC2S with serialize(
+pub impl @mc.Packet for InteractC2S with serialize(
   self,
   buf : &@buffer.Buffer,
 ) {
@@ -33,7 +33,7 @@ impl @mc.Packet for InteractC2S with serialize(
   @types.write_bool(buf, self.sneaking)
 }
 
-impl @mc.Packet for InteractC2S with deserialize(
+pub impl @mc.Packet for InteractC2S with deserialize(
   buf : &@buffer.Buffer,
 ) {
   let entity_id = @types.read_varint(buf)

@@ -1,7 +1,7 @@
 ///|
 /// Respawn packet (0x4B)
 /// Respawns player
-struct RespawnS2C {
+pub(all) struct RespawnS2C {
   dimension_type : String // Dimension type
   dimension_name : String // Dimension name
   hashed_seed : Int64 // World seed hash
@@ -15,6 +15,6 @@ struct RespawnS2C {
   sea_level : Int // Sea level
 }
 ///|
-impl @mc.Packet for RespawnS2C with clientbound(self) {
+pub impl @mc.Packet for RespawnS2C with clientbound(_) {
   true
 }
