@@ -140,7 +140,7 @@ pub fn OpenFlags::has_write(self: OpenFlags) -> Bool {
 }
 
 pub fn OpenFlags::is_read_write(self: OpenFlags) -> Bool {
-  (self.0 & _O_RDWR) != 0
+  (self.0 & 0b11) == _O_RDWR
 }
 
 pub fn OpenFlags::is_read_only(self: OpenFlags) -> Bool {

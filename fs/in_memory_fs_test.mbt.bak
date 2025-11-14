@@ -1,0 +1,80 @@
+///|
+/// InMemoryFS - A simple in-memory filesystem implementation for testing
+/// This provides a basic filesystem that exists purely in memory, useful for
+/// testing path operations without requiring actual file I/O.
+pub struct InMemoryFS {
+  root_path : String
+  current_dir : String
+} derive(Eq)
+
+///|
+/// Create a new InMemoryFS with default settings  
+pub fn InMemoryFS::new() -> InMemoryFS {
+  InMemoryFS::{ root_path: "/", current_dir: "/test" }
+}
+
+impl FileSystem for InMemoryFS with open_file(
+  self,
+  path,
+  flag,
+  mode~,
+  follow_links?
+) {
+  ignore((path, flag, mode, follow_links))
+  fail!("InMemoryFS::open_file not implemented")
+}
+
+impl FileSystem for InMemoryFS with attr(self, path, follow_links?) {
+  ignore((path, follow_links))
+  fail!("InMemoryFS::attr not implemented")
+}
+
+impl FileSystem for InMemoryFS with list_directory(self, path) {
+  ignore(path)
+  fail!("InMemoryFS::list_directory not implemented")
+}
+
+impl FileSystem for InMemoryFS with can_access(self, path, flag) {
+  ignore((path, flag))
+  false
+}
+
+impl FileSystem for InMemoryFS with delete(self, path) {
+  ignore(path)
+  fail!("InMemoryFS::delete not implemented")
+}
+
+impl FileSystem for InMemoryFS with exists(self, path) {
+  ignore(path)
+  false
+}
+
+impl FileSystem for InMemoryFS with read_symbol_link(self, path) {
+  ignore(path)
+  fail!("InMemoryFS::read_symbol_link not implemented")
+}
+
+impl FileSystem for InMemoryFS with rename(
+  self,
+  src,
+  dst,
+  copy_attr~
+) {
+  ignore((src, dst, copy_attr))
+  fail!("InMemoryFS::rename not implemented")
+}
+
+impl FileSystem for InMemoryFS with real_path(self, path) {
+  path
+}
+
+impl FileSystem for InMemoryFS with cwd(self) {
+  // Avoid recursion - directly construct a simple path
+  // by calling path with an empty system_roots check
+  path(self.current_dir, using_fs=self)
+}
+
+impl FileSystem for InMemoryFS with system_roots(self) {
+  // Return empty to avoid recursion in path() construction
+  []
+}
