@@ -3,6 +3,11 @@ struct UvDatagram {
   sock : &@net.DatagramSocket
   buf : @buffer.HeapByteBuf
   udp : @uv.Udp
+  // If not Unspec, this indicates the remote address for this datagram.
+  // For connected UDP (from dial), this is the connected remote and libuv
+  // filters incoming packets at the OS level to only accept from this address.
+  // For unconnected UDP (from bind->accept), this is the source of the received packet.
+  remote : @net.SockAddr
 }
 
 ///|
@@ -12,7 +17,7 @@ impl @net.Connection for UvDatagram with local_addr(self) {
 
 ///|
 impl @net.Connection for UvDatagram with remote_addr(self) {
-  (try? self.udp.getpeername().to_miao()).unwrap_or(@net.SockAddr::Unspec)
+  self.remote
 }
 
 ///|
@@ -37,6 +42,9 @@ impl @io.Writer for UvDatagram with is_closed(_self) {
 
 ///|
 impl @io.Reader for UvDatagram with read(self, arr, off, len) {
+  // The buffer contains the packet data - just read from it
+  // For connected datagrams (from dial), subsequent packets should be read
+  // by calling socket().accept() to get new UvDatagram instances
   self.buf.read(arr, off, len)
 }
 
@@ -75,50 +83,55 @@ struct UvDatagramSocket {
   udp : @uv.Udp
   rt : LibuvRuntime
   mut closed : Bool
+  packet_queue : @pipe.ArrayBlockingQueue[(@net.SockAddr, Bytes)]
+  mut receiving : Bool
 }
 
 ///|
 impl @net.DatagramSocket for UvDatagramSocket with accept(self, buffer, _timeout) {
-  uvrt_op_suspend((resolve, reject, _) => {
-    let mut received = false
-    self.udp.recv_start(
-      (_, size) => FixedArray::make(size, b'\x00').unsafe_reinterpret_as_bytes().op_as_view(),
-      (_, nread, buf, addr, _flags) => {
-        if !received {
-          received = true
-          let arr = FixedArray::makei(nread, fn(i) { buf[i] })
-          (buffer as &@buffer.Buffer).write(arr, 0, nread) |> ignore
-          let sockaddr = (try? addr.to_miao()).unwrap_or(@net.SockAddr::Unspec)
-          resolve(Ok((sockaddr, nread)))
-          self.udp.recv_stop() catch { _ => () }
-        }
-      },
-      (_, errno) => {
-        if !received {
-          received = true
-          resolve(
-            Err(
-              @net.NetworkError::DeviceFailure(
-                msg="Failed to receive UDP packet: \{errno.to_bytes() |> @encoding/utf8.decode_lossy}",
-              ),
-            ),
-          )
-        }
-      },
-    ) catch {
-      err => resolve(
-        Err(
-          @net.NetworkError::DeviceFailure(
-            msg="Failed to start receiving: \{err.to_bytes() |> @encoding/utf8.decode_lossy}",
-          ),
-        ),
-      )
+  // Start receiving if not already started
+  if !self.receiving && !self.closed {
+    self.receiving = true
+    self.start_receiving()
+  }
+  
+  // Wait for a packet from the queue
+  let result = self.packet_queue.pop()
+  match result {
+    (addr, data) => {
+      let view = data.op_as_view()
+      let to_copy = @cmp.minimum(view.length(), buffer.writable_bytes())
+      let arr = FixedArray::makei(to_copy, fn(i) { view[i] })
+      (buffer as &@buffer.Buffer).write(arr, 0, to_copy) |> ignore
+      Ok((addr, to_copy))
     }
-    () => {
-      defer reject(@rt.CoroutineError::Cancelled)
-      self.udp.recv_stop() catch { _ => () }
+  }
+}
+
+///|
+fn UvDatagramSocket::start_receiving(self : UvDatagramSocket) -> Unit {
+  self.udp.recv_start(
+    (_, size) => FixedArray::make(size, b'\x00').unsafe_reinterpret_as_bytes().op_as_view(),
+    (_, nread, buf, addr, _flags) => {
+      if nread > 0 && !self.closed {
+        // Copy the received data into a Bytes object
+        let data = Bytes::from_array(FixedArray::makei(nread, fn(i) { buf[i] }))
+        let sockaddr = (try? addr.to_miao()).unwrap_or(@net.SockAddr::Unspec)
+        // Try to push to queue (non-blocking to avoid issues in callback)
+        let _ = try self.packet_queue.try_push((sockaddr, data)) catch { _ => false }
+      }
+    },
+    (_, _errno) => {
+      // Error in receiving, stop receiving
+      if !self.closed {
+        self.receiving = false
+      }
+    },
+  ) catch {
+    _ => {
+      self.receiving = false
     }
-  })
+  }
 }
 
 ///|
@@ -156,8 +169,11 @@ impl @net.Socket for UvDatagramSocket with accept(self, timeout) {
   let buffer = @buffer.HeapByteBuf::new(65536)
   (@net.DatagramSocket::accept(self, buffer, timeout)).map(
     fn(pair) {
-      let _ = pair
-      UvDatagram::{ sock: self, buf: buffer, udp: self.udp } as &@net.Connection
+      let (remote_addr, _) = pair
+      // Create a datagram wrapper for this specific packet
+      // The remote address indicates where this packet came from
+      UvDatagram::{ sock: self, buf: buffer, udp: self.udp, remote: remote_addr }
+        as &@net.Connection
     },
   )
 }
@@ -165,8 +181,13 @@ impl @net.Socket for UvDatagramSocket with accept(self, timeout) {
 ///|
 impl @net.Socket for UvDatagramSocket with close(self) {
   guard !self.closed
-  self.udp.close(() => ())
   self.closed = true
+  if self.receiving {
+    self.udp.recv_stop() catch { _ => () }
+    self.receiving = false
+  }
+  self.packet_queue.close()
+  self.udp.close(() => ())
 }
 
 ///|

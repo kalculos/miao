@@ -9,82 +9,86 @@ fn UvNet::uv(self : UvNet) -> LibuvRuntime {
 }
 
 ///|
+fn parse_and_convert_addr(
+  address : String,
+) -> Result[(@net.SockAddrIn, @uv.Sockaddr), @net.NetworkError] {
+  let addr = match
+    (try? @net.SockAddrIn::parse(address)).map_err(err => @net.NetworkError::InvalidAddress(
+      msg="Failed to parse address: \{err}",
+    )) {
+    Ok(a) => a
+    Err(e) => return Err(e)
+  }
+  let uv_addr = match
+    (try? @net.SockAddr::Inet(addr).to_uv()).map_err(err => @net.NetworkError::InvalidAddress(
+      msg="Failed to convert address: \{err}",
+    )) {
+    Ok(a) => a
+    Err(e) => return Err(e)
+  }
+  Ok((addr, uv_addr))
+}
+
+///|
 pub impl @net.Network for UvNet with dial(self, network, address, options) {
   match network {
     "tcp" => {
-      let sockaddr = (try? @net.SockAddrIn::parse(address)).map_err(err => @net.NetworkError::InvalidAddress(
-        msg="Failed to parse address: \{err}",
-      ))
-      match sockaddr {
-        Err(e) => Err(e)
-        Ok(addr) => {
-          let tcp = (try? @uv.Tcp::new(self.uv.uv)).map_err(err => @net.NetworkError::DeviceFailure(
-            msg="Failed to create TCP handle: \{err.to_bytes() |> @encoding/utf8.decode_lossy}",
-          ))
-          match tcp {
-            Err(e) => Err(e)
-            Ok(handle) => {
-              let uv_addr = (try? @net.SockAddr::Inet(addr).to_uv()).map_err(err => @net.NetworkError::InvalidAddress(
-                msg="Failed to convert address: \{err}",
-              ))
-              match uv_addr {
-                Err(e) => Err(e)
-                Ok(_) => {
-                  let socket = UvTcpSocket::{ uv: handle, rt: self.uv }
-                  let opt = @net.TcpOption::new(reuseaddr=(options & 1) != 0)
-                  @net.TcpSocket::dial(socket, @net.SockAddr::Inet(addr), opt).map(it => it
-                      as &@net.Connection,
-                  )
-                }
-              }
-            }
-          }
-        }
+      let (addr, _) = match parse_and_convert_addr(address) {
+        Ok(result) => result
+        Err(e) => return Err(e)
       }
+      let handle = match
+        (try? @uv.Tcp::new(self.uv.uv)).map_err(err => @net.NetworkError::DeviceFailure(
+          msg="Failed to create TCP handle: \{err.to_bytes() |> @encoding/utf8.decode_lossy}",
+        )) {
+        Ok(h) => h
+        Err(e) => return Err(e)
+      }
+      let socket = UvTcpSocket::{ uv: handle, rt: self.uv }
+      let opt = @net.TcpOption::new(reuseaddr=(options & 1) != 0)
+      @net.TcpSocket::dial(socket, @net.SockAddr::Inet(addr), opt).map(it => it
+        as &@net.Connection)
     }
     "udp" => {
-      let sockaddr = (try? @net.SockAddrIn::parse(address)).map_err(err => @net.NetworkError::InvalidAddress(
-        msg="Failed to parse address: \{err}",
-      ))
-      match sockaddr {
-        Err(e) => Err(e)
-        Ok(addr) => {
-          let udp = (try? @uv.Udp::new(self.uv.uv)).map_err(err => @net.NetworkError::DeviceFailure(
-            msg="Failed to create UDP handle: \{err.to_bytes() |> @encoding/utf8.decode_lossy}",
-          ))
-          match udp {
-            Err(e) => Err(e)
-            Ok(handle) => {
-              let uv_addr = (try? @net.SockAddr::Inet(addr).to_uv()).map_err(err => @net.NetworkError::InvalidAddress(
-                msg="Failed to convert address: \{err}",
-              ))
-              match uv_addr {
-                Err(e) => Err(e)
-                Ok(uv_sock) => {
-                  handle.connect(uv_sock) catch {
-                    err => {
-                      handle.close(() => ())
-                      raise @net.NetworkError::DeviceFailure(
-                        msg="Failed to connect UDP: \{err.to_bytes() |> @encoding/utf8.decode_lossy}",
-                      )
-                    }
-                  }
-                  let socket = UvDatagramSocket::{
-                    udp: handle,
-                    rt: self.uv,
-                    closed: false,
-                  }
-                  let buffer = @buffer.HeapByteBuf::new(65536)
-                  Ok(
-                    UvDatagram::{ sock: socket, buf: buffer, udp: handle }
-                    as &@net.Connection,
-                  )
-                }
-              }
-            }
-          }
+      let (addr, uv_sock) = match parse_and_convert_addr(address) {
+        Ok(result) => result
+        Err(e) => return Err(e)
+      }
+      let handle = match
+        (try? @uv.Udp::new(self.uv.uv)).map_err(err => @net.NetworkError::DeviceFailure(
+          msg="Failed to create UDP handle: \{err.to_bytes() |> @encoding/utf8.decode_lossy}",
+        )) {
+        Ok(h) => h
+        Err(e) => return Err(e)
+      }
+      handle.connect(uv_sock) catch {
+        err => {
+          handle.close(() => ())
+          raise @net.NetworkError::DeviceFailure(
+            msg="Failed to connect UDP: \{err.to_bytes() |> @encoding/utf8.decode_lossy}",
+          )
         }
       }
+      let socket = UvDatagramSocket::{
+        udp: handle,
+        rt: self.uv,
+        closed: false,
+        packet_queue: @pipe.ArrayBlockingQueue::new(self.uv, 128, fn() {
+          (@net.SockAddr::Unspec, Bytes::new(0))
+        }),
+        receiving: false,
+      }
+      let buffer = @buffer.HeapByteBuf::new(65536)
+      // For connected UDP, set the remote address explicitly
+      Ok(
+        UvDatagram::{
+          sock: socket,
+          buf: buffer,
+          udp: handle,
+          remote: @net.SockAddr::Inet(addr),
+        }
+        as &@net.Connection,
+      )
     }
     _ =>
       Err(
@@ -99,90 +103,68 @@ pub impl @net.Network for UvNet with dial(self, network, address, options) {
 pub impl @net.Network for UvNet with bind(self, network, bind, options) {
   match network {
     "tcp" => {
-      let sockaddr = (try? @net.SockAddrIn::parse(bind)).map_err(err => @net.NetworkError::InvalidAddress(
-        msg="Failed to parse address: \{err}",
-      ))
-      match sockaddr {
-        Err(e) => Err(e)
-        Ok(addr) => {
-          let tcp = (try? @uv.Tcp::new(self.uv.uv)).map_err(err => @net.NetworkError::DeviceFailure(
-            msg="Failed to create TCP handle: \{err.to_bytes() |> @encoding/utf8.decode_lossy}",
-          ))
-          match tcp {
-            Err(e) => Err(e)
-            Ok(handle) => {
-              let uv_addr = (try? @net.SockAddr::Inet(addr).to_uv()).map_err(err => @net.NetworkError::InvalidAddress(
-                msg="Failed to convert address: \{err}",
-              ))
-              match uv_addr {
-                Err(e) => Err(e)
-                Ok(uv_sock) => {
-                  let opt = @net.TcpOption::new(reuseaddr=(options & 1) != 0)
-                  let flags = @uv.TcpBindFlags::new(reuse_port=opt.reuseaddr())
-                  handle.bind(uv_sock, flags) catch {
-                    err => {
-                      handle.close(() => ())
-                      raise @net.NetworkError::DeviceFailure(
-                        msg="Failed to bind: \{err.to_bytes() |> @encoding/utf8.decode_lossy}",
-                      )
-                    }
-                  }
-                  Ok(UvTcpSocket::{ uv: handle, rt: self.uv } as &@net.Socket)
-                }
-              }
-            }
-          }
+      let (_, uv_sock) = match parse_and_convert_addr(bind) {
+        Ok(result) => result
+        Err(e) => return Err(e)
+      }
+      let handle = match
+        (try? @uv.Tcp::new(self.uv.uv)).map_err(err => @net.NetworkError::DeviceFailure(
+          msg="Failed to create TCP handle: \{err.to_bytes() |> @encoding/utf8.decode_lossy}",
+        )) {
+        Ok(h) => h
+        Err(e) => return Err(e)
+      }
+      let opt = @net.TcpOption::new(reuseaddr=(options & 1) != 0)
+      let flags = @uv.TcpBindFlags::new(reuse_port=opt.reuseaddr())
+      handle.bind(uv_sock, flags) catch {
+        err => {
+          handle.close(() => ())
+          raise @net.NetworkError::DeviceFailure(
+            msg="Failed to bind: \{err.to_bytes() |> @encoding/utf8.decode_lossy}",
+          )
         }
       }
+      Ok(UvTcpSocket::{ uv: handle, rt: self.uv } as &@net.Socket)
     }
     "udp" => {
-      let sockaddr = (try? @net.SockAddrIn::parse(bind)).map_err(err => @net.NetworkError::InvalidAddress(
-        msg="Failed to parse address: \{err}",
-      ))
-      match sockaddr {
-        Err(e) => Err(e)
-        Ok(addr) => {
-          let udp = (try? @uv.Udp::new(self.uv.uv)).map_err(err => @net.NetworkError::DeviceFailure(
-            msg="Failed to create UDP handle: \{err.to_bytes() |> @encoding/utf8.decode_lossy}",
-          ))
-          match udp {
-            Err(e) => Err(e)
-            Ok(handle) => {
-              let uv_addr = (try? @net.SockAddr::Inet(addr).to_uv()).map_err(err => @net.NetworkError::InvalidAddress(
-                msg="Failed to convert address: \{err}",
-              ))
-              match uv_addr {
-                Err(e) => Err(e)
-                Ok(uv_sock) => {
-                  let opt = @net.UdpOption::new(broadcast=(options & 1) != 0)
-                  let flags = @uv.UdpFlags::new()
-                  handle.bind(uv_sock, flags) catch {
-                    err => {
-                      handle.close(() => ())
-                      raise @net.NetworkError::DeviceFailure(
-                        msg="Failed to bind UDP: \{err.to_bytes() |> @encoding/utf8.decode_lossy}",
-                      )
-                    }
-                  }
-                  if opt.broadcast() {
-                    handle.set_broadcast(true) catch {
-                      _ => ()
-                    }
-                  }
-                  Ok(
-                    UvDatagramSocket::{
-                      udp: handle,
-                      rt: self.uv,
-                      closed: false,
-                    }
-                    as &@net.Socket,
-                  )
-                }
-              }
-            }
-          }
+      let (_, uv_sock) = match parse_and_convert_addr(bind) {
+        Ok(result) => result
+        Err(e) => return Err(e)
+      }
+      let handle = match
+        (try? @uv.Udp::new(self.uv.uv)).map_err(err => @net.NetworkError::DeviceFailure(
+          msg="Failed to create UDP handle: \{err.to_bytes() |> @encoding/utf8.decode_lossy}",
+        )) {
+        Ok(h) => h
+        Err(e) => return Err(e)
+      }
+      let opt = @net.UdpOption::new(broadcast=(options & 1) != 0)
+      let flags = @uv.UdpFlags::new()
+      handle.bind(uv_sock, flags) catch {
+        err => {
+          handle.close(() => ())
+          raise @net.NetworkError::DeviceFailure(
+            msg="Failed to bind UDP: \{err.to_bytes() |> @encoding/utf8.decode_lossy}",
+          )
         }
       }
+      if opt.broadcast() {
+        handle.set_broadcast(true) catch {
+          _ => ()
+        }
+      }
+      Ok(
+        UvDatagramSocket::{
+          udp: handle,
+          rt: self.uv,
+          closed: false,
+          packet_queue: @pipe.ArrayBlockingQueue::new(self.uv, 128, fn() {
+            (@net.SockAddr::Unspec, Bytes::new(0))
+          }),
+          receiving: false,
+        }
+        as &@net.Socket,
+      )
     }
     _ =>
       Err(

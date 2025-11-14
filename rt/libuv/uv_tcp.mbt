@@ -16,8 +16,7 @@ impl @net.Connection for UvTcpConnecion with remote_addr(self) {
 }
 
 ///|
-impl @net.Connection for UvTcpConnecion with flush(self) {
-  let _ = self
+impl @net.Connection for UvTcpConnecion with flush(_) {
 
 }
 
