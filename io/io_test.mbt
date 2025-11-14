@@ -1,181 +1,386 @@
 ///|
 /// Test coverage for io module
-/// 
-/// NOTE: The io module defines async traits (Reader and Writer) with async methods.
-/// Due to a compiler limitation (v0.6.31) with the `%async.run` intrinsic causing
-/// Internal Compiler Error (ICE), we cannot directly test async trait method calls
-/// in the test suite. The tests below verify:
-/// - Object construction and initialization
-/// - Type correctness
-/// - Basic structure and composition
-///
-/// The actual async functionality (read/write operations) is tested through
-/// integration tests in other modules that use io components.
 
-///| Tests for ByteBufReader and ByteBufWriter
-test "ByteBufReader creation" {
-  let buf = @buffer.HeapByteBuf::wrapped_bytes(b"hello world")
-  let reader = ByteBufReader::new(buf as &@buffer.Buffer)
-  // Reader is created successfully - async methods cannot be tested due to compiler limitation
-  inspect(buf.readable_bytes(), content="11")
+///| `run_async` spawn a new coroutine and execute an async function in it
+fn run_async(f : async () -> Unit noraise) -> Unit = "%async.run"
+
+///| Helper to run async code that may raise errors in tests
+fn test_async(f : async () -> Unit) -> Unit {
+  run_async(fn() {
+    try {
+      f()
+    } catch {
+      e => abort("Test failed with error: \{e}")
+    }
+  })
 }
 
-test "ByteBufWriter creation" {
-  let buf = @buffer.HeapByteBuf::new(100)
-  let writer = ByteBufWriter::new(buf as &@buffer.Buffer)
-  // Writer is created successfully
-  inspect(buf.writable_bytes(), content="100")
+///| Tests for ByteBufReader
+test "ByteBufReader read operations" {
+  test_async(fn() {
+    let buf = @buffer.HeapByteBuf::wrapped_bytes(b"hello world")
+    let reader = ByteBufReader::new(buf as &@buffer.Buffer)
+    
+    // Test basic read
+    let dst : FixedArray[Byte] = FixedArray::make(5, 0)
+    let bytes_read = reader.read(dst, 0, 5)
+    inspect(bytes_read, content="5")
+    inspect(dst[0].to_int(), content="104") // 'h'
+    inspect(dst[4].to_int(), content="111") // 'o'
+    
+    // Test partial read (try to read more than buffer size, should only read what's available)
+    let dst2 : FixedArray[Byte] = FixedArray::make(10, 0)
+    let bytes_read2 = reader.read(dst2, 0, 10)
+    inspect(bytes_read2, content="6") // remaining " world"
+  })
 }
 
-test "ByteBufReader and ByteBufWriter composition" {
-  let src_buf = @buffer.HeapByteBuf::wrapped_bytes(b"test data")
-  let dst_buf = @buffer.HeapByteBuf::new(50)
-  let reader = ByteBufReader::new(src_buf as &@buffer.Buffer)
-  let writer = ByteBufWriter::new(dst_buf as &@buffer.Buffer)
-  // Both created successfully for use in async contexts
-  inspect(src_buf.readable_bytes(), content="9")
-  inspect(dst_buf.writable_bytes(), content="50")
+test "ByteBufReader empty and closed states" {
+  test_async(fn() {
+    let buf = @buffer.HeapByteBuf::new(10)
+    let reader = ByteBufReader::new(buf as &@buffer.Buffer)
+    
+    // Empty buffer returns 0
+    let dst : FixedArray[Byte] = FixedArray::make(5, 0)
+    inspect(reader.read(dst, 0, 5), content="0")
+    
+    // Close and verify
+    inspect(reader.is_closed(), content="false")
+    reader.close()
+    inspect(reader.is_closed(), content="true")
+    inspect(reader.available(), content="0")
+  })
 }
 
-///| Tests for DiscardWriter and EmptyClosedReader
-test "DiscardWriter creation" {
-  let writer = DiscardWriter::new()
-  // DiscardWriter created - it should accept all writes (tested in integration)
+test "ByteBufReader read_all and read_buffer" {
+  test_async(fn() {
+    let buf = @buffer.HeapByteBuf::wrapped_bytes(b"hello world")
+    let reader = ByteBufReader::new(buf as &@buffer.Buffer)
+    let result = reader.read_buffer(5)
+    inspect(result.readable_bytes(), content="5")
+  })
 }
 
-test "EmptyClosedReader creation" {
-  let reader = EmptyClosedReader::new()
-  // EmptyClosedReader created - it should always return 0 bytes (tested in integration)
+test "ByteBufReader read_buffer_to" {
+  test_async(fn() {
+    let src_buf = @buffer.HeapByteBuf::wrapped_bytes(b"hello")
+    let reader = ByteBufReader::new(src_buf as &@buffer.Buffer)
+    let dst_buf = @buffer.HeapByteBuf::new(10)
+    let bytes_read = reader.read_buffer_to(dst_buf as &@buffer.Buffer)
+    inspect(bytes_read, content="5")
+    inspect(dst_buf.readable_bytes(), content="5")
+  })
 }
 
-///| Tests for LimitReader and LimitedWriter
-test "LimitReader creation with limit" {
-  let buf = @buffer.HeapByteBuf::wrapped_bytes(b"hello world")
-  let base_reader = ByteBufReader::new(buf as &@buffer.Buffer)
-  let limited = LimitReader::new(base_reader as &Reader, 5)
-  // Limited reader created with 5 byte limit
-  inspect(buf.readable_bytes(), content="11")
+///| Tests for ByteBufWriter
+test "ByteBufWriter write operations" {
+  test_async(fn() {
+    let buf = @buffer.HeapByteBuf::new(10)
+    let writer = ByteBufWriter::new(buf as &@buffer.Buffer)
+    
+    let src : FixedArray[Byte] = [104, 101, 108, 108, 111]
+    let bytes_written = writer.write(src, 0, 5)
+    inspect(bytes_written, content="5")
+    inspect(buf.readable_bytes(), content="5")
+    
+    // Test closed state
+    inspect(writer.is_closed(), content="false")
+    writer.close()
+    inspect(writer.is_closed(), content="true")
+  })
 }
 
+test "ByteBufWriter capacity limits" {
+  test_async(fn() {
+    let buf = @buffer.HeapByteBuf::new(3)
+    let src : FixedArray[Byte] = [1, 2, 3]
+    ignore(buf.write(src, 0, 3))
+    let writer = ByteBufWriter::new(buf as &@buffer.Buffer)
+    
+    // Full buffer returns 0
+    let src2 : FixedArray[Byte] = [4, 5]
+    inspect(writer.write(src2, 0, 2), content="0")
+  })
+}
+
+test "ByteBufWriter write_buffer" {
+  test_async(fn() {
+    let src_buf = @buffer.HeapByteBuf::wrapped_bytes(b"hello")
+    let dst_buf = @buffer.HeapByteBuf::new(10)
+    let writer = ByteBufWriter::new(dst_buf as &@buffer.Buffer)
+    let bytes_written = writer.write_buffer(src_buf as &@buffer.Buffer)
+    inspect(bytes_written, content="5")
+    inspect(dst_buf.readable_bytes(), content="5")
+  })
+}
+
+///| Tests for DiscardWriter
+test "DiscardWriter always accepts writes" {
+  test_async(fn() {
+    let writer = DiscardWriter::new()
+    
+    // Always returns requested length
+    let data : FixedArray[Byte] = [1, 2, 3, 4, 5]
+    inspect(writer.write(data, 0, 5), content="5")
+    
+    // Large write
+    let large_data : FixedArray[Byte] = FixedArray::make(1000, 42)
+    inspect(writer.write(large_data, 0, 1000), content="1000")
+    
+    // Never closed
+    inspect(writer.is_closed(), content="false")
+    writer.close()
+    inspect(writer.is_closed(), content="false")
+    
+    // Works after "close"
+    inspect(writer.write(data, 0, 3), content="3")
+  })
+}
+
+test "DiscardWriter write_buffer consumes buffer" {
+  test_async(fn() {
+    let writer = DiscardWriter::new()
+    let buf = @buffer.HeapByteBuf::wrapped_bytes(b"hello world")
+    let bytes_written = writer.write_buffer(buf as &@buffer.Buffer)
+    inspect(bytes_written, content="11")
+    inspect(buf.readable_bytes(), content="0")
+  })
+}
+
+///| Tests for EmptyClosedReader
+test "EmptyClosedReader always returns EOF" {
+  test_async(fn() {
+    let reader = EmptyClosedReader::new()
+    
+    // Always closed
+    inspect(reader.is_closed(), content="true")
+    
+    // Always returns 0
+    let dst : FixedArray[Byte] = FixedArray::make(10, 0)
+    inspect(reader.read(dst, 0, 10), content="0")
+    inspect(reader.read(dst, 0, 1000), content="0")
+    
+    // Available is 0
+    inspect(reader.available(), content="0")
+    
+    // read_all returns empty
+    let result = reader.read_all()
+    inspect(result.readable_bytes(), content="0")
+    
+    // Close is no-op
+    reader.close()
+    inspect(reader.is_closed(), content="true")
+  })
+}
+
+///| Tests for LimitReader
+test "LimitReader respects read limit" {
+  test_async(fn() {
+    let buf = @buffer.HeapByteBuf::wrapped_bytes(b"hello world")
+    let base_reader = ByteBufReader::new(buf as &@buffer.Buffer)
+    let limited = LimitReader::new(base_reader as &Reader, 5)
+    
+    // Read within limit
+    let dst : FixedArray[Byte] = FixedArray::make(10, 0)
+    let bytes_read = limited.read(dst, 0, 10)
+    inspect(bytes_read, content="5")
+    
+    // Further reads return 0
+    inspect(limited.read(dst, 0, 10), content="0")
+  })
+}
+
+test "LimitReader multiple reads within limit" {
+  test_async(fn() {
+    let buf = @buffer.HeapByteBuf::wrapped_bytes(b"hello world")
+    let base_reader = ByteBufReader::new(buf as &@buffer.Buffer)
+    let limited = LimitReader::new(base_reader as &Reader, 10)
+    
+    let dst : FixedArray[Byte] = FixedArray::make(5, 0)
+    inspect(limited.read(dst, 0, 5), content="5")
+    inspect(limited.read(dst, 0, 5), content="5")
+    inspect(limited.read(dst, 0, 5), content="0")
+  })
+}
+
+test "LimitReader close and state" {
+  test_async(fn() {
+    let buf = @buffer.HeapByteBuf::wrapped_bytes(b"test")
+    let base_reader = ByteBufReader::new(buf as &@buffer.Buffer)
+    let limited = LimitReader::new(base_reader as &Reader, 5)
+    
+    inspect(limited.is_closed(), content="false")
+    limited.close()
+    inspect(base_reader.is_closed(), content="true")
+    inspect(limited.is_closed(), content="true")
+  })
+}
+
+///| Tests for LimitedWriter
+test "LimitedWriter respects write limit" {
+  test_async(fn() {
+    let buf = @buffer.HeapByteBuf::new(100)
+    let base_writer = ByteBufWriter::new(buf as &@buffer.Buffer)
+    let limited = LimitedWriter::new(base_writer as &Writer, 5)
+    
+    let src : FixedArray[Byte] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    let bytes_written = limited.write(src, 0, 10)
+    inspect(bytes_written, content="5")
+    
+    // Further writes return 0
+    inspect(limited.write(src, 0, 10), content="0")
+  })
+}
+
+test "LimitedWriter multiple writes within limit" {
+  test_async(fn() {
+    let buf = @buffer.HeapByteBuf::new(100)
+    let base_writer = ByteBufWriter::new(buf as &@buffer.Buffer)
+    let limited = LimitedWriter::new(base_writer as &Writer, 10)
+    
+    let src : FixedArray[Byte] = [1, 2, 3, 4, 5]
+    inspect(limited.write(src, 0, 5), content="5")
+    inspect(limited.write(src, 0, 5), content="5")
+    inspect(limited.write(src, 0, 5), content="0")
+  })
+}
+
+test "LimitedWriter close and state" {
+  test_async(fn() {
+    let buf = @buffer.HeapByteBuf::new(100)
+    let base_writer = ByteBufWriter::new(buf as &@buffer.Buffer)
+    let limited = LimitedWriter::new(base_writer as &Writer, 10)
+    
+    inspect(limited.is_closed(), content="false")
+    limited.close()
+    inspect(base_writer.is_closed(), content="true")
+    inspect(limited.is_closed(), content="true")
+  })
+}
+
+///| Tests for TeeReader
+test "TeeReader copies data to writer" {
+  test_async(fn() {
+    let src_buf = @buffer.HeapByteBuf::wrapped_bytes(b"hello")
+    let dst_buf = @buffer.HeapByteBuf::new(10)
+    let reader = ByteBufReader::new(src_buf as &@buffer.Buffer)
+    let writer = ByteBufWriter::new(dst_buf as &@buffer.Buffer)
+    let tee = TeeReader::new(reader as &Reader, writer as &Writer)
+    
+    let data : FixedArray[Byte] = FixedArray::make(5, 0)
+    let bytes_read = tee.read(data, 0, 5)
+    inspect(bytes_read, content="5")
+    inspect(data[0].to_int(), content="104") // 'h'
+    inspect(dst_buf.readable_bytes(), content="5")
+  })
+}
+
+test "TeeReader handles partial writes" {
+  test_async(fn() {
+    let src_buf = @buffer.HeapByteBuf::wrapped_bytes(b"hello world")
+    let dst_buf = @buffer.HeapByteBuf::new(3) // Small buffer
+    let reader = ByteBufReader::new(src_buf as &@buffer.Buffer)
+    let writer = ByteBufWriter::new(dst_buf as &@buffer.Buffer)
+    let tee = TeeReader::new(reader as &Reader, writer as &Writer)
+    
+    let data : FixedArray[Byte] = FixedArray::make(5, 0)
+    let bytes_read = tee.read(data, 0, 5)
+    inspect(bytes_read, content="5") // Reads 5
+    inspect(dst_buf.readable_bytes(), content="3") // Writes only 3
+  })
+}
+
+test "TeeReader close closes both" {
+  test_async(fn() {
+    let src_buf = @buffer.HeapByteBuf::wrapped_bytes(b"test")
+    let dst_buf = @buffer.HeapByteBuf::new(10)
+    let reader = ByteBufReader::new(src_buf as &@buffer.Buffer)
+    let writer = ByteBufWriter::new(dst_buf as &@buffer.Buffer)
+    let tee = TeeReader::new(reader as &Reader, writer as &Writer)
+    
+    tee.close()
+    inspect(reader.is_closed(), content="true")
+    inspect(writer.is_closed(), content="true")
+    inspect(tee.is_closed(), content="true")
+  })
+}
+
+///| Tests for DuplexWriter
+test "DuplexWriter writes to both writers" {
+  test_async(fn() {
+    let buf1 = @buffer.HeapByteBuf::new(10)
+    let buf2 = @buffer.HeapByteBuf::new(10)
+    let writer1 = ByteBufWriter::new(buf1 as &@buffer.Buffer)
+    let writer2 = ByteBufWriter::new(buf2 as &@buffer.Buffer)
+    let duplex = DuplexWriter::new(writer1 as &Writer, writer2 as &Writer)
+    
+    let data : FixedArray[Byte] = [1, 2, 3, 4, 5]
+    let bytes_written = duplex.write(data, 0, 5)
+    inspect(bytes_written, content="5")
+    inspect(buf1.readable_bytes(), content="5")
+    inspect(buf2.readable_bytes(), content="5")
+  })
+}
+
+test "DuplexWriter returns minimum written" {
+  test_async(fn() {
+    let buf1 = @buffer.HeapByteBuf::new(3)
+    let buf2 = @buffer.HeapByteBuf::new(10)
+    let writer1 = ByteBufWriter::new(buf1 as &@buffer.Buffer)
+    let writer2 = ByteBufWriter::new(buf2 as &@buffer.Buffer)
+    let duplex = DuplexWriter::new(writer1 as &Writer, writer2 as &Writer)
+    
+    let data : FixedArray[Byte] = [1, 2, 3, 4, 5]
+    let bytes_written = duplex.write(data, 0, 5)
+    inspect(bytes_written, content="3")
+  })
+}
+
+test "DuplexWriter close closes both" {
+  test_async(fn() {
+    let buf1 = @buffer.HeapByteBuf::new(10)
+    let buf2 = @buffer.HeapByteBuf::new(10)
+    let writer1 = ByteBufWriter::new(buf1 as &@buffer.Buffer)
+    let writer2 = ByteBufWriter::new(buf2 as &@buffer.Buffer)
+    let duplex = DuplexWriter::new(writer1 as &Writer, writer2 as &Writer)
+    
+    duplex.close()
+    inspect(writer1.is_closed(), content="true")
+    inspect(writer2.is_closed(), content="true")
+    inspect(duplex.is_closed(), content="true")
+  })
+}
+
+///| Tests for edge cases
 test "LimitReader with zero limit" {
-  let buf = @buffer.HeapByteBuf::wrapped_bytes(b"test")
-  let base_reader = ByteBufReader::new(buf as &@buffer.Buffer)
-  let limited = LimitReader::new(base_reader as &Reader, 0)
-  // Limited reader with zero limit created
-}
-
-test "LimitedWriter creation with limit" {
-  let buf = @buffer.HeapByteBuf::new(100)
-  let base_writer = ByteBufWriter::new(buf as &@buffer.Buffer)
-  let limited = LimitedWriter::new(base_writer as &Writer, 10)
-  // Limited writer created with 10 byte limit
-  inspect(buf.writable_bytes(), content="100")
+  test_async(fn() {
+    let buf = @buffer.HeapByteBuf::wrapped_bytes(b"test")
+    let base_reader = ByteBufReader::new(buf as &@buffer.Buffer)
+    let limited = LimitReader::new(base_reader as &Reader, 0)
+    
+    let dst : FixedArray[Byte] = FixedArray::make(5, 0)
+    inspect(limited.read(dst, 0, 5), content="0")
+  })
 }
 
 test "LimitedWriter with zero limit" {
-  let buf = @buffer.HeapByteBuf::new(50)
-  let base_writer = ByteBufWriter::new(buf as &@buffer.Buffer)
-  let limited = LimitedWriter::new(base_writer as &Writer, 0)
-  // Limited writer with zero limit created
+  test_async(fn() {
+    let buf = @buffer.HeapByteBuf::new(50)
+    let base_writer = ByteBufWriter::new(buf as &@buffer.Buffer)
+    let limited = LimitedWriter::new(base_writer as &Writer, 0)
+    
+    let src : FixedArray[Byte] = [1, 2, 3]
+    inspect(limited.write(src, 0, 3), content="0")
+  })
 }
 
-///| Tests for TeeReader and DuplexWriter
-test "TeeReader creation" {
-  let src_buf = @buffer.HeapByteBuf::wrapped_bytes(b"hello")
-  let dst_buf = @buffer.HeapByteBuf::new(10)
-  let reader = ByteBufReader::new(src_buf as &@buffer.Buffer)
-  let writer = ByteBufWriter::new(dst_buf as &@buffer.Buffer)
-  let tee = TeeReader::new(reader as &Reader, writer as &Writer)
-  // TeeReader created - should copy data to writer when reading
-  inspect(src_buf.readable_bytes(), content="5")
-  inspect(dst_buf.writable_bytes(), content="10")
-}
-
-test "DuplexWriter creation" {
-  let buf1 = @buffer.HeapByteBuf::new(10)
-  let buf2 = @buffer.HeapByteBuf::new(10)
-  let writer1 = ByteBufWriter::new(buf1 as &@buffer.Buffer)
-  let writer2 = ByteBufWriter::new(buf2 as &@buffer.Buffer)
-  let duplex = DuplexWriter::new(writer1 as &Writer, writer2 as &Writer)
-  // DuplexWriter created - should write to both writers
-  inspect(buf1.writable_bytes(), content="10")
-  inspect(buf2.writable_bytes(), content="10")
-}
-
-test "DuplexWriter with different capacity buffers" {
-  let buf1 = @buffer.HeapByteBuf::new(5)
-  let buf2 = @buffer.HeapByteBuf::new(100)
-  let writer1 = ByteBufWriter::new(buf1 as &@buffer.Buffer)
-  let writer2 = ByteBufWriter::new(buf2 as &@buffer.Buffer)
-  let duplex = DuplexWriter::new(writer1 as &Writer, writer2 as &Writer)
-  // DuplexWriter with different capacities - should return min bytes written
-  inspect(buf1.writable_bytes(), content="5")
-  inspect(buf2.writable_bytes(), content="100")
-}
-
-///| Tests for chaining and composition
-test "Chained readers - TeeReader with LimitReader" {
-  let src_buf = @buffer.HeapByteBuf::wrapped_bytes(b"hello world")
-  let dst_buf = @buffer.HeapByteBuf::new(20)
-  let base_reader = ByteBufReader::new(src_buf as &@buffer.Buffer)
-  let limited = LimitReader::new(base_reader as &Reader, 5)
-  let writer = ByteBufWriter::new(dst_buf as &@buffer.Buffer)
-  let tee = TeeReader::new(limited as &Reader, writer as &Writer)
-  // Chained reader created: TeeReader -> LimitReader -> ByteBufReader
-}
-
-test "Chained writers - DuplexWriter with LimitedWriter" {
-  let buf1 = @buffer.HeapByteBuf::new(10)
-  let buf2 = @buffer.HeapByteBuf::new(10)
-  let base_writer1 = ByteBufWriter::new(buf1 as &@buffer.Buffer)
-  let limited1 = LimitedWriter::new(base_writer1 as &Writer, 5)
-  let base_writer2 = ByteBufWriter::new(buf2 as &@buffer.Buffer)
-  let duplex = DuplexWriter::new(limited1 as &Writer, base_writer2 as &Writer)
-  // Chained writer created: DuplexWriter -> (LimitedWriter, ByteBufWriter)
-}
-
-test "Multiple TeeReaders for logging/debugging pattern" {
-  let src_buf = @buffer.HeapByteBuf::wrapped_bytes(b"data")
-  let log1_buf = @buffer.HeapByteBuf::new(10)
-  let log2_buf = @buffer.HeapByteBuf::new(10)
-  
-  let base_reader = ByteBufReader::new(src_buf as &@buffer.Buffer)
-  let log1_writer = ByteBufWriter::new(log1_buf as &@buffer.Buffer)
-  let tee1 = TeeReader::new(base_reader as &Reader, log1_writer as &Writer)
-  let log2_writer = ByteBufWriter::new(log2_buf as &@buffer.Buffer)
-  let tee2 = TeeReader::new(tee1 as &Reader, log2_writer as &Writer)
-  // Multiple tee readers for multi-destination logging
-}
-
-test "DiscardWriter in DuplexWriter for monitoring" {
-  let buf = @buffer.HeapByteBuf::new(10)
-  let real_writer = ByteBufWriter::new(buf as &@buffer.Buffer)
-  let discard_writer = DiscardWriter::new()
-  let duplex = DuplexWriter::new(real_writer as &Writer, discard_writer as &Writer)
-  // DuplexWriter with one discard for testing/monitoring without side effects
-}
-
-test "EmptyClosedReader as default/placeholder" {
-  let empty = EmptyClosedReader::new()
-  let dst_buf = @buffer.HeapByteBuf::new(10)
-  let writer = ByteBufWriter::new(dst_buf as &@buffer.Buffer)
-  let tee = TeeReader::new(empty as &Reader, writer as &Writer)
-  // EmptyClosedReader as placeholder in TeeReader
-}
-
-///| Buffer size edge cases
 test "Very large limit on LimitReader" {
-  let buf = @buffer.HeapByteBuf::wrapped_bytes(b"small")
-  let reader = ByteBufReader::new(buf as &@buffer.Buffer)
-  let limited = LimitReader::new(reader as &Reader, 999999999)
-  // Limit larger than available data
-  inspect(buf.readable_bytes(), content="5")
-}
-
-test "Very small buffer with normal limit" {
-  let buf = @buffer.HeapByteBuf::wrapped_bytes(b"x")
-  let reader = ByteBufReader::new(buf as &@buffer.Buffer)
-  let limited = LimitReader::new(reader as &Reader, 100)
-  // Small buffer with large limit
-  inspect(buf.readable_bytes(), content="1")
+  test_async(fn() {
+    let buf = @buffer.HeapByteBuf::wrapped_bytes(b"small")
+    let reader = ByteBufReader::new(buf as &@buffer.Buffer)
+    let limited = LimitReader::new(reader as &Reader, 999999999)
+    
+    let dst : FixedArray[Byte] = FixedArray::make(10, 0)
+    inspect(limited.read(dst, 0, 10), content="5")
+  })
 }
