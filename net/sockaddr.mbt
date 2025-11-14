@@ -1,15 +1,15 @@
 ///|
-pub enum SockAddr {
+pub(all) enum SockAddr {
   Inet(SockAddrIn)
   Local
-  Unix
+  Unix(path~: String)
   File
   Unspec
 } derive(Hash, Eq, Show)
 
 ///|
 pub(all) struct SockAddrIn {
-  inet : InetAddr
+  addr : InetAddr
   port : UInt16
 } derive(Hash, Eq)
 
@@ -20,7 +20,7 @@ let ipv6_re : @regexp.Regexp = (try? @regexp.compile(
 
 ///|
 /// Utility to construct SockAddr from host and port string, distinguishing IPv4/IPv6
-pub fn from_host_port(host : String, port : UInt16) -> SockAddrIn raise {
+pub fn SockAddrIn::from_host_port(host : String, port : UInt16) -> SockAddrIn raise {
   // Use regexp to check for IPv6 (contains ':', possibly brackets)
   let is_ipv6 = ipv6_re.execute(host).matched() || host.contains(":")
   let h = if host.has_prefix("[") && host.has_suffix("]") {
@@ -37,12 +37,12 @@ pub fn from_host_port(host : String, port : UInt16) -> SockAddrIn raise {
       err => raise err
     }
   }
-  SockAddrIn::{ inet, port }
+  SockAddrIn::{ addr: inet, port }
 }
 
 ///|
 pub impl Show for SockAddrIn with output(self, logger) {
-  match self.inet {
+  match self.addr {
     IPv4(_) as iv4 => logger.write_string(iv4.to_string())
     IPv6(_) as iv6 => logger.write_string("[\{iv6.to_string()}]")
   }
@@ -93,7 +93,7 @@ pub fn SockAddrIn::parse(address : String) -> SockAddrIn raise {
   guard port >= 0 && port <= 65535 else {
     raise fail("Port out of range: \{port}")
   }
-  from_host_port(parts.0, port.to_uint16())
+  SockAddrIn::from_host_port(parts.0, port.to_uint16())
 }
 
 ///|

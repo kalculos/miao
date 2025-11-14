@@ -11,6 +11,7 @@
     "iceBear67/miao/pipe",
     "iceBear67/miao/rt",
     "iceBear67/miao/net",
+    "iceBear67/miao/buffer",
     "iceBear67/time",
     "iceBear67/miao/process"
   ],
