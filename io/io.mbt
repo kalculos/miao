@@ -1,4 +1,5 @@
-///| Default buffer size for I/O operations
+///|
+/// Default buffer size for I/O operations
 let default_buffer_size : Int = 1024
 
 ///|
@@ -34,6 +35,7 @@ pub(open) trait Writer {
   async is_closed(Self) -> Bool
 }
 
+///|
 impl Reader with available(self) {
   if self.is_closed() {
     0
@@ -93,17 +95,17 @@ impl Reader with read_buffer_to(self, buf) -> Int {
 
 ///|
 impl Writer with write_buffer(self, buf) {
-  let _buf: FixedArray[Byte] = FixedArray::make(default_buffer_size, 0)
+  let _buf : FixedArray[Byte] = FixedArray::make(default_buffer_size, 0)
   let mut totalWritten = 0
   while buf.readable_bytes() > 0 {
-      let to_write = @cmp.minimum(buf.readable_bytes(), default_buffer_size)
-      let read = buf.read(_buf, 0, to_write)
-      let written = self.write(_buf, 0, read)
-      if written > 0 {
-        totalWritten += written
-      } else {
-        break
-      }
+    let to_write = @cmp.minimum(buf.readable_bytes(), default_buffer_size)
+    let read = buf.read(_buf, 0, to_write)
+    let written = self.write(_buf, 0, read)
+    if written > 0 {
+      totalWritten += written
+    } else {
+      break
+    }
   }
   totalWritten
 }

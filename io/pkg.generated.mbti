@@ -1,0 +1,89 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "iceBear67/miao/io"
+
+import(
+  "iceBear67/miao/buffer"
+)
+
+// Values
+
+// Errors
+
+// Types and methods
+pub struct ByteBufReader {
+  buffer : &@buffer.Buffer
+  // private fields
+}
+fn ByteBufReader::new(&@buffer.Buffer) -> Self
+impl Reader for ByteBufReader
+
+pub(all) struct ByteBufWriter {
+  buffer : &@buffer.Buffer
+  // private fields
+}
+fn ByteBufWriter::new(&@buffer.Buffer) -> Self
+impl Writer for ByteBufWriter
+
+pub(all) struct DiscardWriter {
+}
+fn DiscardWriter::new() -> Self
+impl Writer for DiscardWriter
+
+pub(all) struct DuplexWriter {
+  writer1 : &Writer
+  writer2 : &Writer
+}
+fn DuplexWriter::new(&Writer, &Writer) -> Self
+impl Writer for DuplexWriter
+
+pub(all) struct EmptyClosedReader {
+}
+fn EmptyClosedReader::new() -> Self
+impl Reader for EmptyClosedReader
+
+pub(all) struct LimitReader {
+  reader : &Reader
+  mut remaining : Int
+}
+fn LimitReader::new(&Reader, Int) -> Self
+impl Reader for LimitReader
+
+pub(all) struct LimitedWriter {
+  inner : &Writer
+  // private fields
+}
+fn LimitedWriter::new(&Writer, Int) -> Self
+impl Writer for LimitedWriter
+
+pub(all) struct TeeReader {
+  reader : &Reader
+  writer : &Writer
+}
+fn TeeReader::new(&Reader, &Writer) -> Self
+impl Reader for TeeReader
+
+// Type aliases
+
+// Traits
+pub(open) trait Channel : Reader + Writer {
+  async close(Self) -> Unit
+  async is_closed(Self) -> Bool
+}
+
+pub(open) trait Reader {
+  async read(Self, FixedArray[Byte], Int, Int) -> Int
+  async read_all(Self) -> &@buffer.Buffer = _
+  async read_buffer(Self, Int) -> &@buffer.Buffer = _
+  async read_buffer_to(Self, &@buffer.Buffer) -> Int = _
+  async available(Self) -> Int = _
+  async close(Self) -> Unit
+  async is_closed(Self) -> Bool
+}
+
+pub(open) trait Writer {
+  async write(Self, FixedArray[Byte], Int, Int) -> Int
+  async write_buffer(Self, &@buffer.Buffer) -> Int = _
+  async close(Self) -> Unit
+  async is_closed(Self) -> Bool
+}
+

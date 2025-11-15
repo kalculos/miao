@@ -1,5 +1,11 @@
 {
     "import": [
         "iceBear67/miao/buffer"
+    ],
+    "test-import": [
+        "moonbitlang/async"
+    ],
+    "wbtest-import": [
+        "moonbitlang/async"
     ]
 }
