@@ -1,20 +1,11 @@
 ///| Tests for HTTP response parser and serializer
 
-///| Helper to write UTF-8 string to buffer
-fn write_utf8_string_serializer(buffer : &@buffer.Buffer, s : String) -> Unit {
-  let len = s.length()
-  let arr : FixedArray[Byte] = FixedArray::make(len, 0)
-  for i = 0; i < len; i = i + 1 {
-    arr[i] = s[i].land(0xFF).to_byte()
-  }
-  buffer.write(arr, 0, len) |> ignore
-}
-
 ///| Test parsing a simple 200 OK response
 async test "parse_response parses 200 OK response" {
   let response_str = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: 13\r\n\r\nHello, World!"
   let buffer = @buffer.HeapByteBuf::new(1024)
-  write_utf8_string_serializer(buffer as &@buffer.Buffer, response_str)
+  let bytes = @encoding/utf8.encode(response_str)
+  buffer.write(bytes.to_fixedarray(), 0, bytes.length()) |> ignore
   let reader = @io.ByteBufReader::new(buffer as &@buffer.Buffer)
   let http_reader = HttpReader::new(reader as &@io.Reader)
   let response = try {
@@ -29,14 +20,30 @@ async test "parse_response parses 200 OK response" {
   inspect(response.status.code, content="200")
   inspect(response.status.reason, content="OK")
   inspect(response.headers.get("Content-Type"), content="Some(\"text/html\")")
-  inspect(response.body.to_string(), content="Hello, World!")
+  
+  // Read body
+  match response.content_reader {
+    Some(content_reader) => {
+      let body = try {
+        content_reader.read_all()
+      } catch {
+        e => {
+          inspect(e, content="Should not fail reading body")
+          b""
+        }
+      }
+      inspect(@encoding/utf8.decode(body), content="Hello, World!")
+    }
+    None => inspect(false, content="Should have content reader")
+  }
 }
 
 ///| Test parsing 404 Not Found response
 async test "parse_response parses 404 Not Found response" {
   let response_str = "HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\n\r\n"
   let buffer = @buffer.HeapByteBuf::new(1024)
-  write_utf8_string_serializer(buffer as &@buffer.Buffer, response_str)
+  let bytes = @encoding/utf8.encode(response_str)
+  buffer.write(bytes.to_fixedarray(), 0, bytes.length()) |> ignore
   let reader = @io.ByteBufReader::new(buffer as &@buffer.Buffer)
   let http_reader = HttpReader::new(reader as &@io.Reader)
   let response = try {
@@ -49,7 +56,7 @@ async test "parse_response parses 404 Not Found response" {
   }
   inspect(response.status.code, content="404")
   inspect(response.status.reason, content="Not Found")
-  inspect(response.body.length(), content="0")
+  inspect(response.content_reader.is_empty(), content="true")
 }
 
 ///| Test serializing a simple GET request
@@ -60,8 +67,8 @@ async test "serialize_request serializes GET request" {
   let buffer = @buffer.HeapByteBuf::new(1024)
   let writer = @io.ByteBufWriter::new(buffer as &@buffer.Buffer)
   let http_writer = HttpWriter::new(writer as &@io.Writer)
-  http_writer.write_request(request)
-  let result = buffer.to_bytes().to_string()
+  http_writer.write_request(request, None)
+  let result = @encoding/utf8.decode(buffer.to_bytes())
   inspect(
     result.contains("GET /test HTTP/1.1"),
     content="true",
@@ -82,14 +89,14 @@ async test "serialize_request serializes POST request with body" {
   )
   request.headers.add("Host", "api.example.com")
   request.headers.add("Content-Type", "application/json")
-  let body = "{\"name\":\"test\"}"
+  let body_str = "{\"name\":\"test\"}"
+  let body = @encoding/utf8.encode(body_str)
   request.headers.add("Content-Length", body.length().to_string())
-  request.set_body(body.to_bytes())
   let buffer = @buffer.HeapByteBuf::new(1024)
   let writer = @io.ByteBufWriter::new(buffer as &@buffer.Buffer)
   let http_writer = HttpWriter::new(writer as &@io.Writer)
-  http_writer.write_request(request)
-  let result = buffer.to_bytes().to_string()
+  http_writer.write_request(request, Some(body))
+  let result = @encoding/utf8.decode(buffer.to_bytes())
   inspect(
     result.contains("POST /api/data HTTP/1.1"),
     content="true",
@@ -105,14 +112,14 @@ async test "serialize_request serializes POST request with body" {
 async test "serialize_response serializes 200 OK response" {
   let response = HttpResponse::new(HttpVersion::HTTP_1_1, HttpStatus::ok())
   response.headers.add("Content-Type", "text/plain")
-  let body = "Success"
+  let body_str = "Success"
+  let body = @encoding/utf8.encode(body_str)
   response.headers.add("Content-Length", body.length().to_string())
-  response.set_body(body.to_bytes())
   let buffer = @buffer.HeapByteBuf::new(1024)
   let writer = @io.ByteBufWriter::new(buffer as &@buffer.Buffer)
   let http_writer = HttpWriter::new(writer as &@io.Writer)
-  http_writer.write_response(response)
-  let result = buffer.to_bytes().to_string()
+  http_writer.write_response(response, Some(body))
+  let result = @encoding/utf8.decode(buffer.to_bytes())
   inspect(result.contains("HTTP/1.1 200 OK"), content="true")
   inspect(
     result.contains("Content-Type: text/plain"),
@@ -130,15 +137,15 @@ async test "request round-trip serialize and parse" {
   )
   original.headers.add("Host", "test.com")
   original.headers.add("Content-Type", "text/plain")
-  let body = "test data"
+  let body_str = "test data"
+  let body = @encoding/utf8.encode(body_str)
   original.headers.add("Content-Length", body.length().to_string())
-  original.set_body(body.to_bytes())
   
   // Serialize
   let buffer = @buffer.HeapByteBuf::new(1024)
   let writer = @io.ByteBufWriter::new(buffer as &@buffer.Buffer)
   let http_writer = HttpWriter::new(writer as &@io.Writer)
-  http_writer.write_request(original)
+  http_writer.write_request(original, Some(body))
   
   // Parse back
   let reader = @io.ByteBufReader::new(buffer as &@buffer.Buffer)
@@ -153,22 +160,37 @@ async test "request round-trip serialize and parse" {
   }
   inspect(parsed.method(), content="POST")
   inspect(parsed.uri, content="/submit")
-  inspect(parsed.body.to_string(), content="test data")
+  
+  // Read body
+  match parsed.content_reader() {
+    Some(content_reader) => {
+      let read_body = try {
+        content_reader.read_all()
+      } catch {
+        e => {
+          inspect(e, content="Should not fail reading body")
+          b""
+        }
+      }
+      inspect(@encoding/utf8.decode(read_body), content="test data")
+    }
+    None => inspect(false, content="Should have content reader")
+  }
 }
 
 ///| Test round-trip: serialize then parse response
 async test "response round-trip serialize and parse" {
   let original = HttpResponse::new(HttpVersion::HTTP_1_1, HttpStatus::ok())
   original.headers.add("Content-Type", "application/json")
-  let body = "{\"status\":\"ok\"}"
+  let body_str = "{\"status\":\"ok\"}"
+  let body = @encoding/utf8.encode(body_str)
   original.headers.add("Content-Length", body.length().to_string())
-  original.set_body(body.to_bytes())
   
   // Serialize
   let buffer = @buffer.HeapByteBuf::new(1024)
   let writer = @io.ByteBufWriter::new(buffer as &@buffer.Buffer)
   let http_writer = HttpWriter::new(writer as &@io.Writer)
-  http_writer.write_response(original)
+  http_writer.write_response(original, Some(body))
   
   // Parse back
   let reader = @io.ByteBufReader::new(buffer as &@buffer.Buffer)
@@ -182,28 +204,20 @@ async test "response round-trip serialize and parse" {
     }
   }
   inspect(parsed.status.code, content="200")
-  inspect(parsed.body.to_string(), content="{\"status\":\"ok\"}")
-}
-
-///| Helper to check if string contains substring
-fn String::contains(self : String, needle : String) -> Bool {
-  let len = self.length()
-  let needle_len = needle.length()
-  if needle_len > len {
-    return false
-  }
   
-  for i = 0; i <= len - needle_len; i = i + 1 {
-    let mut match_found = true
-    for j = 0; j < needle_len; j = j + 1 {
-      if self[i + j] != needle[j] {
-        match_found = false
-        break
+  // Read body
+  match parsed.content_reader {
+    Some(content_reader) => {
+      let read_body = try {
+        content_reader.read_all()
+      } catch {
+        e => {
+          inspect(e, content="Should not fail reading body")
+          b""
+        }
       }
+      inspect(@encoding/utf8.decode(read_body), content="{\"status\":\"ok\"}")
     }
-    if match_found {
-      return true
-    }
+    None => inspect(false, content="Should have content reader")
   }
-  false
 }
