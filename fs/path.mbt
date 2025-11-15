@@ -1,7 +1,8 @@
 ///|
 let default_file_system : Ref[&FileSystem?] = Ref::new(None)
 
-pub fn set_default_fs(fs: &FileSystem) -> Unit {
+///|
+pub fn set_default_fs(fs : &FileSystem) -> Unit {
   default_file_system.val = Some(fs)
 }
 
@@ -68,7 +69,7 @@ pub fn path(
 
 ///|
 /// Get the root path for this path's filesystem
-pub fn Path::root(self: Path) -> Path {
+pub fn Path::root(self : Path) -> Path {
   let roots = self.fs.system_roots()
   if roots.length() == 0 {
     // Fallback to root with no components
@@ -88,7 +89,7 @@ pub fn Path::root(self: Path) -> Path {
 
 ///|
 /// Return the parent path, or none if has no parent.
-pub fn Path::parent(self: Path) -> Path? {
+pub fn Path::parent(self : Path) -> Path? {
   guard self.components.length() > 1 else { return None }
   return Some(Path::{
     ..self,
@@ -104,7 +105,7 @@ pub fn Path::parent(self: Path) -> Path? {
 /// In the simplest case, the given path does not have a root component, in which case this method joins the given 
 /// path to this path and returns a resulting path that ends with the given path.
 ///  Where the given path has a root component then resolution is highly implementation dependent and therefore unspecified.
-pub fn Path::resolve_path(self: Path, another : Path) -> Path {
+pub fn Path::resolve_path(self : Path, another : Path) -> Path {
   let components = self.components
   return Path::{ ..self, components: [..components, ..another.components] }
 }
@@ -115,7 +116,7 @@ pub fn Path::resolve_path(self: Path, another : Path) -> Path {
 ///  the Path "dir1/dir2/bar". If this path does not have a parent path,
 ///  or other is absolute, then this method returns other. If other is an empty path then this method returns this path's parent, or where this path doesn't
 ///  have a parent, the empty path.
-pub fn Path::sibling(self: Path, another : String) -> Path {
+pub fn Path::sibling(self : Path, another : String) -> Path {
   guard self.parent() is Some(parent) else { return path(another) }
   parent.resolve(another)
 }
@@ -127,7 +128,7 @@ pub fn Path::sibling(self: Path, another : String) -> Path {
 ///|
 
 ///|
-pub fn Path::clean(self: Path) -> Path {
+pub fn Path::clean(self : Path) -> Path {
   let stack = Array::new()
   for component in self.components {
     match component.to_string() {
@@ -148,12 +149,12 @@ pub fn Path::clean(self: Path) -> Path {
 }
 
 ///|
-pub fn Path::is_absolute(self: Path) -> Bool {
+pub fn Path::is_absolute(self : Path) -> Bool {
   self.absolute
 }
 
 ///|
-pub fn Path::to_absolute(self: Path) -> Path {
+pub fn Path::to_absolute(self : Path) -> Path {
   if self.absolute {
     self
   } else {
@@ -163,7 +164,7 @@ pub fn Path::to_absolute(self: Path) -> Path {
 }
 
 ///|
-pub fn Path::starts_with_path(self: Path, prefix : Path) -> Bool {
+pub fn Path::starts_with_path(self : Path, prefix : Path) -> Bool {
   if self.components.length() < prefix.components.length() {
     return false
   }
@@ -177,12 +178,12 @@ pub fn Path::starts_with_path(self: Path, prefix : Path) -> Bool {
 }
 
 ///|
-pub fn Path::starts_with(self: Path, prefix : String) -> Bool {
+pub fn Path::starts_with(self : Path, prefix : String) -> Bool {
   self.starts_with_path(path(prefix))
 }
 
 ///|
-pub fn Path::resolve(self: Path, child : String) -> Path {
+pub fn Path::resolve(self : Path, child : String) -> Path {
   self.resolve_path(path(child))
 }
 
@@ -192,12 +193,12 @@ pub fn Path::resolve(self: Path, child : String) -> Path {
 /// For any two normalized paths p and q, where q does not have a root component,
 /// p.relativize(p .resolve(q)).equals(q)
 /// When symbolic links are supported, then whether the resulting path, when resolved against this path, yields a path that can be used to locate the same file as other is implementation dependent. For example, if this path is "/a/b" and the given path is "/a/x" then the resulting relative path may be "../x". If "b" is a symbolic link then is implementation dependent if "a/b/../x" would locate the same file as "/a/x".
-pub fn Path::relativize(self: Path, other : String) -> Path {
+pub fn Path::relativize(self : Path, other : String) -> Path {
   self.relativize_path(path(other))
 }
 
 ///|
-pub fn Path::relativize_path(self: Path, other : Path) -> Path {
+pub fn Path::relativize_path(self : Path, other : Path) -> Path {
   // Both paths must be absolute or both must be relative
   if self.absolute != other.absolute {
     return other
@@ -251,6 +252,6 @@ pub fn Path::relativize_path(self: Path, other : Path) -> Path {
 }
 
 ///|
-pub fn Path::to_unix_path(self: Path) -> String {
+pub fn Path::to_unix_path(self : Path) -> String {
   self.components.join("/")
 }

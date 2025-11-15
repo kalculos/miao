@@ -1,0 +1,133 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "iceBear67/miao/fs"
+
+import(
+  "iceBear67/miao/io"
+  "iceBear67/time"
+)
+
+// Values
+async fn attr(Path) -> FileAttribute
+
+async fn delete(Path) -> Unit
+
+async fn delete_if_exist(Path) -> Unit
+
+async fn exists(Path) -> Bool
+
+async fn list_dir(Path) -> ArrayView[Path]
+
+async fn open(Path, OpenFlags, permission~ : Int) -> &FileChannel
+
+fn path(String, using_fs? : &FileSystem) -> Path
+
+async fn read_symbolic_link(Path) -> Path?
+
+fn set_default_fs(&FileSystem) -> Unit
+
+async fn size(Path) -> UInt64
+
+// Errors
+
+// Types and methods
+pub struct AccessFlags(Int)
+fn AccessFlags::execute(Self) -> Bool
+#deprecated
+fn AccessFlags::inner(Self) -> Int
+fn AccessFlags::new(read? : Bool, write? : Bool, execute? : Bool) -> Self
+fn AccessFlags::read(Self) -> Bool
+fn AccessFlags::write(Self) -> Bool
+
+pub(all) struct FileAttribute {
+  last_modified_time : @time.Instant
+  last_access_time : @time.Instant
+  creation_time : @time.Instant
+  permission : UInt64
+  size : UInt64
+  kind : FileKind
+}
+impl Eq for FileAttribute
+impl Hash for FileAttribute
+impl Show for FileAttribute
+
+pub(all) struct FileInfo {
+  attribute : FileAttribute
+  path : Path
+}
+
+pub(all) enum FileKind {
+  RegularFile
+  Directory
+  Link
+  Unknown
+}
+impl Eq for FileKind
+impl Hash for FileKind
+impl Show for FileKind
+
+type MemEntry
+
+type MemFileChannel
+
+pub struct MemFileSystem {
+  root : Ref[MemEntry]
+}
+fn MemFileSystem::new() -> Self
+
+type OpenFlags
+fn OpenFlags::has_read(Self) -> Bool
+fn OpenFlags::has_write(Self) -> Bool
+fn OpenFlags::is_append(Self) -> Bool
+fn OpenFlags::is_create(Self) -> Bool
+fn OpenFlags::is_exclusive(Self) -> Bool
+fn OpenFlags::is_read_only(Self) -> Bool
+fn OpenFlags::is_read_write(Self) -> Bool
+fn OpenFlags::is_truncate(Self) -> Bool
+fn OpenFlags::is_write_only(Self) -> Bool
+fn OpenFlags::read_only() -> Self
+fn OpenFlags::read_write(append? : Bool, create? : Bool, truncate? : Bool, exclusive? : Bool) -> Self
+fn OpenFlags::write_only(append? : Bool, create? : Bool, truncate? : Bool, exclusive? : Bool) -> Self
+
+pub(all) struct Path {
+  fs : &FileSystem
+  // private fields
+}
+fn Path::clean(Self) -> Self
+fn Path::is_absolute(Self) -> Bool
+fn Path::parent(Self) -> Self?
+fn Path::relativize(Self, String) -> Self
+fn Path::relativize_path(Self, Self) -> Self
+fn Path::resolve(Self, String) -> Self
+fn Path::resolve_path(Self, Self) -> Self
+fn Path::root(Self) -> Self
+fn Path::sibling(Self, String) -> Self
+fn Path::starts_with(Self, String) -> Bool
+fn Path::starts_with_path(Self, Self) -> Bool
+fn Path::to_absolute(Self) -> Self
+fn Path::to_unix_path(Self) -> String
+impl Eq for Path
+impl Hash for Path
+impl Show for Path
+
+// Type aliases
+
+// Traits
+pub(open) trait FileChannel : @io.Channel {
+  access(Self) -> OpenFlags
+  info(Self) -> FileInfo
+}
+
+pub(open) trait FileSystem {
+  async open_file(Self, Path, OpenFlags, mode~ : AccessFlags, follow_links? : Bool) -> &FileChannel
+  async attr(Self, Path, follow_links? : Bool) -> FileAttribute
+  async list_directory(Self, Path) -> ArrayView[Path]
+  async can_access(Self, Path, AccessFlags) -> Bool
+  async delete(Self, Path) -> Unit
+  async exists(Self, Path) -> Bool
+  async read_symbol_link(Self, Path) -> Path
+  async rename(Self, Path, Path, copy_attr~ : Bool) -> Unit
+  async real_path(Self, Path) -> Path
+  cwd(Self) -> Path
+  system_roots(Self) -> ArrayView[Path]
+}
+
