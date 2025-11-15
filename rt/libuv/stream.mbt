@@ -70,8 +70,7 @@ pub fn read_stream(
     while written != len && !writer.is_closed() {
       written += writer.write(buffer, offset + written, len)
     }
-  })
-  .start()
+  }).start()
   reader
 }
 

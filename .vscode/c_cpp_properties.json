@@ -4,8 +4,8 @@
             "name": "Linux",
             "includePath": [
                 "${workspaceFolder}/**",
-                "/home/icybear/.moon/include/**",
-                "/home/icybear/.moon/include"
+                "${userHome}/.moon/include/**",
+                "${userHome}/.moon/include"
             ],
             "defines": [],
             "compilerPath": "/usr/bin/clang",

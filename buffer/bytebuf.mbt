@@ -24,6 +24,8 @@ pub(open) trait ByteSlice {
   get_byte(Self, idx : Int) -> Unit
   transfer_to(Self, dst : &Buffer) -> Unit
   transfer_from(Self, src : BytesView) -> Int
+  /// The array that backed this byte slice without range constrains.
+  array(Self) -> FixedArray[Byte]?
 }
 
 ///|
