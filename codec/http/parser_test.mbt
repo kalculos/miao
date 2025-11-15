@@ -25,9 +25,9 @@ async test "parse_request parses simple GET request" {
   }
   inspect(request.method(), content="GET")
   inspect(request.uri, content="/index.html")
-  inspect(request.version, content="HTTP/1.1")
-  inspect(request.headers.get("Host"), content="Some(example.com)")
-  inspect(request.headers.get("User-Agent"), content="Some(TestClient/1.0)")
+  inspect(request.version, content="HTTP_1_1")
+  inspect(request.headers.get("Host"), content="Some(\"example.com\")")
+  inspect(request.headers.get("User-Agent"), content="Some(\"TestClient/1.0\")")
   inspect(request.body.length(), content="0")
 }
 
@@ -48,7 +48,7 @@ async test "parse_request parses POST request with body" {
   }
   inspect(request.method(), content="POST")
   inspect(request.uri, content="/api/data")
-  inspect(request.headers.get("Content-Type"), content="Some(application/x-www-form-urlencoded)")
+  inspect(request.headers.get("Content-Type"), content="Some(\"application/x-www-form-urlencoded\")")
   inspect(request.body.length(), content="20")
   inspect(request.body.to_string(), content="name=value&data=test")
 }
@@ -67,10 +67,10 @@ async test "parse_request handles multiple headers" {
     }
   }
   inspect(request.headers.length() >= 4, content="true")
-  inspect(request.headers.get("Accept"), content="Some(text/html)")
+  inspect(request.headers.get("Accept"), content="Some(\"text/html\")")
   inspect(
     request.headers.get("Accept-Encoding"),
-    content="Some(gzip, deflate)",
+    content="Some(\"gzip, deflate\")",
   )
 }
 

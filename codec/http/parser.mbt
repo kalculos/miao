@@ -114,8 +114,11 @@ fn read_bytes(buffer : &@buffer.Buffer, length : Int) -> Bytes raise {
 
 ///| Convert Bytes to String (UTF-8)
 fn bytes_to_string(bytes : Bytes) -> String {
-  // Use builtin Bytes.to_string() which properly handles UTF-8
-  bytes.to_string()
+  let mut result = ""
+  for i = 0; i < bytes.length(); i = i + 1 {
+    result = result + bytes[i].to_int().unsafe_to_char().to_string()
+  }
+  result
 }
 
 ///| Helper to find index of character in string

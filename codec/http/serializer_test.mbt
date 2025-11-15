@@ -23,10 +23,10 @@ async test "parse_response parses 200 OK response" {
       HttpResponse::new(HttpVersion::HTTP_1_1, HttpStatus::ok())
     }
   }
-  inspect(response.version, content="HTTP/1.1")
+  inspect(response.version, content="HTTP_1_1")
   inspect(response.status.code, content="200")
   inspect(response.status.reason, content="OK")
-  inspect(response.headers.get("Content-Type"), content="Some(text/html)")
+  inspect(response.headers.get("Content-Type"), content="Some(\"text/html\")")
   inspect(response.body.to_string(), content="Hello, World!")
 }
 

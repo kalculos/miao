@@ -20,7 +20,7 @@ test "HttpMethod::from_string parses correctly" {
 
 test "HttpVersion::to_string converts correctly" {
   inspect(HttpVersion::HTTP_1_0.to_string(), content="HTTP/1.0")
-  inspect(HttpVersion::HTTP_1_1.to_string(), content="HTTP/1.1")
+  inspect(HttpVersion::HTTP_1_1.to_string(), content="HTTP_1_1")
 }
 
 test "HttpVersion::from_string parses correctly" {
@@ -28,7 +28,7 @@ test "HttpVersion::from_string parses correctly" {
     try { HttpVersion::from_string("HTTP/1.1") } catch {
       _ => HttpVersion::HTTP_1_0
     },
-    content="HTTP/1.1",
+    content="HTTP_1_1",
   )
 }
 
@@ -45,8 +45,8 @@ test "HttpHeaders add and get" {
   let headers = HttpHeaders::new()
   headers.add("Content-Type", "text/html")
   headers.add("Content-Length", "100")
-  inspect(headers.get("Content-Type"), content="Some(text/html)")
-  inspect(headers.get("content-type"), content="Some(text/html)")
+  inspect(headers.get("Content-Type"), content="Some(\"text/html\")")
+  inspect(headers.get("content-type"), content="Some(\"text/html\")")
   inspect(headers.get("Missing"), content="None")
 }
 
@@ -76,13 +76,13 @@ test "HttpRequest::new creates request with empty headers" {
   let request = HttpRequest::new(HttpMethod::GET, "/", HttpVersion::HTTP_1_1)
   inspect(request.method(), content="GET")
   inspect(request.uri, content="/")
-  inspect(request.version, content="HTTP/1.1")
+  inspect(request.version, content="HTTP_1_1")
   inspect(request.headers.length(), content="0")
 }
 
 test "HttpResponse::new creates response with empty headers" {
   let response = HttpResponse::new(HttpVersion::HTTP_1_1, HttpStatus::ok())
-  inspect(response.version, content="HTTP/1.1")
+  inspect(response.version, content="HTTP_1_1")
   inspect(response.status.code, content="200")
   inspect(response.headers.length(), content="0")
 }
