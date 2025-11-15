@@ -15,8 +15,10 @@ async test "parse_request parses simple GET request" {
   let request_str = "GET /index.html HTTP/1.1\r\nHost: example.com\r\nUser-Agent: TestClient/1.0\r\n\r\n"
   let buffer = @buffer.HeapByteBuf::new(1024)
   write_utf8_string_parser(buffer as &@buffer.Buffer, request_str)
+  let reader = @io.ByteBufReader::new(buffer as &@buffer.Buffer)
+  let http_reader = HttpReader::new(reader as &@io.Reader)
   let request = try {
-    parse_request(buffer as &@buffer.Buffer)
+    http_reader.read_request()
   } catch {
     e => {
       inspect(e, content="Should not fail")
@@ -38,8 +40,10 @@ async test "parse_request parses POST request with body" {
     body_content.length().to_string() + "\r\n\r\n" + body_content
   let buffer = @buffer.HeapByteBuf::new(1024)
   write_utf8_string_parser(buffer as &@buffer.Buffer, request_str)
+  let reader = @io.ByteBufReader::new(buffer as &@buffer.Buffer)
+  let http_reader = HttpReader::new(reader as &@io.Reader)
   let request = try {
-    parse_request(buffer as &@buffer.Buffer)
+    http_reader.read_request()
   } catch {
     e => {
       inspect(e, content="Should not fail")
@@ -58,8 +62,10 @@ async test "parse_request handles multiple headers" {
   let request_str = "GET /test HTTP/1.1\r\nHost: example.com\r\nAccept: text/html\r\nAccept-Encoding: gzip, deflate\r\nConnection: keep-alive\r\n\r\n"
   let buffer = @buffer.HeapByteBuf::new(1024)
   write_utf8_string_parser(buffer as &@buffer.Buffer, request_str)
+  let reader = @io.ByteBufReader::new(buffer as &@buffer.Buffer)
+  let http_reader = HttpReader::new(reader as &@io.Reader)
   let request = try {
-    parse_request(buffer as &@buffer.Buffer)
+    http_reader.read_request()
   } catch {
     e => {
       inspect(e, content="Should not fail")
@@ -79,8 +85,10 @@ async test "parse_request handles query parameters in URI" {
   let request_str = "GET /search?q=moonbit&lang=en HTTP/1.1\r\nHost: search.example.com\r\n\r\n"
   let buffer = @buffer.HeapByteBuf::new(1024)
   write_utf8_string_parser(buffer as &@buffer.Buffer, request_str)
+  let reader = @io.ByteBufReader::new(buffer as &@buffer.Buffer)
+  let http_reader = HttpReader::new(reader as &@io.Reader)
   let request = try {
-    parse_request(buffer as &@buffer.Buffer)
+    http_reader.read_request()
   } catch {
     e => {
       inspect(e, content="Should not fail")
@@ -95,8 +103,10 @@ async test "parse_request parses PUT request" {
   let request_str = "PUT /resource/123 HTTP/1.1\r\nHost: api.example.com\r\nContent-Length: 0\r\n\r\n"
   let buffer = @buffer.HeapByteBuf::new(1024)
   write_utf8_string_parser(buffer as &@buffer.Buffer, request_str)
+  let reader = @io.ByteBufReader::new(buffer as &@buffer.Buffer)
+  let http_reader = HttpReader::new(reader as &@io.Reader)
   let request = try {
-    parse_request(buffer as &@buffer.Buffer)
+    http_reader.read_request()
   } catch {
     e => {
       inspect(e, content="Should not fail")
@@ -112,8 +122,10 @@ async test "parse_request parses DELETE request" {
   let request_str = "DELETE /resource/456 HTTP/1.1\r\nHost: api.example.com\r\n\r\n"
   let buffer = @buffer.HeapByteBuf::new(1024)
   write_utf8_string_parser(buffer as &@buffer.Buffer, request_str)
+  let reader = @io.ByteBufReader::new(buffer as &@buffer.Buffer)
+  let http_reader = HttpReader::new(reader as &@io.Reader)
   let request = try {
-    parse_request(buffer as &@buffer.Buffer)
+    http_reader.read_request()
   } catch {
     e => {
       inspect(e, content="Should not fail")

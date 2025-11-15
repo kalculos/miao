@@ -15,8 +15,10 @@ async test "parse_response parses 200 OK response" {
   let response_str = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: 13\r\n\r\nHello, World!"
   let buffer = @buffer.HeapByteBuf::new(1024)
   write_utf8_string_serializer(buffer as &@buffer.Buffer, response_str)
+  let reader = @io.ByteBufReader::new(buffer as &@buffer.Buffer)
+  let http_reader = HttpReader::new(reader as &@io.Reader)
   let response = try {
-    parse_response(buffer as &@buffer.Buffer)
+    http_reader.read_response()
   } catch {
     e => {
       inspect(e, content="Should not fail")
@@ -35,8 +37,10 @@ async test "parse_response parses 404 Not Found response" {
   let response_str = "HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\n\r\n"
   let buffer = @buffer.HeapByteBuf::new(1024)
   write_utf8_string_serializer(buffer as &@buffer.Buffer, response_str)
+  let reader = @io.ByteBufReader::new(buffer as &@buffer.Buffer)
+  let http_reader = HttpReader::new(reader as &@io.Reader)
   let response = try {
-    parse_response(buffer as &@buffer.Buffer)
+    http_reader.read_response()
   } catch {
     e => {
       inspect(e, content="Should not fail")
@@ -54,7 +58,9 @@ async test "serialize_request serializes GET request" {
   request.headers.add("Host", "example.com")
   request.headers.add("User-Agent", "TestClient/1.0")
   let buffer = @buffer.HeapByteBuf::new(1024)
-  serialize_request(request, buffer as &@buffer.Buffer)
+  let writer = @io.ByteBufWriter::new(buffer as &@buffer.Buffer)
+  let http_writer = HttpWriter::new(writer as &@io.Writer)
+  http_writer.write_request(request)
   let result = buffer.to_bytes().to_string()
   inspect(
     result.contains("GET /test HTTP/1.1"),
@@ -80,7 +86,9 @@ async test "serialize_request serializes POST request with body" {
   request.headers.add("Content-Length", body.length().to_string())
   request.set_body(body.to_bytes())
   let buffer = @buffer.HeapByteBuf::new(1024)
-  serialize_request(request, buffer as &@buffer.Buffer)
+  let writer = @io.ByteBufWriter::new(buffer as &@buffer.Buffer)
+  let http_writer = HttpWriter::new(writer as &@io.Writer)
+  http_writer.write_request(request)
   let result = buffer.to_bytes().to_string()
   inspect(
     result.contains("POST /api/data HTTP/1.1"),
@@ -101,7 +109,9 @@ async test "serialize_response serializes 200 OK response" {
   response.headers.add("Content-Length", body.length().to_string())
   response.set_body(body.to_bytes())
   let buffer = @buffer.HeapByteBuf::new(1024)
-  serialize_response(response, buffer as &@buffer.Buffer)
+  let writer = @io.ByteBufWriter::new(buffer as &@buffer.Buffer)
+  let http_writer = HttpWriter::new(writer as &@io.Writer)
+  http_writer.write_response(response)
   let result = buffer.to_bytes().to_string()
   inspect(result.contains("HTTP/1.1 200 OK"), content="true")
   inspect(
@@ -126,11 +136,15 @@ async test "request round-trip serialize and parse" {
   
   // Serialize
   let buffer = @buffer.HeapByteBuf::new(1024)
-  serialize_request(original, buffer as &@buffer.Buffer)
+  let writer = @io.ByteBufWriter::new(buffer as &@buffer.Buffer)
+  let http_writer = HttpWriter::new(writer as &@io.Writer)
+  http_writer.write_request(original)
   
   // Parse back
+  let reader = @io.ByteBufReader::new(buffer as &@buffer.Buffer)
+  let http_reader = HttpReader::new(reader as &@io.Reader)
   let parsed = try {
-    parse_request(buffer as &@buffer.Buffer)
+    http_reader.read_request()
   } catch {
     e => {
       inspect(e, content="Should not fail")
@@ -152,11 +166,15 @@ async test "response round-trip serialize and parse" {
   
   // Serialize
   let buffer = @buffer.HeapByteBuf::new(1024)
-  serialize_response(original, buffer as &@buffer.Buffer)
+  let writer = @io.ByteBufWriter::new(buffer as &@buffer.Buffer)
+  let http_writer = HttpWriter::new(writer as &@io.Writer)
+  http_writer.write_response(original)
   
   // Parse back
+  let reader = @io.ByteBufReader::new(buffer as &@buffer.Buffer)
+  let http_reader = HttpReader::new(reader as &@io.Reader)
   let parsed = try {
-    parse_response(buffer as &@buffer.Buffer)
+    http_reader.read_response()
   } catch {
     e => {
       inspect(e, content="Should not fail")

@@ -1,13 +1,23 @@
 ///| HTTP Request Parser
 
-///| Parse HTTP request from buffer
-pub async fn parse_request(buffer : &@buffer.Buffer) -> HttpRequest raise {
+///| HTTP Reader that operates on an @io.Reader
+pub struct HttpReader {
+  reader : &@io.Reader
+}
+
+///| Create a new HttpReader from a Reader
+pub fn HttpReader::new(reader : &@io.Reader) -> HttpReader {
+  { reader }
+}
+
+///| Read HTTP request from the underlying reader
+pub async fn HttpReader::read_request(self : HttpReader) -> HttpRequest raise {
   // Read request line
-  let request_line = read_line(buffer)
+  let request_line = self.read_line()
   let (http_method, uri, version) = parse_request_line(request_line)
   
   // Parse headers
-  let headers = parse_headers(buffer)
+  let headers = self.read_headers()
   
   // Parse body based on Content-Length
   let body = match headers.get("Content-Length") {
@@ -16,7 +26,7 @@ pub async fn parse_request(buffer : &@buffer.Buffer) -> HttpRequest raise {
       match length {
         Some(len) => {
           if len > 0 {
-            read_bytes(buffer, len)
+            self.read_bytes(len)
           } else {
             b""
           }
@@ -28,6 +38,36 @@ pub async fn parse_request(buffer : &@buffer.Buffer) -> HttpRequest raise {
   }
   
   { http_method, uri, version, headers, body }
+}
+
+///| Read HTTP response from the underlying reader
+pub async fn HttpReader::read_response(self : HttpReader) -> HttpResponse raise {
+  // Read status line
+  let status_line = self.read_line()
+  let (version, status) = parse_status_line(status_line)
+  
+  // Parse headers
+  let headers = self.read_headers()
+  
+  // Parse body based on Content-Length
+  let body = match headers.get("Content-Length") {
+    Some(length_str) => {
+      let length = length_str.parse_int()
+      match length {
+        Some(len) => {
+          if len > 0 {
+            self.read_bytes(len)
+          } else {
+            b""
+          }
+        }
+        None => raise fail("Invalid Content-Length: " + length_str)
+      }
+    }
+    None => b""
+  }
+  
+  { version, status, headers, body }
 }
 
 ///| Parse request line (e.g., "GET /path HTTP/1.1")
@@ -44,12 +84,41 @@ fn parse_request_line(line : String) -> (HttpMethod, String, HttpVersion) raise 
   (http_method, uri, version)
 }
 
-///| Parse HTTP headers
-fn parse_headers(buffer : &@buffer.Buffer) -> HttpHeaders raise {
+///| Parse status line (e.g., "HTTP/1.1 200 OK")
+fn parse_status_line(line : String) -> (HttpVersion, HttpStatus) raise {
+  let parts = line.split(" ").collect()
+  if parts.length() < 2 {
+    raise fail("Invalid status line: " + line)
+  }
+  
+  let version = HttpVersion::from_string(parts[0].to_string())
+  let code_str = parts[1].to_string()
+  let code = code_str.parse_int()
+  
+  match code {
+    Some(c) => {
+      let reason = if parts.length() > 2 {
+        // Join remaining parts as reason phrase
+        let mut r = parts[2].to_string()
+        for i = 3; i < parts.length(); i = i + 1 {
+          r = r + " " + parts[i].to_string()
+        }
+        r
+      } else {
+        ""
+      }
+      (version, HttpStatus::new(c, reason))
+    }
+    None => raise fail("Invalid status code: " + code_str)
+  }
+}
+
+///| Read HTTP headers from the reader
+async fn HttpReader::read_headers(self : HttpReader) -> HttpHeaders raise {
   let headers = HttpHeaders::new()
   
   while true {
-    let line = read_line(buffer)
+    let line = self.read_line()
     if line.is_empty() {
       break
     }
@@ -69,13 +138,18 @@ fn parse_headers(buffer : &@buffer.Buffer) -> HttpHeaders raise {
   headers
 }
 
-///| Read a line from buffer (until \r\n or \n)
-fn read_line(buffer : &@buffer.Buffer) -> String raise {
+///| Read a line from the reader (until \r\n or \n)
+async fn HttpReader::read_line(self : HttpReader) -> String raise {
   let line_bytes = Array::new()
   let mut prev_byte : Byte = 0
+  let buffer : FixedArray[Byte] = FixedArray::make(1, 0)
   
-  while buffer.readable_bytes() > 0 {
-    let byte = buffer.read_byte()
+  while true {
+    let read = self.reader.read(buffer, 0, 1)
+    if read == 0 {
+      break // EOF
+    }
+    let byte = buffer[0]
     
     // Check for \r\n
     if prev_byte == b'\r' && byte == b'\n' {
@@ -102,13 +176,19 @@ fn read_line(buffer : &@buffer.Buffer) -> String raise {
   bytes_to_string(Bytes::from_array(arr))
 }
 
-///| Read specific number of bytes from buffer
-fn read_bytes(buffer : &@buffer.Buffer, length : Int) -> Bytes raise {
+///| Read specific number of bytes from the reader
+async fn HttpReader::read_bytes(self : HttpReader, length : Int) -> Bytes raise {
   let arr : FixedArray[Byte] = FixedArray::make(length, 0)
-  let read = buffer.read(arr, 0, length)
-  if read != length {
-    raise fail("Expected " + length.to_string() + " bytes, got " + read.to_string())
+  let mut total_read = 0
+  
+  while total_read < length {
+    let read = self.reader.read(arr, total_read, length - total_read)
+    if read == 0 {
+      raise fail("Unexpected EOF: expected " + length.to_string() + " bytes, got " + total_read.to_string())
+    }
+    total_read = total_read + read
   }
+  
   Bytes::from_array(arr)
 }
 
