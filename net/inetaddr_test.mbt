@@ -77,7 +77,7 @@ test "from_ipv4 fails on leading zeros causing overflow" {
 
 ///|
 /// Tests for InetAddr::IPv6 parsing
-test "from_ipv6 parses valid fullInetAddr::IPv6 address" {
+test "from_ipv6 parses valid full InetAddr::IPv6 address" {
   let addr = InetAddr::from_ipv6("2001:0db8:85a3:0000:0000:8a2e:0370:7334")
   inspect(addr.to_string(), content="2001:db8:85a3:0:0:8a2e:370:7334")
 }

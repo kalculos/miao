@@ -1,27 +1,27 @@
 ///|
-struct UvTcpConnecion {
+struct UvTcpConnection {
   tcp : @uv.Tcp
   mut closed : Bool
   reader : &@io.Reader
 }
 
 ///|
-impl @net.Connection for UvTcpConnecion with local_addr(self) {
+impl @net.Connection for UvTcpConnection with local_addr(self) {
   (try? self.tcp.getsockname().to_miao()).unwrap()
 }
 
 ///|
-impl @net.Connection for UvTcpConnecion with remote_addr(self) {
+impl @net.Connection for UvTcpConnection with remote_addr(self) {
   (try? self.tcp.getpeername().to_miao()).unwrap()
 }
 
 ///|
-impl @net.Connection for UvTcpConnecion with flush(_) {
+impl @net.Connection for UvTcpConnection with flush(_) {
 
 }
 
 ///|
-impl @io.Writer for UvTcpConnecion with write(self, arr, off, len) {
+impl @io.Writer for UvTcpConnection with write(self, arr, off, len) {
   uvrt_op_suspend((resolve, reject, _) => {
     let _handle = self.tcp.write(
       [arr.unsafe_reinterpret_as_bytes()[off:off + len]],
@@ -36,24 +36,24 @@ impl @io.Writer for UvTcpConnecion with write(self, arr, off, len) {
 }
 
 ///|
-impl @io.Writer for UvTcpConnecion with close(self) {
+impl @io.Writer for UvTcpConnection with close(self) {
   guard !self.closed
   self.tcp.close(() => ())
   self.closed = true
 }
 
 ///|
-impl @io.Writer for UvTcpConnecion with is_closed(self) {
+impl @io.Writer for UvTcpConnection with is_closed(self) {
   self.closed
 }
 
 ///|
-impl @io.Reader for UvTcpConnecion with read(self, arr, off, len) {
+impl @io.Reader for UvTcpConnection with read(self, arr, off, len) {
   self.reader.read(arr, off, len)
 }
 
 ///|
-impl @io.Reader for UvTcpConnecion with close(self) {
+impl @io.Reader for UvTcpConnection with close(self) {
   guard !self.closed
   self.reader.close()
   self.tcp.close(() => ())
@@ -61,12 +61,12 @@ impl @io.Reader for UvTcpConnecion with close(self) {
 }
 
 ///|
-impl @io.Reader for UvTcpConnecion with is_closed(self) {
+impl @io.Reader for UvTcpConnection with is_closed(self) {
   self.closed
 }
 
 ///|
-impl @io.Channel for UvTcpConnecion with close(self) {
+impl @io.Channel for UvTcpConnection with close(self) {
   guard !self.closed
   self.reader.close()
   self.tcp.close(() => ())
@@ -74,16 +74,16 @@ impl @io.Channel for UvTcpConnecion with close(self) {
 }
 
 ///|
-impl @io.Channel for UvTcpConnecion with is_closed(self) {
+impl @io.Channel for UvTcpConnection with is_closed(self) {
   self.closed
 }
 
 ///|
-fn UvTcpConnecion::new(
+fn UvTcpConnection::new(
   rt : &@rt.Runtime,
   tcp : @uv.Tcp,
-) -> UvTcpConnecion raise {
-  UvTcpConnecion::{
+) -> UvTcpConnection raise {
+  UvTcpConnection::{
     tcp,
     closed: false,
     reader: read_stream(rt, tcp.to_stream()),
@@ -103,7 +103,7 @@ impl @net.TcpSocket for UvTcpSocket with accept(self, _timeout, opt?) {
     self.uv.listen(
       16,
       tcp => resolve(
-        (try? UvTcpConnecion::new(self.rt, tcp))
+        (try? UvTcpConnection::new(self.rt, tcp))
         .map(it => it as &@net.TcpConnection)
         .map_err(failure => @net.NetworkError::DeviceFailure(
           msg="Failed to initialize TCP connection: \{failure}",
@@ -139,7 +139,7 @@ impl @net.TcpSocket for UvTcpSocket with dial(self, host, _opt) {
         let _handle = self.uv.connect(
           addr,
           () => resolve(
-            (try? UvTcpConnecion::new(self.rt, self.uv))
+            (try? UvTcpConnection::new(self.rt, self.uv))
             .map(it => it as &@net.TcpConnection)
             .map_err(failure => @net.NetworkError::DeviceFailure(
               msg="Failed to initialize TCP connection: \{failure}",

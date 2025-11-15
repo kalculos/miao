@@ -11,11 +11,11 @@ pub fn InetAddr::from_ipv4(s : String) -> InetAddr raise {
   let nums = []
   for part in parts {
     try @strconv.parse_int(part) catch {
-      err => raise fail("Couldn't parse \{part} as an byte. \{err}")
+      err => raise fail("Couldn't parse \{part} as a byte. \{err}")
     } noraise {
       n => {
         guard n >= 0 && n <= 255 else {
-          raise fail("Couldn't parse \{part} as an byte.")
+          raise fail("Couldn't parse \{part} as a byte.")
         }
         nums.push(n)
       }

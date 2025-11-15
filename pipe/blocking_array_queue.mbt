@@ -1,5 +1,5 @@
 ///|
-/// SyncQueue is a thread-safe queue with blocking read/write operations.
+/// ArrayBlockingQueue is a thread-safe queue with blocking read/write operations.
 /// It uses ArrayDeque as the underlying buffer and provides synchronization
 /// primitives for cooperative multitasking.
 struct ArrayBlockingQueue[T] {
@@ -15,7 +15,7 @@ struct ArrayBlockingQueue[T] {
 }
 
 ///|
-/// Create a new SyncQueue with the given runtime and buffer capacity.
+/// Create a new ArrayBlockingQueue with the given runtime and buffer capacity.
 pub fn [T] ArrayBlockingQueue::new(
   runtime : &@rt.Runtime,
   capacity : Int,
