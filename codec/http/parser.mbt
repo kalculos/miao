@@ -199,20 +199,6 @@ fn String::index_of(self : String, needle : String) -> Int? {
   None
 }
 
-///| Helper to convert string to lowercase (shadows built-in to_lower)
-fn String::to_lower(self : String) -> String {
-  let mut result = ""
-  for i = 0; i < self.length(); i = i + 1 {
-    let c = self[i]
-    if c >= 'A' && c <= 'Z' {
-      result = result + (c + 32).unsafe_to_char().to_string()
-    } else {
-      result = result + c.to_string()
-    }
-  }
-  result
-}
-
 ///| Parse integer from string
 fn String::parse_int(self : String) -> Int? {
   let mut result = 0

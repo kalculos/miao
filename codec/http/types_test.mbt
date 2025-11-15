@@ -20,7 +20,7 @@ test "HttpMethod::from_string parses correctly" {
 
 test "HttpVersion::to_string converts correctly" {
   inspect(HttpVersion::HTTP_1_0.to_string(), content="HTTP/1.0")
-  inspect(HttpVersion::HTTP_1_1.to_string(), content="HTTP_1_1")
+  inspect(HttpVersion::HTTP_1_1.to_string(), content="HTTP/1.1")
 }
 
 test "HttpVersion::from_string parses correctly" {
