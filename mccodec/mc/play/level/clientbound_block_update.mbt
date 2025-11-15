@@ -5,6 +5,7 @@ pub(all) struct BlockUpdateS2C {
   location : (Int, Int, Int) // Block position
   block_id : Int // New block state ID
 }
+
 ///|
 pub impl @mc.Packet for BlockUpdateS2C with clientbound(_) {
   true

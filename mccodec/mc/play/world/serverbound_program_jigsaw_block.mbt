@@ -44,6 +44,14 @@ pub impl @mc.Packet for ProgramJigsawBlockC2S with deserialize(
   let joint_type = @types.read_string(buf)
   let selection_priority = @types.read_varint(buf)
   let placement_priority = @types.read_varint(buf)
-  { location, name, target, pool, final_state, joint_type, selection_priority, placement_priority }
+  {
+    location,
+    name,
+    target,
+    pool,
+    final_state,
+    joint_type,
+    selection_priority,
+    placement_priority,
+  }
 }
-

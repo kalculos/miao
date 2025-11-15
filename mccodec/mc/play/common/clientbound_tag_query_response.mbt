@@ -21,7 +21,9 @@ pub impl @mc.Packet for TagQueryResponseS2C with serialize(
 }
 
 ///|
-pub impl @mc.Packet for TagQueryResponseS2C with deserialize(buf : &@buffer.Buffer) {
+pub impl @mc.Packet for TagQueryResponseS2C with deserialize(
+  buf : &@buffer.Buffer,
+) {
   let transaction_id = @types.read_varint(buf)
   let nbt = @types.read_nbt(buf)
   { transaction_id, nbt }

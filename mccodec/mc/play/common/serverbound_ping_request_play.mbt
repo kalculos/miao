@@ -24,4 +24,3 @@ pub impl @mc.Packet for PingRequestPlayC2S with deserialize(
 ) {
   { payload: buf.read_int64() }
 }
-

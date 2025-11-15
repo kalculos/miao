@@ -12,7 +12,10 @@ pub impl @mc.Packet for TransferPlayS2C with clientbound(_) {
 }
 
 ///|
-pub impl @mc.Packet for TransferPlayS2C with serialize(self, buf : &@buffer.Buffer) raise {
+pub impl @mc.Packet for TransferPlayS2C with serialize(
+  self,
+  buf : &@buffer.Buffer,
+) raise {
   @types.write_string(buf, self.host)
   @types.write_varint(buf, self.port)
 }

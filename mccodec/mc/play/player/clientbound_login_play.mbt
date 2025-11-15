@@ -23,6 +23,7 @@ pub(all) struct LoginPlayS2C {
   sea_level : Int // Sea level
   enforces_secure_chat : Bool // Secure chat enforcement
 }
+
 ///|
 pub impl @mc.Packet for LoginPlayS2C with clientbound(_) {
   true

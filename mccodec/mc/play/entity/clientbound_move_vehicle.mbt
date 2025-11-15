@@ -8,6 +8,7 @@ pub(all) struct MoveVehicleS2C {
   yaw : Float // Yaw angle
   pitch : Float // Pitch angle
 }
+
 ///|
 pub impl @mc.Packet for MoveVehicleS2C with clientbound(_) {
   true

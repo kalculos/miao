@@ -4,6 +4,7 @@
 pub(all) struct ChunkBatchFinishedS2C {
   batch_size : Int // Number of chunks in batch
 }
+
 ///|
 pub impl @mc.Packet for ChunkBatchFinishedS2C with clientbound(_) {
   true

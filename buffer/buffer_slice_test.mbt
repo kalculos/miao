@@ -1,6 +1,5 @@
 ///|
 /// Tests for BufferSlice behavior
-
 test "BufferSlice write is bounded and does not expand underlying buffer" {
   let arr : FixedArray[Byte] = [1, 2, 3, 4, 5, 6]
   let buf = HeapByteBuf::wrapped_array(arr)

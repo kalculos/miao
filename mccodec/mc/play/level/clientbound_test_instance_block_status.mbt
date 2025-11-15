@@ -6,6 +6,7 @@ pub(all) struct TestInstanceBlockStatusS2C {
   block_state : Int // Block state ID
   block_entity_data : String? // Block entity NBT
 }
+
 ///|
 pub impl @mc.Packet for TestInstanceBlockStatusS2C with clientbound(_) {
   true

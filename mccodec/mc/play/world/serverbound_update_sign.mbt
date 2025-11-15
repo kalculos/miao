@@ -29,9 +29,7 @@ pub impl @mc.Packet for UpdateSignC2S with serialize(
 }
 
 ///|
-pub impl @mc.Packet for UpdateSignC2S with deserialize(
-  buf : &@buffer.Buffer,
-) {
+pub impl @mc.Packet for UpdateSignC2S with deserialize(buf : &@buffer.Buffer) {
   let location = @types.read_position(buf)
   let is_front_text = @types.read_bool(buf)
   let line1 = @types.read_string(buf)
@@ -40,4 +38,3 @@ pub impl @mc.Packet for UpdateSignC2S with deserialize(
   let line4 = @types.read_string(buf)
   { location, is_front_text, line1, line2, line3, line4 }
 }
-

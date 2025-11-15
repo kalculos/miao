@@ -19,7 +19,9 @@ pub impl @mc.Packet for DisconnectLoginS2C with serialize(
 }
 
 ///|
-pub impl @mc.Packet for DisconnectLoginS2C with deserialize(buf : &@buffer.Buffer) {
+pub impl @mc.Packet for DisconnectLoginS2C with deserialize(
+  buf : &@buffer.Buffer,
+) {
   let reason_str = @types.read_string(buf)
   { reason: reason_str }
 }

@@ -11,7 +11,10 @@ pub impl @mc.Packet for PingRequestC2S with clientbound(_) {
 }
 
 ///|
-pub impl @mc.Packet for PingRequestC2S with serialize(self, buf : &@buffer.Buffer) {
+pub impl @mc.Packet for PingRequestC2S with serialize(
+  self,
+  buf : &@buffer.Buffer,
+) {
   buf.write_int64(self.timestamp)
 }
 

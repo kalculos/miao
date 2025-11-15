@@ -24,4 +24,3 @@ pub impl @mc.Packet for TeleportToEntityC2S with deserialize(
 ) {
   { target_player: @types.read_uuid(buf) }
 }
-

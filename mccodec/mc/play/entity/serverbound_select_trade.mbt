@@ -19,9 +19,6 @@ pub impl @mc.Packet for SelectTradeC2S with serialize(
 }
 
 ///|
-pub impl @mc.Packet for SelectTradeC2S with deserialize(
-  buf : &@buffer.Buffer,
-) {
+pub impl @mc.Packet for SelectTradeC2S with deserialize(buf : &@buffer.Buffer) {
   { selected_slot: @types.read_varint(buf) }
 }
-

@@ -36,10 +36,7 @@ pub fn read_game_profile(buf : &@buffer.Buffer) -> GameProfile raise {
 }
 
 ///|
-pub fn write_game_profile(
-  buf : &@buffer.Buffer,
-  profile : GameProfile,
-) -> Unit {
+pub fn write_game_profile(buf : &@buffer.Buffer, profile : GameProfile) -> Unit {
   write_uuid(buf, profile.uuid)
   write_string(buf, profile.username)
   write_prefix_array(buf, profile.properties, write_property)

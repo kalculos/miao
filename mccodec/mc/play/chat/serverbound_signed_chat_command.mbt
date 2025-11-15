@@ -1,3 +1,4 @@
+///|
 struct ArgumentSignature {
   name : String // Argument name
   signature : FixedArray[Byte] // Argument signature, fixed 256 bytes
@@ -21,7 +22,7 @@ pub impl @mc.Packet for SignedChatCommandC2S with clientbound(_) {
   false
 }
 
-
+///|
 pub impl @mc.Packet for SignedChatCommandC2S with serialize(
   self,
   buf : &@buffer.Buffer,
@@ -38,6 +39,7 @@ pub impl @mc.Packet for SignedChatCommandC2S with serialize(
   buf.write_byte(self.checksum)
 }
 
+///|
 pub impl @mc.Packet for SignedChatCommandC2S with deserialize(
   buf : &@buffer.Buffer,
 ) {
@@ -52,5 +54,13 @@ pub impl @mc.Packet for SignedChatCommandC2S with deserialize(
   let message_count = @types.read_varint(buf)
   let acknowledged = @types.read_fixed_bitset(buf, 20)
   let checksum = buf.read_byte()
-  { command, timestamp, salt, argument_signatures, message_count, acknowledged, checksum }
+  {
+    command,
+    timestamp,
+    salt,
+    argument_signatures,
+    message_count,
+    acknowledged,
+    checksum,
+  }
 }

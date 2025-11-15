@@ -9,6 +9,7 @@ pub(all) struct EntityEffectS2C {
   flags : Byte // Effect flags
   factor_data : String? // Factor calculation data
 }
+
 ///|
 pub impl @mc.Packet for EntityEffectS2C with clientbound(_) {
   true

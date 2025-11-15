@@ -22,4 +22,3 @@ pub impl @mc.Packet for ClearDialogConfigS2C with deserialize(
 ) {
   ClearDialogConfigS2C::{  }
 }
-

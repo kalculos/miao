@@ -24,4 +24,3 @@ pub impl @mc.Packet for ChangeGameModeC2S with deserialize(
 ) {
   { game_mode: @types.read_varint(buf) }
 }
-

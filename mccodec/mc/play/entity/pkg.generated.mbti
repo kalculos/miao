@@ -1,0 +1,236 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "iceBear67/miao/mccodec/mc/play/entity"
+
+import(
+  "iceBear67/miao/buffer"
+  "iceBear67/miao/mccodec/mc"
+)
+
+// Values
+
+// Errors
+
+// Types and methods
+pub(all) struct DamageEventS2C {
+  entity_id : Int
+  source_type_id : Int
+  source_cause_id : Int
+  source_direct_id : Int
+  source_position : (Double, Double, Double)?
+}
+impl @mc.Packet for DamageEventS2C
+
+pub(all) struct EntityAnimationS2C {
+  entity_id : Int
+  animation : Byte
+}
+impl @mc.Packet for EntityAnimationS2C
+
+pub(all) struct EntityEffectS2C {
+  entity_id : Int
+  effect_id : Int
+  amplifier : Int
+  duration : Int
+  flags : Byte
+  factor_data : String?
+}
+impl @mc.Packet for EntityEffectS2C
+
+pub(all) struct EntityEventS2C {
+  entity_id : Int
+  entity_status : Byte
+}
+impl @mc.Packet for EntityEventS2C
+
+pub(all) struct EntitySoundEffectS2C {
+  sound_id : Int
+  sound_category : Int
+  entity_id : Int
+  volume : Float
+  pitch : Float
+  seed : Int64
+}
+impl @mc.Packet for EntitySoundEffectS2C
+
+pub(all) struct HurtAnimationS2C {
+  entity_id : Int
+  yaw : Float
+}
+impl @mc.Packet for HurtAnimationS2C
+
+pub(all) struct InteractC2S {
+  entity_id : Int
+  interaction_type : Int
+  target_x : Float?
+  target_y : Float?
+  target_z : Float?
+  hand : Int?
+  sneaking : Bool
+}
+impl @mc.Packet for InteractC2S
+
+pub(all) struct LinkEntitiesS2C {
+  attached_entity_id : Int
+  holding_entity_id : Int
+}
+impl @mc.Packet for LinkEntitiesS2C
+
+pub(all) struct MoveMinecartAlongTrackS2C {
+  entity_id : Int
+  steps : Array[(Double, Double, Double, Float, Float)]
+}
+impl @mc.Packet for MoveMinecartAlongTrackS2C
+
+pub(all) struct MoveVehicleS2C {
+  x : Double
+  y : Double
+  z : Double
+  yaw : Float
+  pitch : Float
+}
+impl @mc.Packet for MoveVehicleS2C
+
+pub(all) struct PickupItemS2C {
+  collected_entity_id : Int
+  collector_entity_id : Int
+  pickup_item_count : Int
+}
+impl @mc.Packet for PickupItemS2C
+
+pub(all) struct ProjectilePowerS2C {
+  entity_id : Int
+  power_x : Double
+  power_y : Double
+  power_z : Double
+}
+impl @mc.Packet for ProjectilePowerS2C
+
+pub(all) struct QueryEntityTagC2S {
+  transaction_id : Int
+  entity_id : Int
+}
+impl @mc.Packet for QueryEntityTagC2S
+
+pub(all) struct RemoveEntitiesS2C {
+  entity_ids : Array[Int]
+}
+impl @mc.Packet for RemoveEntitiesS2C
+
+pub(all) struct RemoveEntityEffectS2C {
+  entity_id : Int
+  effect_id : Int
+}
+impl @mc.Packet for RemoveEntityEffectS2C
+
+pub(all) struct SelectTradeC2S {
+  selected_slot : Int
+}
+impl @mc.Packet for SelectTradeC2S
+
+pub(all) struct SetEntityMetadataS2C {
+  entity_id : Int
+  metadata : Array[String]
+}
+impl @mc.Packet for SetEntityMetadataS2C
+
+pub(all) struct SetEntityVelocityS2C {
+  entity_id : Int
+  velocity_x : Int16
+  velocity_y : Int16
+  velocity_z : Int16
+}
+impl @mc.Packet for SetEntityVelocityS2C
+
+pub(all) struct SetEquipmentS2C {
+  entity_id : Int
+  equipment : Array[(Byte, String)]
+}
+impl @mc.Packet for SetEquipmentS2C
+
+pub(all) struct SetHeadRotationS2C {
+  entity_id : Int
+  head_yaw : Byte
+}
+impl @mc.Packet for SetHeadRotationS2C
+
+pub(all) struct SetPassengersS2C {
+  entity_id : Int
+  passenger_ids : Array[Int]
+}
+impl @mc.Packet for SetPassengersS2C
+
+pub(all) struct SpawnEntityS2C {
+  entity_id : Int
+  entity_uuid : String
+  entity_type : Int
+  x : Double
+  y : Double
+  z : Double
+  pitch : Byte
+  yaw : Byte
+  head_yaw : Byte
+  data : Int
+  velocity_x : Int16
+  velocity_y : Int16
+  velocity_z : Int16
+}
+impl @mc.Packet for SpawnEntityS2C
+
+pub(all) struct SynchronizeVehiclePositionS2C {
+  x : Double
+  y : Double
+  z : Double
+  yaw : Float
+  pitch : Float
+}
+impl @mc.Packet for SynchronizeVehiclePositionS2C
+
+pub(all) struct TeleportEntityS2C {
+  entity_id : Int
+  x : Double
+  y : Double
+  z : Double
+  yaw : Byte
+  pitch : Byte
+  on_ground : Bool
+}
+impl @mc.Packet for TeleportEntityS2C
+
+pub(all) struct UpdateAttributesS2C {
+  entity_id : Int
+  attributes : Array[(String, Double, Array[(String, String, Double, Int)])]
+}
+impl @mc.Packet for UpdateAttributesS2C
+
+pub(all) struct UpdateEntityPositionAndRotationS2C {
+  entity_id : Int
+  delta_x : Int16
+  delta_y : Int16
+  delta_z : Int16
+  yaw : Byte
+  pitch : Byte
+  on_ground : Bool
+}
+impl @mc.Packet for UpdateEntityPositionAndRotationS2C
+
+pub(all) struct UpdateEntityPositionS2C {
+  entity_id : Int
+  delta_x : Int16
+  delta_y : Int16
+  delta_z : Int16
+  on_ground : Bool
+}
+impl @mc.Packet for UpdateEntityPositionS2C
+
+pub(all) struct UpdateEntityRotationS2C {
+  entity_id : Int
+  yaw : Byte
+  pitch : Byte
+  on_ground : Bool
+}
+impl @mc.Packet for UpdateEntityRotationS2C
+
+// Type aliases
+
+// Traits
+

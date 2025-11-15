@@ -14,6 +14,7 @@ pub(all) struct ChunkDataAndUpdateLightS2C {
   sky_light : Array[Array[Byte]] // Sky light arrays
   block_light : Array[Array[Byte]] // Block light arrays
 }
+
 ///|
 pub impl @mc.Packet for ChunkDataAndUpdateLightS2C with clientbound(_) {
   true

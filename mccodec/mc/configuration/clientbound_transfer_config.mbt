@@ -21,9 +21,10 @@ pub impl @mc.Packet for TransferConfigS2C with serialize(
 }
 
 ///|
-pub impl @mc.Packet for TransferConfigS2C with deserialize(buf : &@buffer.Buffer) {
+pub impl @mc.Packet for TransferConfigS2C with deserialize(
+  buf : &@buffer.Buffer,
+) {
   let host = @types.read_string(buf)
   let port = @types.read_varint(buf)
   { host, port }
 }
-

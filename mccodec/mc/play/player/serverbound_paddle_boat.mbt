@@ -21,11 +21,8 @@ pub impl @mc.Packet for PaddleBoatC2S with serialize(
 }
 
 ///|
-pub impl @mc.Packet for PaddleBoatC2S with deserialize(
-  buf : &@buffer.Buffer,
-) {
+pub impl @mc.Packet for PaddleBoatC2S with deserialize(buf : &@buffer.Buffer) {
   let left_paddle_turning = @types.read_bool(buf)
   let right_paddle_turning = @types.read_bool(buf)
   { left_paddle_turning, right_paddle_turning }
 }
-

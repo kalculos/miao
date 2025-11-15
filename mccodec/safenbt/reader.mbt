@@ -10,9 +10,7 @@ pub fn read_nbt_buf(
     let byte = buf.read_byte()
     if byte == @nbt.TypeEnd {
       depth -= 1
-      guard depth >= 0 else {
-        raise fail("NBTTag underflow at \{buf.ridx()}")
-      }
+      guard depth >= 0 else { raise fail("NBTTag underflow at \{buf.ridx()}") }
       if depth == 0 {
         return buf.slice(stream_begin, buf.ridx())
       }
@@ -39,10 +37,8 @@ pub fn read_nbt_buf(
         let arrayLength = buf.read_int()
         buf.skip_n(arrayLength * size)
       }
-      @nbt.TypeList => {
-        buf.skip_n(1 + 4)
-        //todo: depth support for lists
-      }
+      @nbt.TypeList => buf.skip_n(1 + 4)
+      //todo: depth support for lists
       @nbt.TypeCompound => {
         depth += 1
         if depth > max_depth {

@@ -21,7 +21,9 @@ pub impl @mc.Packet for OpenSignEditorS2C with serialize(
 }
 
 ///|
-pub impl @mc.Packet for OpenSignEditorS2C with deserialize(buf : &@buffer.Buffer) {
+pub impl @mc.Packet for OpenSignEditorS2C with deserialize(
+  buf : &@buffer.Buffer,
+) {
   let location = @types.read_position(buf)
   let is_front_text = @types.read_bool(buf)
   { location, is_front_text }

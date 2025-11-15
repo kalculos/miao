@@ -29,7 +29,9 @@ pub impl @mc.Packet for EncryptionRequestS2C with serialize(
 }
 
 ///|
-pub impl @mc.Packet for EncryptionRequestS2C with deserialize(buf : &@buffer.Buffer) {
+pub impl @mc.Packet for EncryptionRequestS2C with deserialize(
+  buf : &@buffer.Buffer,
+) {
   let server_id = @types.read_string(buf)
   let public_key = @types.read_prefix_array(buf, b => b.read_byte())
   let verify_token = @types.read_prefix_array(buf, b => b.read_byte())

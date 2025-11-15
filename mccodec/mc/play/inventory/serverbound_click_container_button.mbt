@@ -28,4 +28,3 @@ pub impl @mc.Packet for ClickContainerButtonC2S with deserialize(
   let button_id = @types.read_varint(buf)
   { window_id, button_id }
 }
-

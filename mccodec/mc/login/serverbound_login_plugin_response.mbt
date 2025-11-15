@@ -17,7 +17,8 @@ pub impl @mc.Packet for LoginPluginResponseC2S with serialize(
   buf : &@buffer.Buffer,
 ) {
   @types.write_varint(buf, self.message_id)
-  @types.write_optional(buf, self.data, (b, d) => b.write(d, 0, d.length()) |> ignore)
+  @types.write_optional(buf, self.data, (b, d) => b.write(d, 0, d.length())
+    |> ignore)
 }
 
 ///|

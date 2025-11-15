@@ -23,6 +23,7 @@ impl @net.Connection for UvDatagram with remote_addr(self) {
 ///|
 impl @net.Connection for UvDatagram with flush(self) {
   let _ = self
+
 }
 
 ///|
@@ -88,13 +89,17 @@ struct UvDatagramSocket {
 }
 
 ///|
-impl @net.DatagramSocket for UvDatagramSocket with accept(self, buffer, _timeout) {
+impl @net.DatagramSocket for UvDatagramSocket with accept(
+  self,
+  buffer,
+  _timeout,
+) {
   // Start receiving if not already started
   if !self.receiving && !self.closed {
     self.receiving = true
     self.start_receiving()
   }
-  
+
   // Wait for a packet from the queue
   let result = self.packet_queue.pop()
   match result {
@@ -111,26 +116,24 @@ impl @net.DatagramSocket for UvDatagramSocket with accept(self, buffer, _timeout
 ///|
 fn UvDatagramSocket::start_receiving(self : UvDatagramSocket) -> Unit {
   self.udp.recv_start(
-    (_, size) => FixedArray::make(size, b'\x00').unsafe_reinterpret_as_bytes().op_as_view(),
-    (_, nread, buf, addr, _flags) => {
-      if nread > 0 && !self.closed {
-        // Copy the received data into a Bytes object
-        let data = Bytes::from_array(FixedArray::makei(nread, fn(i) { buf[i] }))
-        let sockaddr = (try? addr.to_miao()).unwrap_or(@net.SockAddr::Unspec)
-        // Try to push to queue (non-blocking to avoid issues in callback)
-        let _ = try self.packet_queue.try_push((sockaddr, data)) catch { _ => false }
-      }
+    (_, size) => FixedArray::make(size, b'\x00')
+      .unsafe_reinterpret_as_bytes()
+      .op_as_view(),
+    (_, nread, buf, addr, _flags) => if nread > 0 && !self.closed {
+      // Copy the received data into a Bytes object
+      let data = Bytes::from_array(FixedArray::makei(nread, fn(i) { buf[i] }))
+      let sockaddr = (try? addr.to_miao()).unwrap_or(@net.SockAddr::Unspec)
+      // Try to push to queue (non-blocking to avoid issues in callback)
+      let _ = self.packet_queue.try_push((sockaddr, data)) catch { _ => false }
+
     },
-    (_, _errno) => {
+    (
+      _,
+      _errno,
       // Error in receiving, stop receiving
-      if !self.closed {
-        self.receiving = false
-      }
-    },
+    ) => if !self.closed { self.receiving = false },
   ) catch {
-    _ => {
-      self.receiving = false
-    }
+    _ => self.receiving = false
   }
 }
 
@@ -154,10 +157,11 @@ impl @net.DatagramSocket for UvDatagramSocket with send(self, dst, buffer, _opt)
               ),
             ),
           ),
-          addr=addr,
+          addr~,
         )
         () => {
           defer reject(@rt.CoroutineError::Cancelled)
+
         }
       })
     }
@@ -167,15 +171,13 @@ impl @net.DatagramSocket for UvDatagramSocket with send(self, dst, buffer, _opt)
 ///|
 impl @net.Socket for UvDatagramSocket with accept(self, timeout) {
   let buffer = @buffer.HeapByteBuf::new(65536)
-  (@net.DatagramSocket::accept(self, buffer, timeout)).map(
-    fn(pair) {
-      let (remote_addr, _) = pair
-      // Create a datagram wrapper for this specific packet
-      // The remote address indicates where this packet came from
-      UvDatagram::{ sock: self, buf: buffer, udp: self.udp, remote: remote_addr }
-        as &@net.Connection
-    },
-  )
+  @net.DatagramSocket::accept(self, buffer, timeout).map(fn(pair) {
+    let (remote_addr, _) = pair
+    // Create a datagram wrapper for this specific packet
+    // The remote address indicates where this packet came from
+    UvDatagram::{ sock: self, buf: buffer, udp: self.udp, remote: remote_addr }
+    as &@net.Connection
+  })
 }
 
 ///|
@@ -183,7 +185,9 @@ impl @net.Socket for UvDatagramSocket with close(self) {
   guard !self.closed
   self.closed = true
   if self.receiving {
-    self.udp.recv_stop() catch { _ => () }
+    self.udp.recv_stop() catch {
+      _ => ()
+    }
     self.receiving = false
   }
   self.packet_queue.close()
@@ -194,5 +198,3 @@ impl @net.Socket for UvDatagramSocket with close(self) {
 impl @net.Socket for UvDatagramSocket with is_closed(self) {
   self.closed
 }
-
-

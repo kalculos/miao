@@ -26,10 +26,11 @@ test "invalid ipv4" {
   try {
     let _ = SockAddrIn::from_host_port("256.0.0.1", 80)
     inspect(false, content="true") // Should not reach here
-  } catch { err => {
-    // Just verify error was raised - message contains file paths
-    inspect(err.to_string().contains("256"), content="true")
-  }}
+  } catch {
+    err =>
+      // Just verify error was raised - message contains file paths
+      inspect(err.to_string().contains("256"), content="true")
+  }
 }
 
 ///|
@@ -37,8 +38,9 @@ test "invalid ipv6" {
   try {
     let _ = SockAddrIn::from_host_port("[::zz]", 80)
     inspect(false, content="true") // Should not reach here
-  } catch { err => {
-    // Just verify error was raised - message contains file paths
-    inspect(err.to_string().contains("zz"), content="true")
-  }}
+  } catch {
+    err =>
+      // Just verify error was raised - message contains file paths
+      inspect(err.to_string().contains("zz"), content="true")
+  }
 }

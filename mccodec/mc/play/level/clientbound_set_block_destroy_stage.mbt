@@ -6,6 +6,7 @@ pub(all) struct SetBlockDestroyStageS2C {
   location : (Int, Int, Int) // Block position
   destroy_stage : Byte // Breaking stage (0-9, or -1 to remove)
 }
+
 ///|
 pub impl @mc.Packet for SetBlockDestroyStageS2C with clientbound(_) {
   true

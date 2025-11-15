@@ -1,4 +1,5 @@
-///| This is a basic implementation of a Context. Most of its members are visible in public to
+///|
+/// This is a basic implementation of a Context. Most of its members are visible in public to
 /// help you compose a specialized version without reimplementing most of those hassles.
 pub struct BasicContext { // share information in tasks, manage jobs in batch, etc.
   priv mut cancelled : Bool
@@ -61,10 +62,10 @@ pub impl Context for BasicContext with job(self, task) -> &Task {
     raise fail("The context is already cancelled! (new_job)")
   }
   let taskToken = self.rt.new_task(t => {
-      // It can keep the state tracked even if the user called cancel() on returned tasks.
-      defer self.tasks.remove(t.id())
-      Job::{ context: self, task: t } |> task |> ignore
-    })
+    // It can keep the state tracked even if the user called cancel() on returned tasks.
+    defer self.tasks.remove(t.id())
+    Job::{ context: self, task: t } |> task |> ignore
+  })
   self.tasks[taskToken.id()] = taskToken
   taskToken
 }
@@ -84,19 +85,19 @@ pub impl Context for BasicContext with job_timeout(self, timeout_millis~, task) 
     timeoutTask.start()
     self
     .job(j => {
-        defer (fn() { done = true })()
-        try task(j) catch {
-          err => {
-            timeoutTask.cancel()
-            raise err
-          }
-        } noraise {
-          v => {
-            timeoutTask.cancel()
-            v
-          }
+      defer (fn() { done = true })()
+      try task(j) catch {
+        err => {
+          timeoutTask.cancel()
+          raise err
         }
-      })
+      } noraise {
+        v => {
+          timeoutTask.cancel()
+          v
+        }
+      }
+    })
     .start()
   })
 }

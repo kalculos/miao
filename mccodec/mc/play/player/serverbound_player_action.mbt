@@ -25,13 +25,10 @@ pub impl @mc.Packet for PlayerActionC2S with serialize(
 }
 
 ///|
-pub impl @mc.Packet for PlayerActionC2S with deserialize(
-  buf : &@buffer.Buffer,
-) {
+pub impl @mc.Packet for PlayerActionC2S with deserialize(buf : &@buffer.Buffer) {
   let status = @types.read_varint(buf)
   let location = @types.read_position(buf)
   let face = buf.read_byte()
   let sequence = @types.read_varint(buf)
   { status, location, face, sequence }
 }
-

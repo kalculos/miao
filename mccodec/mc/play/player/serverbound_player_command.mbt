@@ -23,12 +23,9 @@ pub impl @mc.Packet for PlayerCommandC2S with serialize(
 }
 
 ///|
-pub impl @mc.Packet for PlayerCommandC2S with deserialize(
-  buf : &@buffer.Buffer,
-) {
+pub impl @mc.Packet for PlayerCommandC2S with deserialize(buf : &@buffer.Buffer) {
   let entity_id = @types.read_varint(buf)
   let action_id = @types.read_varint(buf)
   let jump_boost = @types.read_varint(buf)
   { entity_id, action_id, jump_boost }
 }
-

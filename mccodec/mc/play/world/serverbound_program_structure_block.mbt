@@ -67,7 +67,23 @@ pub impl @mc.Packet for ProgramStructureBlockC2S with deserialize(
   let metadata = @types.read_string(buf)
   let integrity = buf.read_float()
   let seed = @types.read_varlong(buf)
-  let flags = buf.read_byte();
-  { location, action, mode, name, offset_x, offset_y, offset_z, size_x, size_y, size_z, mirror, rotation, metadata, integrity, seed, flags }
+  let flags = buf.read_byte()
+  {
+    location,
+    action,
+    mode,
+    name,
+    offset_x,
+    offset_y,
+    offset_z,
+    size_x,
+    size_y,
+    size_z,
+    mirror,
+    rotation,
+    metadata,
+    integrity,
+    seed,
+    flags,
+  }
 }
-

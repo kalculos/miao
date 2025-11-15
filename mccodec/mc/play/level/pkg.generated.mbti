@@ -1,0 +1,203 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "iceBear67/miao/mccodec/mc/play/level"
+
+import(
+  "iceBear67/miao/buffer"
+  "iceBear67/miao/mccodec/mc"
+  "iceBear67/miao/mccodec/mc/types"
+)
+
+// Values
+
+// Errors
+
+// Types and methods
+pub(all) struct AcknowledgeBlockChangeS2C {
+  sequence_id : Int
+}
+impl @mc.Packet for AcknowledgeBlockChangeS2C
+
+pub(all) struct BlockActionS2C {
+  location : (Int, Int, Int)
+  action_id : Byte
+  action_param : Byte
+  block_type : Int
+}
+impl @mc.Packet for BlockActionS2C
+
+pub(all) struct BlockEntityDataS2C {
+  location : (Int, Int, Int)
+  entity_type : Int
+  nbt_data : String
+}
+impl @mc.Packet for BlockEntityDataS2C
+
+pub(all) struct BlockUpdateS2C {
+  location : (Int, Int, Int)
+  block_id : Int
+}
+impl @mc.Packet for BlockUpdateS2C
+
+pub(all) struct ChangeDifficultyC2S {
+  new_difficulty : Int
+}
+impl @mc.Packet for ChangeDifficultyC2S
+
+pub(all) struct ChangeGameModeC2S {
+  game_mode : Int
+}
+impl @mc.Packet for ChangeGameModeC2S
+
+pub(all) struct ChunkBatchFinishedS2C {
+  batch_size : Int
+}
+impl @mc.Packet for ChunkBatchFinishedS2C
+
+pub(all) struct ChunkBatchReceivedC2S {
+  chunks_per_tick : Float
+}
+impl @mc.Packet for ChunkBatchReceivedC2S
+
+pub(all) struct ChunkBatchStartS2C {
+}
+impl @mc.Packet for ChunkBatchStartS2C
+
+pub(all) struct ChunkBiomesS2C {
+  chunk_biomes : Array[(Int, Int, Array[Int])]
+}
+impl @mc.Packet for ChunkBiomesS2C
+
+pub(all) struct ChunkDataAndUpdateLightS2C {
+  chunk_x : Int
+  chunk_z : Int
+  heightmaps : String
+  data : Array[Byte]
+  block_entities : Array[String]
+  sky_light_mask : Int64
+  block_light_mask : Int64
+  empty_sky_light_mask : Int64
+  empty_block_light_mask : Int64
+  sky_light : Array[Array[Byte]]
+  block_light : Array[Array[Byte]]
+}
+impl @mc.Packet for ChunkDataAndUpdateLightS2C
+
+pub(all) struct DebugSampleSubscriptionC2S {
+  sample_type : Int
+}
+impl @mc.Packet for DebugSampleSubscriptionC2S
+
+pub(all) struct ExplosionS2C {
+  x : Double
+  y : Double
+  z : Double
+  strength : Float
+  records : Array[(Int, Int, Int)]
+  player_motion_x : Float
+  player_motion_y : Float
+  player_motion_z : Float
+  block_interaction : Int
+  small_explosion_particle : String
+  large_explosion_particle : String
+  explosion_sound : String
+}
+impl @mc.Packet for ExplosionS2C
+
+pub(all) struct LockDifficultyC2S {
+  locked : Bool
+}
+impl @mc.Packet for LockDifficultyC2S
+
+pub(all) struct ParticleS2C {
+  particle_id : Int
+  long_distance : Bool
+  x : Double
+  y : Double
+  z : Double
+  offset_x : Float
+  offset_y : Float
+  offset_z : Float
+  max_speed : Float
+  particle_count : Int
+  data : Array[Byte]
+}
+impl @mc.Packet for ParticleS2C
+
+pub(all) struct SetBlockDestroyStageS2C {
+  entity_id : Int
+  location : (Int, Int, Int)
+  destroy_stage : Byte
+}
+impl @mc.Packet for SetBlockDestroyStageS2C
+
+pub(all) struct SetCenterChunkS2C {
+  chunk_x : Int
+  chunk_z : Int
+}
+impl @mc.Packet for SetCenterChunkS2C
+
+pub(all) struct SetDefaultSpawnPositionS2C {
+  location : (Int, Int, Int)
+  angle : Float
+}
+impl @mc.Packet for SetDefaultSpawnPositionS2C
+
+pub(all) struct SetRenderDistanceS2C {
+  view_distance : Int
+}
+impl @mc.Packet for SetRenderDistanceS2C
+
+pub(all) struct SetSimulationDistanceS2C {
+  simulation_distance : Int
+}
+impl @mc.Packet for SetSimulationDistanceS2C
+
+pub(all) struct TestInstanceBlockActionC2S {
+  location : @types.Position
+  action : Int
+  test_id : @types.Identifier
+  size_x : Int
+  size_y : Int
+  size_z : Int
+  rotation : Int
+  ignore_entities : Bool
+  status : Int
+  error_message : String?
+}
+impl @mc.Packet for TestInstanceBlockActionC2S
+
+pub(all) struct TestInstanceBlockStatusS2C {
+  location : (Int, Int, Int)
+  block_state : Int
+  block_entity_data : String?
+}
+impl @mc.Packet for TestInstanceBlockStatusS2C
+
+pub(all) struct UnloadChunkS2C {
+  chunk_x : Int
+  chunk_z : Int
+}
+impl @mc.Packet for UnloadChunkS2C
+
+pub(all) struct UpdateLightS2C {
+  chunk_x : Int
+  chunk_z : Int
+  sky_light_mask : Int64
+  block_light_mask : Int64
+  empty_sky_light_mask : Int64
+  empty_block_light_mask : Int64
+  sky_light : Array[Array[Byte]]
+  block_light : Array[Array[Byte]]
+}
+impl @mc.Packet for UpdateLightS2C
+
+pub(all) struct UpdateSectionBlocksS2C {
+  chunk_section_position : Int64
+  blocks : Array[(Int16, Int)]
+}
+impl @mc.Packet for UpdateSectionBlocksS2C
+
+// Type aliases
+
+// Traits
+

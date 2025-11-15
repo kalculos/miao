@@ -22,4 +22,3 @@ pub impl @mc.Packet for AcknowledgeConfigurationC2S with deserialize(
 ) {
   AcknowledgeConfigurationC2S::{  }
 }
-

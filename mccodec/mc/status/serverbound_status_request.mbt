@@ -9,10 +9,7 @@ pub impl @mc.Packet for StatusRequestC2S with clientbound(_) {
 }
 
 ///|
-pub impl @mc.Packet for StatusRequestC2S with serialize(
-  _,
-  _ : &@buffer.Buffer,
-) {
+pub impl @mc.Packet for StatusRequestC2S with serialize(_, _ : &@buffer.Buffer) {
   // No fields to serialize
 }
 

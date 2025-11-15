@@ -24,4 +24,3 @@ pub impl @mc.Packet for DebugSampleSubscriptionC2S with deserialize(
 ) {
   { sample_type: @types.read_varint(buf) }
 }
-

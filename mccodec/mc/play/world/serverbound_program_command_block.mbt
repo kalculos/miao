@@ -34,4 +34,3 @@ pub impl @mc.Packet for ProgramCommandBlockC2S with deserialize(
   let flags = buf.read_byte()
   { location, command, mode, flags }
 }
-

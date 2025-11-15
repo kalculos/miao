@@ -8,6 +8,7 @@ pub(all) struct UpdateScoreS2C {
   display_name : String? // Display name
   number_format : String? // Number format
 }
+
 ///|
 pub impl @mc.Packet for UpdateScoreS2C with clientbound(_) {
   true

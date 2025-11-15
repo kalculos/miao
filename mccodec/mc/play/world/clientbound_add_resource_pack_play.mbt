@@ -8,6 +8,7 @@ pub(all) struct AddResourcePackPlayS2C {
   forced : Bool // Force pack
   prompt_message : String? // Prompt message
 }
+
 ///|
 pub impl @mc.Packet for AddResourcePackPlayS2C with clientbound(_) {
   true

@@ -11,17 +11,11 @@ pub impl @mc.Packet for PongPlayC2S with clientbound(_) {
 }
 
 ///|
-pub impl @mc.Packet for PongPlayC2S with serialize(
-  self,
-  buf : &@buffer.Buffer,
-) {
+pub impl @mc.Packet for PongPlayC2S with serialize(self, buf : &@buffer.Buffer) {
   @types.write_varint(buf, self.id)
 }
 
 ///|
-pub impl @mc.Packet for PongPlayC2S with deserialize(
-  buf : &@buffer.Buffer,
-) {
+pub impl @mc.Packet for PongPlayC2S with deserialize(buf : &@buffer.Buffer) {
   { id: @types.read_varint(buf) }
 }
-

@@ -26,9 +26,8 @@ pub impl @mc.Packet for JigsawGenerateC2S with serialize(
 pub impl @mc.Packet for JigsawGenerateC2S with deserialize(
   buf : &@buffer.Buffer,
 ) {
-  let location = @types.read_position(buf);
-  let levels = @types.read_varint(buf);
-  let keep_jigsaws = @types.read_bool(buf);
+  let location = @types.read_position(buf)
+  let levels = @types.read_varint(buf)
+  let keep_jigsaws = @types.read_bool(buf)
   { location, levels, keep_jigsaws }
 }
-

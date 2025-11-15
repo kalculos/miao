@@ -8,6 +8,7 @@ pub(all) struct DamageEventS2C {
   source_direct_id : Int // Direct damage source (or 0)  
   source_position : (Double, Double, Double)? // Damage source position
 }
+
 ///|
 pub impl @mc.Packet for DamageEventS2C with clientbound(_) {
   true

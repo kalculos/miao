@@ -1,0 +1,182 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "iceBear67/miao/mccodec/mc/configuration"
+
+import(
+  "iceBear67/miao/buffer"
+  "iceBear67/miao/mccodec/mc"
+  "iceBear67/miao/mccodec/mc/types"
+  "iceBear67/mnbt/nbt"
+  "moonbitlang/x/uuid"
+)
+
+// Values
+
+// Errors
+
+// Types and methods
+pub(all) struct AcknowledgeFinishConfigurationC2S {
+}
+impl @mc.Packet for AcknowledgeFinishConfigurationC2S
+
+pub(all) struct AddResourcePackConfigS2C {
+  uuid : @uuid.UUID
+  url : String
+  hash : String
+  forced : Bool
+  prompt_message : String?
+}
+impl @mc.Packet for AddResourcePackConfigS2C
+
+pub(all) struct ClearDialogConfigS2C {
+}
+impl @mc.Packet for ClearDialogConfigS2C
+
+pub(all) struct ClientInformationConfigC2S {
+  locale : String
+  view_distance : Byte
+  chat_mode : Int
+  chat_colors : Bool
+  displayed_skin_parts : Array[@types.SkinPart]
+  main_hand : Int
+  enable_text_filtering : Bool
+  allow_server_listings : Bool
+  particle_status : Int
+}
+impl @mc.Packet for ClientInformationConfigC2S
+
+pub(all) struct ClientboundKeepAliveConfigS2C {
+  keep_alive_id : Int64
+}
+impl @mc.Packet for ClientboundKeepAliveConfigS2C
+
+pub(all) struct ClientboundKnownPacksS2C {
+  known_packs : FixedArray[@types.KnownPack]
+}
+impl @mc.Packet for ClientboundKnownPacksS2C
+
+pub(all) struct ClientboundPluginMessageConfigS2C {
+  channel : String
+  data : FixedArray[Byte]
+}
+impl @mc.Packet for ClientboundPluginMessageConfigS2C
+
+pub(all) struct CookieRequestConfigS2C {
+  key : @types.Identifier
+}
+impl @mc.Packet for CookieRequestConfigS2C
+
+pub(all) struct CookieResponseConfigC2S {
+  key : @types.Identifier
+  payload : FixedArray[Byte]?
+}
+impl @mc.Packet for CookieResponseConfigC2S
+
+pub(all) struct CustomClickActionC2S {
+  id : @types.Identifier
+  payload : @nbt.NBTTag
+}
+impl @mc.Packet for CustomClickActionC2S
+
+pub(all) struct CustomReportDetailsConfigS2C {
+  details : Map[String, String]
+}
+impl @mc.Packet for CustomReportDetailsConfigS2C
+
+pub(all) struct DisconnectConfigS2C {
+  reason : String
+}
+impl @mc.Packet for DisconnectConfigS2C
+
+pub(all) struct FeatureFlagsS2C {
+  feature_flags : FixedArray[@types.Identifier]
+}
+impl @mc.Packet for FeatureFlagsS2C
+
+pub(all) struct FinishConfigurationS2C {
+}
+impl @mc.Packet for FinishConfigurationS2C
+
+pub(all) struct PingConfigS2C {
+  id : Int
+}
+impl @mc.Packet for PingConfigS2C
+
+pub(all) struct PongConfigC2S {
+  id : Int
+}
+impl @mc.Packet for PongConfigC2S
+
+pub(all) struct RegistryDataS2C {
+  registry_id : @types.Identifier
+  entries : FixedArray[(String, String)]
+}
+impl @mc.Packet for RegistryDataS2C
+
+pub(all) struct RemoveResourcePackConfigS2C {
+  uuid : @uuid.UUID?
+}
+impl @mc.Packet for RemoveResourcePackConfigS2C
+
+pub(all) struct ResetChatS2C {
+}
+impl @mc.Packet for ResetChatS2C
+
+pub(all) struct ResourcePackResponseConfigC2S {
+  uuid : @uuid.UUID
+  result : Int
+}
+impl @mc.Packet for ResourcePackResponseConfigC2S
+
+type ServerLink
+
+type ServerLinkType
+fn ServerLinkType::from_int(Int) -> Self?
+fn ServerLinkType::to_int(Self) -> Int
+
+pub(all) struct ServerLinksConfigS2C {
+  links : FixedArray[ServerLink]
+}
+impl @mc.Packet for ServerLinksConfigS2C
+
+pub(all) struct ServerboundKeepAliveConfigC2S {
+  keep_alive_id : Int64
+}
+impl @mc.Packet for ServerboundKeepAliveConfigC2S
+
+pub(all) struct ServerboundKnownPacksC2S {
+  known_packs : FixedArray[@types.KnownPack]
+}
+impl @mc.Packet for ServerboundKnownPacksC2S
+
+pub(all) struct ServerboundPluginMessageConfigC2S {
+  channel : @types.Identifier
+  data : FixedArray[Byte]
+}
+impl @mc.Packet for ServerboundPluginMessageConfigC2S
+
+pub(all) struct ShowDialogConfigS2C {
+  dialog : @nbt.NBTTag
+}
+impl @mc.Packet for ShowDialogConfigS2C
+
+pub(all) struct StoreCookieConfigS2C {
+  key : @types.Identifier
+  payload : FixedArray[Byte]
+}
+impl @mc.Packet for StoreCookieConfigS2C
+
+pub(all) struct TransferConfigS2C {
+  host : String
+  port : Int
+}
+impl @mc.Packet for TransferConfigS2C
+
+pub(all) struct UpdateTagsConfigS2C {
+  tags : Map[@types.Identifier, Map[@types.Identifier, FixedArray[Int]]]
+}
+impl @mc.Packet for UpdateTagsConfigS2C
+
+// Type aliases
+
+// Traits
+

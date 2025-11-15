@@ -6,6 +6,7 @@ pub(all) struct SetExperienceS2C {
   level : Int // Experience level
   total_experience : Int // Total experience
 }
+
 ///|
 pub impl @mc.Packet for SetExperienceS2C with clientbound(_) {
   true

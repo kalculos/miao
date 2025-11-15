@@ -16,10 +16,8 @@ pub impl @mc.Packet for InteractC2S with clientbound(_) {
   false
 }
 
-pub impl @mc.Packet for InteractC2S with serialize(
-  self,
-  buf : &@buffer.Buffer,
-) {
+///|
+pub impl @mc.Packet for InteractC2S with serialize(self, buf : &@buffer.Buffer) {
   @types.write_varint(buf, self.entity_id)
   @types.write_varint(buf, self.interaction_type)
   if self.interaction_type == 2 {
@@ -33,17 +31,12 @@ pub impl @mc.Packet for InteractC2S with serialize(
   @types.write_bool(buf, self.sneaking)
 }
 
-pub impl @mc.Packet for InteractC2S with deserialize(
-  buf : &@buffer.Buffer,
-) {
+///|
+pub impl @mc.Packet for InteractC2S with deserialize(buf : &@buffer.Buffer) {
   let entity_id = @types.read_varint(buf)
   let interaction_type = @types.read_varint(buf)
   let (target_x, target_y, target_z) = if interaction_type == 2 {
-    (
-      Some(buf.read_float()),
-      Some(buf.read_float()),
-      Some(buf.read_float()),
-    )
+    (Some(buf.read_float()), Some(buf.read_float()), Some(buf.read_float()))
   } else {
     (None, None, None)
   }
@@ -53,14 +46,5 @@ pub impl @mc.Packet for InteractC2S with deserialize(
     None
   }
   let sneaking = @types.read_bool(buf)
-  {
-    entity_id,
-    interaction_type,
-    target_x,
-    target_y,
-    target_z,
-    hand,
-    sneaking,
-  }
+  { entity_id, interaction_type, target_x, target_y, target_z, hand, sneaking }
 }
-

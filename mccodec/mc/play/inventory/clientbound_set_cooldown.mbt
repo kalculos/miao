@@ -12,7 +12,10 @@ pub impl @mc.Packet for SetCooldownS2C with clientbound(_) {
 }
 
 ///|
-pub impl @mc.Packet for SetCooldownS2C with serialize(self, buf : &@buffer.Buffer) {
+pub impl @mc.Packet for SetCooldownS2C with serialize(
+  self,
+  buf : &@buffer.Buffer,
+) {
   @types.write_identifier(buf, self.cooldown_group)
   @types.write_varint(buf, self.cooldown_ticks)
 }

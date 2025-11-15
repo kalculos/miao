@@ -19,9 +19,6 @@ pub impl @mc.Packet for SetHeldItemC2S with serialize(
 }
 
 ///|
-pub impl @mc.Packet for SetHeldItemC2S with deserialize(
-  buf : &@buffer.Buffer,
-) {
+pub impl @mc.Packet for SetHeldItemC2S with deserialize(buf : &@buffer.Buffer) {
   { slot: buf.read_int16() }
 }
-

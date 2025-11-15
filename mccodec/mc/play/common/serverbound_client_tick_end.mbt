@@ -9,17 +9,11 @@ pub impl @mc.Packet for ClientTickEndC2S with clientbound(_) {
 }
 
 ///|
-pub impl @mc.Packet for ClientTickEndC2S with serialize(
-  _,
-  _ : &@buffer.Buffer,
-) {
+pub impl @mc.Packet for ClientTickEndC2S with serialize(_, _ : &@buffer.Buffer) {
   // No fields to serialize
 }
 
 ///|
-pub impl @mc.Packet for ClientTickEndC2S with deserialize(
-  _ : &@buffer.Buffer,
-) {
+pub impl @mc.Packet for ClientTickEndC2S with deserialize(_ : &@buffer.Buffer) {
   ClientTickEndC2S::{  }
 }
-

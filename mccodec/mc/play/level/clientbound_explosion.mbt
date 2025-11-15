@@ -15,6 +15,7 @@ pub(all) struct ExplosionS2C {
   large_explosion_particle : String // Large particle data
   explosion_sound : String // Explosion sound
 }
+
 ///|
 pub impl @mc.Packet for ExplosionS2C with clientbound(_) {
   true

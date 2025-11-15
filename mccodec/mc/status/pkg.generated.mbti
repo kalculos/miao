@@ -1,0 +1,36 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "iceBear67/miao/mccodec/mc/status"
+
+import(
+  "iceBear67/miao/buffer"
+  "iceBear67/miao/mccodec/mc"
+)
+
+// Values
+
+// Errors
+
+// Types and methods
+pub(all) struct PingRequestC2S {
+  timestamp : Int64
+}
+impl @mc.Packet for PingRequestC2S
+
+pub(all) struct PongResponseS2C {
+  timestamp : Int64
+}
+impl @mc.Packet for PongResponseS2C
+
+pub(all) struct StatusRequestC2S {
+}
+impl @mc.Packet for StatusRequestC2S
+
+pub(all) struct StatusResponseS2C {
+  json_response : Json
+}
+impl @mc.Packet for StatusResponseS2C
+
+// Type aliases
+
+// Traits
+

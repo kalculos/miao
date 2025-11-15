@@ -53,7 +53,7 @@ pub(all) struct Job {
 }
 
 ///|
-pub typealias async (Job) -> Unit as Coroutine
+pub type Coroutine = async (Job) -> Unit
 
 ///|
 /// A Context manages multiple Tasks in batch to enable structured concurrency, while 

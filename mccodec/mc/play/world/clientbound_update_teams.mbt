@@ -13,6 +13,7 @@ pub(all) struct UpdateTeamsS2C {
   color : Int? // Team color
   entities : Array[String]? // Entity names
 }
+
 ///|
 pub impl @mc.Packet for UpdateTeamsS2C with clientbound(_) {
   true

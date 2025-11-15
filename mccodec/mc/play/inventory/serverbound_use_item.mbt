@@ -14,10 +14,7 @@ pub impl @mc.Packet for UseItemC2S with clientbound(_) {
 }
 
 ///|
-pub impl @mc.Packet for UseItemC2S with serialize(
-  self,
-  buf : &@buffer.Buffer,
-) {
+pub impl @mc.Packet for UseItemC2S with serialize(self, buf : &@buffer.Buffer) {
   @types.write_varint(buf, self.hand)
   @types.write_varint(buf, self.sequence)
   buf.write_float(self.yaw)
@@ -25,13 +22,10 @@ pub impl @mc.Packet for UseItemC2S with serialize(
 }
 
 ///|
-pub impl @mc.Packet for UseItemC2S with deserialize(
-  buf : &@buffer.Buffer,
-) {
+pub impl @mc.Packet for UseItemC2S with deserialize(buf : &@buffer.Buffer) {
   let hand = @types.read_varint(buf)
   let sequence = @types.read_varint(buf)
   let yaw = buf.read_float()
   let pitch = buf.read_float()
   { hand, sequence, yaw, pitch }
 }
-

@@ -19,7 +19,9 @@ pub impl @mc.Packet for CloseContainerS2C with serialize(
 }
 
 ///|
-pub impl @mc.Packet for CloseContainerS2C with deserialize(buf : &@buffer.Buffer) {
+pub impl @mc.Packet for CloseContainerS2C with deserialize(
+  buf : &@buffer.Buffer,
+) {
   let window_id = @types.read_varint(buf)
   { window_id, }
 }

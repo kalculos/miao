@@ -28,4 +28,3 @@ pub impl @mc.Packet for ServerboundPluginMessagePlayC2S with deserialize(
   let data = buf.read_bytes(buf.readable_bytes()).to_fixedarray()
   { channel, data }
 }
-

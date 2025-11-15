@@ -6,6 +6,7 @@ pub(all) struct SetBorderLerpSizeS2C {
   new_diameter : Double // New diameter
   speed : Int64 // Resize speed in milliseconds
 }
+
 ///|
 pub impl @mc.Packet for SetBorderLerpSizeS2C with clientbound(_) {
   true

@@ -337,7 +337,6 @@ test "multiple slices share same underlying array" {
   let buf = HeapByteBuf::wrapped_array(arr)
   let slice1 = buf.slice(0, 3)
   let slice2 = buf.slice(2, 5)
-  
   inspect(slice1.readable_bytes(), content="3")
   inspect(slice2.readable_bytes(), content="3")
 }

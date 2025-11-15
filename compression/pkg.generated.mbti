@@ -1,0 +1,147 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "iceBear67/miao/compression"
+
+import(
+  "iceBear67/miao/io"
+)
+
+// Values
+fn bit_reader() -> BitReaderStream
+
+fn bit_writer() -> BitWriter
+
+fn decode_step(DeflateStream, BitReaderStream) -> Bool
+
+fn deflate_stream() -> DeflateStream
+
+fn from_code_lengths(Array[Byte]) -> Huffman raise CompressionError
+
+fn from_explicit_codes(Array[UInt16], Array[Byte]) -> Huffman
+
+fn from_explicit_codes_dist(Array[UInt16], Array[Byte]) -> Huffman
+
+fn is_finished(DeflateStream) -> Bool
+
+fn pack_bits_lsb(Array[Int]) -> Array[Byte]
+
+fn pull(DeflateStream, Array[Byte]) -> Int
+
+fn push_bits(DeflateStream, Array[Byte]) -> Int
+
+fn revbits(UInt, UInt) -> UInt
+
+// Errors
+pub suberror CompressionError {
+  UnexpectedEof
+  InvalidZlibHeader
+  InvalidGzipHeader
+  InvalidChecksum
+  UnsupportedWindow
+  InvalidBlockType
+  InvalidHuffman
+  DecodeMismatch
+  DistanceTooFar
+  LengthOutOfRange
+  Internal
+}
+impl Show for CompressionError
+
+// Types and methods
+pub struct BitReaderStream {
+  mut fifo : Array[Byte]
+  mut head : Int
+  mut tail : Int
+  mut cap : Int
+  mut bit_buff : UInt64
+  mut bit_cnt : UInt
+}
+fn BitReaderStream::align_to_byte(Self) -> Unit
+fn BitReaderStream::byte_available(Self) -> Int
+fn BitReaderStream::can_read(Self) -> Bool
+fn BitReaderStream::feed(Self, Bytes) -> Int
+fn BitReaderStream::read_bit(Self) -> Byte?
+fn BitReaderStream::read_bits(Self, UInt) -> UInt?
+fn BitReaderStream::take_bytes(Self, Int) -> Bytes?
+
+pub struct BitWriter {
+  mut out : Array[Byte]
+  mut bit_buff : UInt64
+  mut bit_cnt : UInt
+}
+fn BitWriter::align_to_byte(Self) -> Unit
+fn BitWriter::drain_all_aligned(Self) -> Bytes
+fn BitWriter::take_bytes(Self) -> Bytes
+fn BitWriter::write_bits(Self, UInt, UInt) -> Unit
+fn BitWriter::write_le16(Self, UInt16) -> Unit
+fn BitWriter::write_raw_bytes(Self, Bytes) -> Unit
+
+pub struct DeflateReader {
+  source : &@io.Reader
+  bit_reader : BitReaderStream
+  // private fields
+}
+fn DeflateReader::new(&@io.Reader) -> Self
+impl @io.Reader for DeflateReader
+
+pub enum DeflateState {
+  NeedBlockHeader
+  StoredCopy(StoredCopy)
+  FixedTablesReady
+  DynReadCounts
+  DynReadCL(DynReadCL)
+  DynBuildCL
+  DynReadLL(DynRead)
+  DynReadDD(DynRead)
+  DynBuildLLDD
+  Lz77Loop
+  FinishedStream
+}
+
+pub struct DeflateStream {
+  window : Array[Byte]
+  window_postion : Int
+  out_quene : Array[Byte]
+  bfinal_seen : Bool
+  state : DeflateState
+  litlen : Huffman?
+  dist : Huffman?
+  dyn_hlit : UInt
+  dyn_hdist : UInt
+  dyn_hclen : UInt
+  cl_lens : Array[Byte]
+  cl_tree : Huffman?
+  ll_lens : Array[Byte]
+  dd_lens : Array[Byte]
+}
+
+pub struct DeflateWriter {
+  sink : &@io.Writer
+  bit_writer : BitWriter
+  // private fields
+}
+fn DeflateWriter::new(&@io.Writer) -> Self
+impl @io.Writer for DeflateWriter
+
+pub struct DynRead {
+  filled : Int
+  last_len : Byte
+}
+
+pub struct DynReadCL {
+  i : Int
+}
+
+pub struct Huffman {
+  slow : Array[(UInt16, Byte, UInt16)]
+  fast : Array[Int]
+}
+fn Huffman::decode(Self, BitReaderStream) -> UInt16? raise CompressionError
+
+pub struct StoredCopy {
+  len : Int
+}
+
+// Type aliases
+
+// Traits
+

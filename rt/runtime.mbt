@@ -1,5 +1,5 @@
 ///|
-pub typealias () -> Unit raise as CancellationToken
+pub type CancellationToken = () -> Unit raise
 
 ///|
 type ResolvedToken

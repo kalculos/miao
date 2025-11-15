@@ -6,6 +6,7 @@ pub(all) struct ServerDataS2C {
   icon : Array[Byte]? // Server icon data
   enforces_secure_chat : Bool // Secure chat enforcement
 }
+
 ///|
 pub impl @mc.Packet for ServerDataS2C with clientbound(_) {
   true

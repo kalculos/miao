@@ -10,6 +10,7 @@ pub impl @mc.Packet for ChunkBatchReceivedC2S with clientbound(_) {
   false
 }
 
+///|
 pub impl @mc.Packet for ChunkBatchReceivedC2S with serialize(
   self,
   buf : &@buffer.Buffer,
@@ -17,9 +18,9 @@ pub impl @mc.Packet for ChunkBatchReceivedC2S with serialize(
   buf.write_float(self.chunks_per_tick)
 }
 
+///|
 pub impl @mc.Packet for ChunkBatchReceivedC2S with deserialize(
   buf : &@buffer.Buffer,
 ) {
   { chunks_per_tick: buf.read_float() }
 }
-

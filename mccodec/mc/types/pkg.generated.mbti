@@ -1,0 +1,171 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "iceBear67/miao/mccodec/mc/types"
+
+import(
+  "iceBear67/miao/buffer"
+  "iceBear67/mnbt/nbt"
+  "moonbitlang/x/uuid"
+)
+
+// Values
+fn[T] byte_to_enum(Byte) -> T
+
+fn[T] enum_to_byte(T) -> Byte
+
+fn[T] enum_to_int(T) -> Int
+
+fn[T] int_to_enum(Int) -> T
+
+fn read_bitset(&@buffer.Buffer) -> BitSet raise
+
+fn read_bool(&@buffer.Buffer) -> Bool raise
+
+fn read_chat_type(&@buffer.Buffer) -> ChatType raise
+
+fn read_chat_type_decoration(&@buffer.Buffer) -> ChatTypeDecoration raise
+
+fn read_fixed_bitset(&@buffer.Buffer, Int) -> BitSet raise
+
+fn read_game_profile(&@buffer.Buffer) -> GameProfile raise
+
+fn read_hashed_slot(&@buffer.Buffer) -> HashedSlot raise
+
+fn[T] read_holder(&@buffer.Buffer, (&@buffer.Buffer) -> T raise) -> Holder[T] raise
+
+fn read_identifier(&@buffer.Buffer) -> Identifier raise
+
+fn read_known_pack(&@buffer.Buffer) -> KnownPack raise
+
+fn[T : Eq + Hash, U] read_map(&@buffer.Buffer, (&@buffer.Buffer) -> T raise, (&@buffer.Buffer) -> U raise) -> Map[T, U] raise
+
+fn read_nbt(&@buffer.Buffer) -> @nbt.NBTTag raise
+
+fn[T] read_optional(&@buffer.Buffer, (&@buffer.Buffer) -> T raise) -> T? raise
+
+fn read_position(&@buffer.Buffer) -> Position raise
+
+fn[T] read_prefix_array(&@buffer.Buffer, (&@buffer.Buffer) -> T raise) -> FixedArray[T] raise
+
+fn read_property(&@buffer.Buffer) -> Property raise
+
+fn read_slot(&@buffer.Buffer) -> Slot raise
+
+fn read_string(&@buffer.Buffer) -> String raise
+
+fn read_uuid(&@buffer.Buffer) -> @uuid.UUID raise
+
+fn read_varint(&@buffer.Buffer) -> Int raise
+
+fn read_varlong(&@buffer.Buffer) -> Int64 raise
+
+fn write_bitset(&@buffer.Buffer, BitSet) -> Unit
+
+fn write_bool(&@buffer.Buffer, Bool) -> Unit
+
+fn write_chat_type(&@buffer.Buffer, ChatType) -> Unit
+
+fn write_chat_type_decoration(&@buffer.Buffer, ChatTypeDecoration) -> Unit
+
+fn write_fixed_bitset(&@buffer.Buffer, BitSet, Int) -> Unit
+
+fn write_game_profile(&@buffer.Buffer, GameProfile) -> Unit
+
+fn write_hashed_slot(&@buffer.Buffer, HashedSlot) -> Unit raise
+
+fn[T] write_holder(&@buffer.Buffer, Holder[T], (&@buffer.Buffer, T) -> Unit) -> Unit
+
+fn write_identifier(&@buffer.Buffer, Identifier) -> Unit
+
+fn write_known_pack(&@buffer.Buffer, KnownPack) -> Unit
+
+fn[T : Eq + Hash, U] write_map(&@buffer.Buffer, Map[T, U], (&@buffer.Buffer, T) -> Unit, (&@buffer.Buffer, U) -> Unit) -> Unit
+
+fn write_nbt(&@buffer.Buffer, @nbt.NBTTag) -> Unit
+
+fn[T] write_optional(&@buffer.Buffer, T?, (&@buffer.Buffer, T) -> Unit) -> Unit
+
+fn write_position(&@buffer.Buffer, Position) -> Unit
+
+fn[T] write_prefix_array(&@buffer.Buffer, FixedArray[T], (&@buffer.Buffer, T) -> Unit) -> Unit
+
+fn write_property(&@buffer.Buffer, Property) -> Unit
+
+fn write_slot(&@buffer.Buffer, Slot) -> Unit
+
+fn write_string(&@buffer.Buffer, String) -> Unit
+
+fn write_uuid(&@buffer.Buffer, @uuid.UUID) -> Unit
+
+fn write_varint(&@buffer.Buffer, Int) -> Unit
+
+fn write_varlong(&@buffer.Buffer, Int64) -> Unit
+
+// Errors
+
+// Types and methods
+pub struct BitSet {
+  words : Array[UInt64]
+}
+fn BitSet::cardinality(Self) -> Int
+fn BitSet::clear(Self, Int) -> Unit
+fn BitSet::get(Self, Int) -> Bool
+fn BitSet::is_empty(Self) -> Bool
+fn BitSet::new() -> Self
+fn BitSet::set(Self, Int) -> Unit
+impl Eq for BitSet
+impl Show for BitSet
+
+type ChatType
+
+type ChatTypeDecoration
+
+type GameProfile
+
+pub struct HashedSlot {
+  item_count : Int
+  item_id : Int?
+  components_hashes : Map[Int, Int?]
+}
+fn HashedSlot::empty() -> Self
+fn HashedSlot::is_empty(Self) -> Bool
+
+type Holder[T]
+
+type Identifier
+fn Identifier::from_str(String) -> Self raise
+fn Identifier::new(String, String) -> Self
+fn Identifier::to_str(Self) -> String
+impl Eq for Identifier
+impl Hash for Identifier
+
+type KnownPack
+
+type Position
+
+type Property
+
+pub(all) enum SkinPart {
+  CAPE
+  JACKET
+  LEFT_SLEEVE
+  RIGHT_SLEEVE
+  LEFT_PANTS_LEG
+  RIGHT_PANTS_LEG
+  HAT
+}
+fn SkinPart::from_bitmask(Byte) -> Array[Self]
+fn SkinPart::to_bitmask(Array[Self]) -> Byte
+fn SkinPart::values() -> FixedArray[Self]
+
+pub struct Slot {
+  item_count : Int
+  item_id : Int?
+  components : Map[Int, @nbt.NBTTag?]
+}
+fn Slot::empty() -> Self
+fn Slot::is_empty(Self) -> Bool
+
+// Type aliases
+
+// Traits
+

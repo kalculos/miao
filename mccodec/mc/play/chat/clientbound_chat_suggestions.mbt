@@ -21,7 +21,9 @@ pub impl @mc.Packet for ChatSuggestionsS2C with serialize(
 }
 
 ///|
-pub impl @mc.Packet for ChatSuggestionsS2C with deserialize(buf : &@buffer.Buffer) {
+pub impl @mc.Packet for ChatSuggestionsS2C with deserialize(
+  buf : &@buffer.Buffer,
+) {
   let action = @types.read_varint(buf)
   let entries = @types.read_prefix_array(buf, @types.read_string)
   { action, entries }

@@ -5,6 +5,7 @@ pub(all) struct EntityAnimationS2C {
   entity_id : Int // Entity ID
   animation : Byte // Animation type
 }
+
 ///|
 pub impl @mc.Packet for EntityAnimationS2C with clientbound(_) {
   true

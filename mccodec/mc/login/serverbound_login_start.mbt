@@ -12,7 +12,10 @@ pub impl @mc.Packet for LoginStartC2S with clientbound(_) {
 }
 
 ///|
-pub impl @mc.Packet for LoginStartC2S with serialize(self, buf : &@buffer.Buffer) {
+pub impl @mc.Packet for LoginStartC2S with serialize(
+  self,
+  buf : &@buffer.Buffer,
+) {
   @types.write_string(buf, self.name)
   @types.write_uuid(buf, self.player_uuid)
 }

@@ -19,10 +19,7 @@ pub impl @mc.Packet for PlayerInputC2S with serialize(
 }
 
 ///|
-pub impl @mc.Packet for PlayerInputC2S with deserialize(
-  buf : &@buffer.Buffer,
-) {
+pub impl @mc.Packet for PlayerInputC2S with deserialize(buf : &@buffer.Buffer) {
   let flags = buf.read_byte()
-  {  flags, }
+  { flags, }
 }
-

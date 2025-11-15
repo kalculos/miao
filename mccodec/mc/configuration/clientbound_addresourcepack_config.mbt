@@ -37,4 +37,3 @@ pub impl @mc.Packet for AddResourcePackConfigS2C with deserialize(
   let prompt_message = @types.read_optional(buf, @types.read_string)
   { uuid, url, hash, forced, prompt_message }
 }
-

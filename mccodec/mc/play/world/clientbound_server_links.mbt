@@ -4,6 +4,7 @@
 pub(all) struct ServerLinksS2C {
   links : Array[(String, String)] // (Label, URL) pairs
 }
+
 ///|
 pub impl @mc.Packet for ServerLinksS2C with clientbound(_) {
   true

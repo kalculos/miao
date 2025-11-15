@@ -11,6 +11,7 @@ pub(all) struct RecipeBookSettingsS2C {
   smoker_recipe_book_open : Bool // Smoker book open
   smoker_recipe_book_filter_active : Bool // Smoker filter active
 }
+
 ///|
 pub impl @mc.Packet for RecipeBookSettingsS2C with clientbound(_) {
   true

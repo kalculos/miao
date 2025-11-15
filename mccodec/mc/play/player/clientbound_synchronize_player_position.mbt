@@ -10,6 +10,7 @@ pub(all) struct SynchronizePlayerPositionS2C {
   flags : Byte // Relative position flags
   teleport_id : Int // Teleport ID
 }
+
 ///|
 pub impl @mc.Packet for SynchronizePlayerPositionS2C with clientbound(_) {
   true

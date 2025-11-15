@@ -40,4 +40,3 @@ pub impl @mc.Packet for SetPlayerPositionAndRotationC2S with deserialize(
   let on_ground = buf.read_byte()
   { x, feet_y, z, yaw, pitch, on_ground }
 }
-

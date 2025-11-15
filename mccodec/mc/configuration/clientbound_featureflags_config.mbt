@@ -23,4 +23,3 @@ pub impl @mc.Packet for FeatureFlagsS2C with deserialize(buf : &@buffer.Buffer) 
   let feature_flags = @types.read_prefix_array(buf, @types.read_identifier)
   { feature_flags, }
 }
-

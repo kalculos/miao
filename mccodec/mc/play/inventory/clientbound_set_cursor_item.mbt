@@ -11,7 +11,10 @@ pub impl @mc.Packet for SetCursorItemS2C with clientbound(_) {
 }
 
 ///|
-pub impl @mc.Packet for SetCursorItemS2C with serialize(self, buf : &@buffer.Buffer) {
+pub impl @mc.Packet for SetCursorItemS2C with serialize(
+  self,
+  buf : &@buffer.Buffer,
+) {
   @types.write_slot(buf, self.slot_data)
 }
 

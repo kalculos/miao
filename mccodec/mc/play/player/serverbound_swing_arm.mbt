@@ -11,17 +11,11 @@ pub impl @mc.Packet for SwingArmC2S with clientbound(_) {
 }
 
 ///|
-pub impl @mc.Packet for SwingArmC2S with serialize(
-  self,
-  buf : &@buffer.Buffer,
-) {
+pub impl @mc.Packet for SwingArmC2S with serialize(self, buf : &@buffer.Buffer) {
   @types.write_varint(buf, self.hand)
 }
 
 ///|
-pub impl @mc.Packet for SwingArmC2S with deserialize(
-  buf : &@buffer.Buffer,
-) {
+pub impl @mc.Packet for SwingArmC2S with deserialize(buf : &@buffer.Buffer) {
   { hand: @types.read_varint(buf) }
 }
-

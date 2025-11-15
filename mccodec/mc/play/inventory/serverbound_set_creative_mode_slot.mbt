@@ -6,4 +6,3 @@ pub(all) struct SetCreativeModeSlotC2S {
   slot : Int16 // Slot ID
   clicked_item : String // Item data
 }
-

@@ -11,7 +11,10 @@ pub impl @mc.Packet for SetHeldItemS2C with clientbound(_) {
 }
 
 ///|
-pub impl @mc.Packet for SetHeldItemS2C with serialize(self, buf : &@buffer.Buffer) {
+pub impl @mc.Packet for SetHeldItemS2C with serialize(
+  self,
+  buf : &@buffer.Buffer,
+) {
   @types.write_varint(buf, self.slot)
 }
 

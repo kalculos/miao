@@ -1,0 +1,81 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "iceBear67/miao/mccodec/mc/play/recipe"
+
+import(
+  "iceBear67/miao/buffer"
+  "iceBear67/miao/mccodec/mc"
+)
+
+// Values
+
+// Errors
+
+// Types and methods
+pub(all) struct ChangeRecipeBookSettingsC2S {
+  book_id : Int
+  book_open : Bool
+  filter_active : Bool
+}
+impl @mc.Packet for ChangeRecipeBookSettingsC2S
+
+pub(all) struct MerchantOffersS2C {
+  window_id : Int
+  trades : Array[String]
+  villager_level : Int
+  experience : Int
+  is_regular_villager : Bool
+  can_restock : Bool
+}
+impl @mc.Packet for MerchantOffersS2C
+
+pub(all) struct PlaceGhostRecipeS2C {
+  window_id : Byte
+  recipe : String
+}
+impl @mc.Packet for PlaceGhostRecipeS2C
+
+pub(all) struct PlaceRecipeC2S {
+  window_id : Int
+  recipe : String
+  make_all : Bool
+}
+impl @mc.Packet for PlaceRecipeC2S
+
+pub(all) struct RecipeBookAddS2C {
+  recipes : Array[String]
+  replace : Bool
+}
+impl @mc.Packet for RecipeBookAddS2C
+
+pub(all) struct RecipeBookRemoveS2C {
+  recipes : Array[String]
+}
+impl @mc.Packet for RecipeBookRemoveS2C
+
+pub(all) struct RecipeBookSettingsS2C {
+  crafting_recipe_book_open : Bool
+  crafting_recipe_book_filter_active : Bool
+  smelting_recipe_book_open : Bool
+  smelting_recipe_book_filter_active : Bool
+  blast_furnace_recipe_book_open : Bool
+  blast_furnace_recipe_book_filter_active : Bool
+  smoker_recipe_book_open : Bool
+  smoker_recipe_book_filter_active : Bool
+}
+impl @mc.Packet for RecipeBookSettingsS2C
+
+pub(all) struct SetSeenRecipeC2S {
+  recipe_id : Int
+}
+impl @mc.Packet for SetSeenRecipeC2S
+
+pub(all) struct UpdateRecipesS2C {
+  property_sets : Array[(String, Array[Int])]
+  stonecutter_recipes : Array[(String, String)]
+}
+impl @mc.Packet for UpdateRecipesS2C
+
+// Type aliases
+
+// Traits
+

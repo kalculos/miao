@@ -7,11 +7,13 @@ pub(all) struct DisguisedChatMessageS2C {
   sender_name : String // Display name of sender, TODO: Text Component
   target_name : String? // Target name (for targeted messages), TODO: Text Component
 }
+
 ///|
 pub impl @mc.Packet for DisguisedChatMessageS2C with clientbound(_) {
   true
 }
 
+///|
 pub impl @mc.Packet for DisguisedChatMessageS2C with serialize(
   self,
   buf : &@buffer.Buffer,
@@ -22,6 +24,7 @@ pub impl @mc.Packet for DisguisedChatMessageS2C with serialize(
   @types.write_optional(buf, self.target_name, @types.write_string)
 }
 
+///|
 pub impl @mc.Packet for DisguisedChatMessageS2C with deserialize(
   buf : &@buffer.Buffer,
 ) {

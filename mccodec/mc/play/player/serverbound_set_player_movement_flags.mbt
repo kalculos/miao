@@ -24,4 +24,3 @@ pub impl @mc.Packet for SetPlayerMovementFlagsC2S with deserialize(
 ) {
   { on_ground: buf.read_byte() }
 }
-

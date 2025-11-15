@@ -10,6 +10,7 @@ pub impl @mc.Packet for ChatCommandC2S with clientbound(_) {
   false
 }
 
+///|
 pub impl @mc.Packet for ChatCommandC2S with serialize(
   self,
   buf : &@buffer.Buffer,
@@ -17,11 +18,8 @@ pub impl @mc.Packet for ChatCommandC2S with serialize(
   @types.write_string(buf, self.command)
 }
 
-pub impl @mc.Packet for ChatCommandC2S with deserialize(
-  buf : &@buffer.Buffer,
-) {
+///|
+pub impl @mc.Packet for ChatCommandC2S with deserialize(buf : &@buffer.Buffer) {
   let command = @types.read_string(buf)
   { command, }
-
 }
-

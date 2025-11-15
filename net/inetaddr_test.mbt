@@ -115,32 +115,32 @@ test "from_ipv6 fails on too few groups" {
 ///|
 test "from_ipv6 fails on too many groups" {
   let result = try? InetAddr::from_ipv6(
-      "2001:0db8:85a3:0000:0000:8a2e:0370:7334:1111",
-    )
+    "2001:0db8:85a3:0000:0000:8a2e:0370:7334:1111",
+  )
   inspect(result is Err(_), content="true")
 }
 
 ///|
 test "from_ipv6 fails on out of range hex (10000)" {
   let result = try? InetAddr::from_ipv6(
-      "2001:0db8:85a3:10000:0000:8a2e:0370:7334",
-    )
+    "2001:0db8:85a3:10000:0000:8a2e:0370:7334",
+  )
   inspect(result is Err(_), content="true")
 }
 
 ///|
 test "from_ipv6 fails on invalid hex characters" {
   let result = try? InetAddr::from_ipv6(
-      "2001:0db8:85g3:0000:0000:8a2e:0370:7334",
-    )
+    "2001:0db8:85g3:0000:0000:8a2e:0370:7334",
+  )
   inspect(result is Err(_), content="true")
 }
 
 ///|
 test "from_ipv6 fails on negative hex" {
   let result = try? InetAddr::from_ipv6(
-      "2001:0db8:-85a3:0000:0000:8a2e:0370:7334",
-    )
+    "2001:0db8:-85a3:0000:0000:8a2e:0370:7334",
+  )
   inspect(result is Err(_), content="true")
 }
 

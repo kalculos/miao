@@ -28,4 +28,3 @@ pub impl @mc.Packet for ResourcePackResponsePlayC2S with deserialize(
   let result = @types.read_varint(buf)
   { uuid, result }
 }
-

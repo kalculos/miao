@@ -10,6 +10,7 @@ pub(all) struct LookAtS2C {
   entity_id : Int? // Entity ID (if is_entity)
   entity_anchor : Int? // Entity anchor point (if is_entity)
 }
+
 ///|
 pub impl @mc.Packet for LookAtS2C with clientbound(_) {
   true

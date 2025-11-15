@@ -8,6 +8,7 @@ pub(all) struct UpdateObjectivesS2C {
   render_type : Int? // Render type (for create/update)
   number_format : String? // Number format (for create/update)
 }
+
 ///|
 pub impl @mc.Packet for UpdateObjectivesS2C with clientbound(_) {
   true

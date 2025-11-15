@@ -68,9 +68,9 @@ async fn gather_fattr(rt : LibuvRuntime, fd : @uv.File) -> @fs.FileAttribute {
       err => reject(err),
     )
     () => {
-        defer reject(@rt.CoroutineError::Cancelled)
-        handle.cancel()
-      }
+      defer reject(@rt.CoroutineError::Cancelled)
+      handle.cancel()
+    }
   })
 }
 
@@ -104,7 +104,7 @@ async fn LibuvFile::new(
 }
 
 ///|
-pub fn LibuvFile::fd(self: LibuvFile) -> Int {
+pub fn LibuvFile::fd(self : LibuvFile) -> Int {
   self.fd.to_int()
 }
 
@@ -119,7 +119,7 @@ impl @fs.FileChannel for LibuvFile with info(self) {
 }
 
 ///|
-async fn LibuvFile::close(self: LibuvFile) -> Unit {
+async fn LibuvFile::close(self : LibuvFile) -> Unit {
   guard !self.closed else {
     raise fail("File \{self.info.path} (fd: \{self.fd()}) is already closed!")
   }
@@ -153,9 +153,9 @@ impl @io.Writer for LibuvFile with write(self, arr, off, len) {
       err => reject(err),
     )
     () => {
-        defer reject(@rt.CoroutineError::Cancelled)
-        handle.cancel()
-      }
+      defer reject(@rt.CoroutineError::Cancelled)
+      handle.cancel()
+    }
   })
 }
 
@@ -179,9 +179,9 @@ impl @io.Reader for LibuvFile with read(self, dst, off, len) {
       err => reject(err),
     )
     () => {
-        defer reject(@rt.CoroutineError::Cancelled)
-        handle.cancel()
-      }
+      defer reject(@rt.CoroutineError::Cancelled)
+      handle.cancel()
+    }
   })
 }
 

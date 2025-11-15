@@ -28,4 +28,3 @@ pub impl @mc.Packet for QueryBlockEntityTagC2S with deserialize(
   let location = @types.read_position(buf)
   { transaction_id, location }
 }
-

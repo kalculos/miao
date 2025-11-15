@@ -8,6 +8,7 @@ pub(all) struct UpdateEntityPositionS2C {
   delta_z : Int16 // Z movement delta
   on_ground : Bool // On ground flag
 }
+
 ///|
 pub impl @mc.Packet for UpdateEntityPositionS2C with clientbound(_) {
   true

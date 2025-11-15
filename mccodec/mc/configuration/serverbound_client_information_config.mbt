@@ -42,9 +42,7 @@ pub impl @mc.Packet for ClientInformationConfigC2S with deserialize(
   let view_distance = buf.read_byte()
   let chat_mode = @types.read_varint(buf)
   let chat_colors = @types.read_bool(buf)
-  let displayed_skin_parts = @types.SkinPart::from_bitmask(
-    buf.read_byte(),
-  )
+  let displayed_skin_parts = @types.SkinPart::from_bitmask(buf.read_byte())
   let main_hand = @types.read_varint(buf)
   let enable_text_filtering = @types.read_bool(buf)
   let allow_server_listings = @types.read_bool(buf)

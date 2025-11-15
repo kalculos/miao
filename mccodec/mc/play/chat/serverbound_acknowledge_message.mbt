@@ -24,4 +24,3 @@ pub impl @mc.Packet for AcknowledgeMessageC2S with deserialize(
 ) {
   { message_count: @types.read_varint(buf) }
 }
-

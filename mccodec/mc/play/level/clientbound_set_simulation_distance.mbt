@@ -4,6 +4,7 @@
 pub(all) struct SetSimulationDistanceS2C {
   simulation_distance : Int // Simulation distance
 }
+
 ///|
 pub impl @mc.Packet for SetSimulationDistanceS2C with clientbound(_) {
   true

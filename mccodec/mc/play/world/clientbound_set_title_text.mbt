@@ -4,6 +4,7 @@
 pub(all) struct SetTitleTextS2C {
   title_text : String // Title text
 }
+
 ///|
 pub impl @mc.Packet for SetTitleTextS2C with clientbound(_) {
   true

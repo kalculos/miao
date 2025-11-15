@@ -14,6 +14,7 @@ pub(all) struct ParticleS2C {
   particle_count : Int // Number of particles
   data : Array[Byte] // Particle-specific data
 }
+
 ///|
 pub impl @mc.Packet for ParticleS2C with clientbound(_) {
   true

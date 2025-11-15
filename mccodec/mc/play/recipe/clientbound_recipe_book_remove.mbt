@@ -4,6 +4,7 @@
 pub(all) struct RecipeBookRemoveS2C {
   recipes : Array[String] // Recipe identifiers to remove
 }
+
 ///|
 pub impl @mc.Packet for RecipeBookRemoveS2C with clientbound(_) {
   true

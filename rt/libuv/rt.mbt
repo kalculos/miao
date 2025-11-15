@@ -47,9 +47,9 @@ pub impl @rt.Runtime for LibuvRuntime with sleep(self, time_millis) {
       err => reject(err)
     }
     () => {
-        defer reject(@rt.CoroutineError::Cancelled)
-        timer.stop()
-      }
+      defer reject(@rt.CoroutineError::Cancelled)
+      timer.stop()
+    }
   })
 }
 
@@ -73,7 +73,11 @@ struct UvTask {
 }
 
 ///|
-fn UvTask::on_exit(self: UvTask, _type : ExitType, handler : () -> Unit) -> () -> Unit {
+fn UvTask::on_exit(
+  self : UvTask,
+  _type : ExitType,
+  handler : () -> Unit,
+) -> () -> Unit {
   if self.state == Completed || self.state == Cancelled {
     handler()
     return () => ()
@@ -81,16 +85,16 @@ fn UvTask::on_exit(self: UvTask, _type : ExitType, handler : () -> Unit) -> () -
   let og = self.exit_handler
   let mut cancel = false
   self.exit_handler = type_ => {
-      defer og(type_)
-      if !cancel && type_ == _type {
-        handler()
-      }
+    defer og(type_)
+    if !cancel && type_ == _type {
+      handler()
     }
+  }
   () => cancel = true
 }
 
 ///|
-fn UvTask::_cleanup_exit(self: UvTask, _type : ExitType) -> Unit {
+fn UvTask::_cleanup_exit(self : UvTask, _type : ExitType) -> Unit {
   guard _type != Any
   (self.exit_handler)(_type)
 }

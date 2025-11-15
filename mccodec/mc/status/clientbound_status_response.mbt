@@ -19,7 +19,9 @@ pub impl @mc.Packet for StatusResponseS2C with serialize(
 }
 
 ///|
-pub impl @mc.Packet for StatusResponseS2C with deserialize(buf : &@buffer.Buffer) {
+pub impl @mc.Packet for StatusResponseS2C with deserialize(
+  buf : &@buffer.Buffer,
+) {
   let json_str = @types.read_string(buf)
   { json_response: @json.parse(json_str) }
 }

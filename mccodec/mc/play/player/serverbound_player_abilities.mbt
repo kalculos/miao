@@ -24,4 +24,3 @@ pub impl @mc.Packet for PlayerAbilitiesC2S with deserialize(
 ) {
   { flags: buf.read_byte() }
 }
-

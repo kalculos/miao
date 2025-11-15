@@ -11,7 +11,10 @@ pub impl @mc.Packet for PongConfigC2S with clientbound(_) {
 }
 
 ///|
-pub impl @mc.Packet for PongConfigC2S with serialize(self, buf : &@buffer.Buffer) {
+pub impl @mc.Packet for PongConfigC2S with serialize(
+  self,
+  buf : &@buffer.Buffer,
+) {
   buf.write_int(self.id)
 }
 
@@ -19,4 +22,3 @@ pub impl @mc.Packet for PongConfigC2S with serialize(self, buf : &@buffer.Buffer
 pub impl @mc.Packet for PongConfigC2S with deserialize(buf : &@buffer.Buffer) {
   { id: buf.read_int() }
 }
-

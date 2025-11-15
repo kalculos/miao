@@ -1,0 +1,82 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "iceBear67/miao/mccodec/mc/login"
+
+import(
+  "iceBear67/miao/buffer"
+  "iceBear67/miao/mccodec/mc"
+  "iceBear67/miao/mccodec/mc/types"
+  "moonbitlang/x/uuid"
+)
+
+// Values
+
+// Errors
+
+// Types and methods
+pub(all) struct CookieRequestLoginS2C {
+  key : @types.Identifier
+}
+impl @mc.Packet for CookieRequestLoginS2C
+
+pub(all) struct CookieResponseLoginC2S {
+  key : @types.Identifier
+  payload : FixedArray[Byte]?
+}
+impl @mc.Packet for CookieResponseLoginC2S
+
+pub(all) struct DisconnectLoginS2C {
+  reason : String
+}
+impl @mc.Packet for DisconnectLoginS2C
+
+pub(all) struct EncryptionRequestS2C {
+  server_id : String
+  public_key : FixedArray[Byte]
+  verify_token : FixedArray[Byte]
+  should_authenticate : Bool
+}
+impl @mc.Packet for EncryptionRequestS2C
+
+pub(all) struct EncryptionResponseC2S {
+  shared_secret : FixedArray[Byte]
+  verify_token : FixedArray[Byte]
+}
+impl @mc.Packet for EncryptionResponseC2S
+
+pub(all) struct LoginAcknowledgedC2S {
+}
+impl @mc.Packet for LoginAcknowledgedC2S
+
+pub(all) struct LoginPluginRequestS2C {
+  message_id : Int
+  channel : @types.Identifier
+  data : FixedArray[Byte]
+}
+impl @mc.Packet for LoginPluginRequestS2C
+
+pub(all) struct LoginPluginResponseC2S {
+  message_id : Int
+  data : FixedArray[Byte]?
+}
+impl @mc.Packet for LoginPluginResponseC2S
+
+pub(all) struct LoginStartC2S {
+  name : String
+  player_uuid : @uuid.UUID
+}
+impl @mc.Packet for LoginStartC2S
+
+pub(all) struct LoginSuccessS2C {
+  profile : @types.GameProfile
+}
+impl @mc.Packet for LoginSuccessS2C
+
+pub(all) struct SetCompressionS2C {
+  threshold : Int
+}
+impl @mc.Packet for SetCompressionS2C
+
+// Type aliases
+
+// Traits
+

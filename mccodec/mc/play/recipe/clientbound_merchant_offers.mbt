@@ -9,6 +9,7 @@ pub(all) struct MerchantOffersS2C {
   is_regular_villager : Bool // Regular villager flag
   can_restock : Bool // Can restock trades
 }
+
 ///|
 pub impl @mc.Packet for MerchantOffersS2C with clientbound(_) {
   true

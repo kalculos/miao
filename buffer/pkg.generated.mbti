@@ -1,0 +1,122 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "iceBear67/miao/buffer"
+
+// Values
+
+// Errors
+
+// Types and methods
+pub struct BufferSlice {
+  // private fields
+}
+impl ByteSlice for BufferSlice
+
+pub struct HeapByteBuf {
+  // private fields
+}
+fn HeapByteBuf::new(Int) -> Self
+fn HeapByteBuf::wrapped_array(FixedArray[Byte]) -> Self
+fn HeapByteBuf::wrapped_bytes(Bytes) -> Self
+impl Buffer for HeapByteBuf
+impl ByteSlice for HeapByteBuf
+
+// Type aliases
+
+// Traits
+pub(open) trait Buffer : ByteSlice {
+  duplicate(Self) -> &Buffer
+  copy_buffer(Self) -> &Buffer
+  shrink(Self) -> Bool
+  ensure_writeable(Self, Int) -> Unit
+}
+fn &Buffer::read_bytes(Self, Int) -> Bytes raise
+fn &Buffer::read_double(Self) -> Double raise
+fn &Buffer::read_double_le(Self) -> Double raise
+fn &Buffer::read_float(Self) -> Float raise
+fn &Buffer::read_float_le(Self) -> Float raise
+fn &Buffer::read_int(Self) -> Int raise
+fn &Buffer::read_int16(Self) -> Int16 raise
+fn &Buffer::read_int16_le(Self) -> Int16 raise
+fn &Buffer::read_int64(Self) -> Int64 raise
+fn &Buffer::read_int64_le(Self) -> Int64 raise
+fn &Buffer::read_int_le(Self) -> Int raise
+fn &Buffer::read_uint(Self) -> UInt raise
+fn &Buffer::read_uint16(Self) -> UInt16 raise
+fn &Buffer::read_uint16_le(Self) -> UInt16 raise
+fn &Buffer::read_uint64(Self) -> UInt64 raise
+fn &Buffer::read_uint64_le(Self) -> UInt64 raise
+fn &Buffer::read_uint_le(Self) -> UInt raise
+fn &Buffer::write_double(Self, Double) -> Unit
+fn &Buffer::write_double_le(Self, Double) -> Unit
+fn &Buffer::write_float(Self, Float) -> Unit
+fn &Buffer::write_float_le(Self, Float) -> Unit
+fn &Buffer::write_int(Self, Int) -> Unit
+fn &Buffer::write_int16(Self, Int16) -> Unit
+fn &Buffer::write_int16_le(Self, Int16) -> Unit
+fn &Buffer::write_int64(Self, Int64) -> Unit
+fn &Buffer::write_int64_le(Self, Int64) -> Unit
+fn &Buffer::write_int_le(Self, Int) -> Unit
+fn &Buffer::write_uint(Self, UInt) -> Unit
+fn &Buffer::write_uint16(Self, UInt16) -> Unit
+fn &Buffer::write_uint16_le(Self, UInt16) -> Unit
+fn &Buffer::write_uint64(Self, UInt64) -> Unit
+fn &Buffer::write_uint64_le(Self, UInt64) -> Unit
+fn &Buffer::write_uint_le(Self, UInt) -> Unit
+
+pub(open) trait ByteSlice {
+  read(Self, FixedArray[Byte], Int, Int) -> Int
+  read_byte(Self) -> Byte raise
+  write(Self, FixedArray[Byte], Int, Int) -> Int
+  write_byte(Self, Byte) -> Unit
+  ridx(Self) -> Int
+  widx(Self) -> Int
+  readable_bytes(Self) -> Int
+  writable_bytes(Self) -> Int
+  slice(Self, Int, Int) -> &ByteSlice
+  copy(Self) -> &Buffer
+  view_as_bytes(Self) -> Bytes
+  to_bytes(Self) -> Bytes
+  set_position(Self, Int) -> Unit
+  each_byte(Self, (Byte) -> Unit) -> Unit
+  skip_n(Self, Int) -> Unit
+  clear(Self) -> Unit
+  get_byte(Self, Int) -> Unit
+  transfer_to(Self, &Buffer) -> Unit
+  transfer_from(Self, BytesView) -> Int
+  array(Self) -> FixedArray[Byte]?
+}
+fn &ByteSlice::read_bytes(Self, Int) -> Bytes raise
+fn &ByteSlice::read_double(Self) -> Double raise
+fn &ByteSlice::read_double_le(Self) -> Double raise
+fn &ByteSlice::read_float(Self) -> Float raise
+fn &ByteSlice::read_float_le(Self) -> Float raise
+fn &ByteSlice::read_int(Self) -> Int raise
+fn &ByteSlice::read_int16(Self) -> Int16 raise
+fn &ByteSlice::read_int16_le(Self) -> Int16 raise
+fn &ByteSlice::read_int64(Self) -> Int64 raise
+fn &ByteSlice::read_int64_le(Self) -> Int64 raise
+fn &ByteSlice::read_int_le(Self) -> Int raise
+fn &ByteSlice::read_uint(Self) -> UInt raise
+fn &ByteSlice::read_uint16(Self) -> UInt16 raise
+fn &ByteSlice::read_uint16_le(Self) -> UInt16 raise
+fn &ByteSlice::read_uint64(Self) -> UInt64 raise
+fn &ByteSlice::read_uint64_le(Self) -> UInt64 raise
+fn &ByteSlice::read_uint_le(Self) -> UInt raise
+fn &ByteSlice::write_array(Self, FixedArray[Byte], Int, Int) -> Int
+fn &ByteSlice::write_double(Self, Double) -> Unit raise
+fn &ByteSlice::write_double_le(Self, Double) -> Unit raise
+fn &ByteSlice::write_float(Self, Float) -> Unit raise
+fn &ByteSlice::write_float_le(Self, Float) -> Unit raise
+fn &ByteSlice::write_int(Self, Int) -> Unit raise
+fn &ByteSlice::write_int16(Self, Int16) -> Unit raise
+fn &ByteSlice::write_int16_le(Self, Int16) -> Unit raise
+fn &ByteSlice::write_int64(Self, Int64) -> Unit raise
+fn &ByteSlice::write_int64_le(Self, Int64) -> Unit raise
+fn &ByteSlice::write_int_le(Self, Int) -> Unit raise
+fn &ByteSlice::write_uint(Self, UInt) -> Unit raise
+fn &ByteSlice::write_uint16(Self, UInt16) -> Unit raise
+fn &ByteSlice::write_uint16_le(Self, UInt16) -> Unit raise
+fn &ByteSlice::write_uint64(Self, UInt64) -> Unit raise
+fn &ByteSlice::write_uint64_le(Self, UInt64) -> Unit raise
+fn &ByteSlice::write_uint_le(Self, UInt) -> Unit raise
+

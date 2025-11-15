@@ -17,4 +17,3 @@ pub impl @mc.Packet for ResetChatS2C with serialize(_, _ : &@buffer.Buffer) {
 pub impl @mc.Packet for ResetChatS2C with deserialize(_ : &@buffer.Buffer) {
   ResetChatS2C::{  }
 }
-

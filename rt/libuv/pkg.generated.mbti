@@ -1,0 +1,66 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "iceBear67/miao/rt/libuv"
+
+import(
+  "iceBear67/miao/io"
+  "iceBear67/miao/net"
+  "iceBear67/miao/rt"
+  "tonyfettes/uv"
+)
+
+// Values
+fn bytes_reinterpret(Bytes) -> FixedArray[Byte]
+
+fn current_coroutine() -> UvTask?
+
+fn read_stream(&@rt.Runtime, @uv.Stream, buffer_size? : Int) -> &@io.Reader raise
+
+// Errors
+
+// Types and methods
+pub enum ExitType {
+  Cancelled
+  UnhandledError
+  Done
+  Any
+}
+impl Eq for ExitType
+impl Hash for ExitType
+
+type LibuvFile
+fn LibuvFile::fd(Self) -> Int
+
+type LibuvFileSystem
+
+type LibuvRuntime
+fn LibuvRuntime::default() -> Self raise
+fn LibuvRuntime::new(@uv.Loop) -> Self
+fn LibuvRuntime::run(async () -> Unit noraise) -> Unit raise
+impl @rt.Runtime for LibuvRuntime
+
+type StreamWriter
+fn StreamWriter::new(@uv.Stream) -> Self
+impl @io.Writer for StreamWriter
+
+type UvDatagram
+
+type UvDatagramSocket
+
+type UvNet
+impl @net.Network for UvNet
+
+type UvTask
+impl @rt.Task for UvTask
+
+type UvTcpConnection
+
+type UvTcpSocket
+
+pub struct UvTerminal {
+  stdout : @uv.Tty
+}
+
+// Type aliases
+
+// Traits
+

@@ -53,9 +53,9 @@ pub fn read_stream(
         (_, err) => reject(err),
       )
       () => {
-          defer reject(@uv.Errno::ECANCELED)
-          stream.read_stop()
-        }
+        defer reject(@uv.Errno::ECANCELED)
+        stream.read_stop()
+      }
     })
     if !writer.can_write(data.length()) {
       stream.read_stop()
@@ -70,7 +70,8 @@ pub fn read_stream(
     while written != len && !writer.is_closed() {
       written += writer.write(buffer, offset + written, len)
     }
-  }).start()
+  })
+  .start()
   reader
 }
 

@@ -6,6 +6,7 @@ pub(all) struct SetHealthS2C {
   food : Int // Food level
   food_saturation : Float // Food saturation
 }
+
 ///|
 pub impl @mc.Packet for SetHealthS2C with clientbound(_) {
   true

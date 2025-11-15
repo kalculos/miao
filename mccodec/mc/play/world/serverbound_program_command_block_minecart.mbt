@@ -31,4 +31,3 @@ pub impl @mc.Packet for ProgramCommandBlockMinecartC2S with deserialize(
   let track_output = @types.read_bool(buf)
   { entity_id, command, track_output }
 }
-

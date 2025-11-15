@@ -9,7 +9,7 @@ pub(all) struct UseItemOnC2S {
   cursor_position_y : Float // Cursor Y on block  
   cursor_position_z : Float // Cursor Z on block
   inside_block : Bool // Inside block check
-  world_border_hit: Bool // Whether world border was hit
+  world_border_hit : Bool // Whether world border was hit
   sequence : Int // Action sequence
 }
 
@@ -19,10 +19,7 @@ pub impl @mc.Packet for UseItemOnC2S with clientbound(_) {
 }
 
 ///|
-pub impl @mc.Packet for UseItemOnC2S with serialize(
-  self,
-  buf : &@buffer.Buffer,
-) {
+pub impl @mc.Packet for UseItemOnC2S with serialize(self, buf : &@buffer.Buffer) {
   @types.write_varint(buf, self.hand)
   @types.write_position(buf, self.location)
   @types.write_varint(buf, self.direction)
@@ -35,9 +32,7 @@ pub impl @mc.Packet for UseItemOnC2S with serialize(
 }
 
 ///|
-pub impl @mc.Packet for UseItemOnC2S with deserialize(
-  buf : &@buffer.Buffer,
-) {
+pub impl @mc.Packet for UseItemOnC2S with deserialize(buf : &@buffer.Buffer) {
   let hand = @types.read_varint(buf)
   let location = @types.read_position(buf)
   let direction = @types.read_varint(buf)
@@ -47,6 +42,15 @@ pub impl @mc.Packet for UseItemOnC2S with deserialize(
   let inside_block = @types.read_bool(buf)
   let world_border_hit = @types.read_bool(buf)
   let sequence = @types.read_varint(buf)
-  { hand, location, direction, cursor_position_x, cursor_position_y, cursor_position_z, inside_block, world_border_hit, sequence }
+  {
+    hand,
+    location,
+    direction,
+    cursor_position_x,
+    cursor_position_y,
+    cursor_position_z,
+    inside_block,
+    world_border_hit,
+    sequence,
+  }
 }
-

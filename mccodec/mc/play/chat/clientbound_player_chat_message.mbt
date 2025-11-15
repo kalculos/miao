@@ -47,8 +47,9 @@ pub impl @mc.Packet for PlayerChatMessageS2C with serialize(
   buf.write_int64(self.salt)
   // previous messages
   @types.write_map(buf, self.previous_messages, @types.write_varint, (buf, sig) => buf.write(
-    sig, 0, 256,
-  ) |> ignore)
+      sig, 0, 256,
+    )
+    |> ignore)
   // other
   @types.write_optional(buf, self.unsigned_content, @types.write_string)
   @types.write_varint(buf, self.filter_type)

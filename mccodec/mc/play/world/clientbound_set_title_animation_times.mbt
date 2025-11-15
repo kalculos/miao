@@ -6,6 +6,7 @@ pub(all) struct SetTitleAnimationTimesS2C {
   stay : Int // Stay time in ticks
   fade_out : Int // Fade out time in ticks
 }
+
 ///|
 pub impl @mc.Packet for SetTitleAnimationTimesS2C with clientbound(_) {
   true

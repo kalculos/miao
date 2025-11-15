@@ -7,6 +7,7 @@ pub(all) struct UpdateAdvancementsS2C {
   identifiers : Array[String] // Identifiers to remove
   progress_mapping : Array[(String, String)] // (ID, Progress) pairs
 }
+
 ///|
 pub impl @mc.Packet for UpdateAdvancementsS2C with clientbound(_) {
   true

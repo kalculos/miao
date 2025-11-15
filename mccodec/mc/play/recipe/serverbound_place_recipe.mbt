@@ -23,12 +23,9 @@ pub impl @mc.Packet for PlaceRecipeC2S with serialize(
 }
 
 ///|
-pub impl @mc.Packet for PlaceRecipeC2S with deserialize(
-  buf : &@buffer.Buffer,
-) {
+pub impl @mc.Packet for PlaceRecipeC2S with deserialize(buf : &@buffer.Buffer) {
   let window_id = buf.read_int()
   let recipe = @types.read_string(buf)
   let make_all = @types.read_bool(buf)
   { window_id, recipe, make_all }
 }
-

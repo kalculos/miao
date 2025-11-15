@@ -28,4 +28,3 @@ pub impl @mc.Packet for PickItemFromBlockC2S with deserialize(
   let include_nbt = @types.read_bool(buf)
   { location, include_nbt }
 }
-

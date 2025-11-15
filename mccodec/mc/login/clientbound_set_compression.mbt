@@ -19,7 +19,9 @@ pub impl @mc.Packet for SetCompressionS2C with serialize(
 }
 
 ///|
-pub impl @mc.Packet for SetCompressionS2C with deserialize(buf : &@buffer.Buffer) {
+pub impl @mc.Packet for SetCompressionS2C with deserialize(
+  buf : &@buffer.Buffer,
+) {
   let threshold = @types.read_varint(buf)
   { threshold, }
 }

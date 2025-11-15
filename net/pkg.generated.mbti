@@ -1,0 +1,120 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "iceBear67/miao/net"
+
+import(
+  "iceBear67/miao/buffer"
+  "iceBear67/miao/io"
+  "iceBear67/time"
+)
+
+// Values
+async fn dial_tcp(String, opt? : TcpOption) -> Result[&TcpConnection, NetworkError]
+
+async fn dial_udp(String, opt? : UdpOption) -> Result[&DatagramConnection, NetworkError]
+
+fn int64_to_hex(Int64) -> String
+
+async fn listen_tcp(String, opt? : TcpOption) -> Result[&TcpSocket, NetworkError]
+
+async fn listen_udp(String, opt? : UdpOption) -> Result[&DatagramSocket, NetworkError]
+
+fn set_network(&Network) -> Unit
+
+// Errors
+pub(all) suberror NetworkError {
+  InvalidAddress(msg~ : String)
+  DeviceFailure(msg~ : String)
+  ConnReset(msg~ : String)
+  ConnClose(msg~ : String)
+  TimedOut(msg~ : String)
+}
+impl Eq for NetworkError
+impl Hash for NetworkError
+impl Show for NetworkError
+
+// Types and methods
+pub(all) enum InetAddr {
+  IPv4(host~ : Int)
+  IPv6(msb~ : Int64, lsb~ : Int64)
+}
+fn InetAddr::from_ipv4(String) -> Self raise
+fn InetAddr::from_ipv6(String) -> Self raise
+fn InetAddr::to_string(Self) -> String
+impl Eq for InetAddr
+impl Hash for InetAddr
+impl Show for InetAddr
+
+pub(all) enum SockAddr {
+  Inet(SockAddrIn)
+  Local
+  Unix(path~ : String)
+  File
+  Unspec
+}
+impl Eq for SockAddr
+impl Hash for SockAddr
+impl Show for SockAddr
+
+pub(all) struct SockAddrIn {
+  addr : InetAddr
+  port : UInt16
+}
+fn SockAddrIn::from_host_port(String, UInt16) -> Self raise
+fn SockAddrIn::parse(String) -> Self raise
+fn SockAddrIn::to_string(Self) -> String
+impl Eq for SockAddrIn
+impl Hash for SockAddrIn
+impl Show for SockAddrIn
+
+pub struct TcpOption(Int)
+#deprecated
+fn TcpOption::inner(Self) -> Int
+fn TcpOption::new(reuseaddr? : Bool) -> Self
+fn TcpOption::reuseaddr(Self) -> Bool
+
+pub struct UdpOption(Int)
+fn UdpOption::broadcast(Self) -> Bool
+#deprecated
+fn UdpOption::inner(Self) -> Int
+fn UdpOption::new(broadcast? : Bool) -> Self
+
+// Type aliases
+
+// Traits
+pub(open) trait Connection : @io.Channel {
+  local_addr(Self) -> SockAddr
+  remote_addr(Self) -> SockAddr
+  async flush(Self) -> Unit
+}
+
+pub(open) trait DatagramConnection : Connection {
+  socket(Self) -> &DatagramSocket
+  buffer(Self) -> &@buffer.Buffer
+}
+
+pub(open) trait DatagramSocket : Socket {
+  async accept(Self, &@buffer.Buffer, @time.Duration) -> Result[(SockAddr, Int), NetworkError]
+  async send(Self, SockAddr, &@buffer.Buffer, UdpOption) -> Result[Unit, NetworkError]
+}
+
+pub(open) trait Network {
+  async dial(Self, String, String, Int) -> Result[&Connection, NetworkError]
+  async bind(Self, String, String, Int) -> Result[&Socket, NetworkError]
+}
+
+pub(open) trait Socket {
+  async accept(Self, @time.Duration) -> Result[&Connection, NetworkError]
+  async close(Self) -> Unit
+  is_closed(Self) -> Bool
+}
+
+pub(open) trait TcpConnection : Connection {
+}
+
+pub(open) trait TcpSocket : Socket {
+  async accept(Self, @time.Duration, opt? : TcpOption) -> Result[&TcpConnection, NetworkError]
+  async dial(Self, SockAddr, TcpOption) -> Result[&TcpConnection, NetworkError]
+  async close(Self) -> Unit
+  async close_immediately(Self) -> Unit
+}
+

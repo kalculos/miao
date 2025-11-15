@@ -24,4 +24,3 @@ pub impl @mc.Packet for RemoveResourcePackConfigS2C with deserialize(
 ) {
   { uuid: @types.read_optional(buf, @types.read_uuid) }
 }
-

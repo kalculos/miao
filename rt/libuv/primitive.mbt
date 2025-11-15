@@ -10,7 +10,7 @@ async fn[T, E : Error] ___suspend(
 ) -> T raise E = "%async.suspend"
 
 ///|
-typealias () -> Unit raise as UvCancellationToken
+type UvCancellationToken = () -> Unit raise
 
 ///|
 /// This method is a wrapper of error handling for common libuv operations
@@ -18,12 +18,10 @@ typealias () -> Unit raise as UvCancellationToken
 async fn[T] uvrt_op_suspend(
   f : ((T) -> Unit, (Error) -> Unit, UvTask) -> UvCancellationToken raise @uv.Errno,
 ) -> T raise @rt.CoroutineError {
-  uvrt_suspend((resolve, reject, task) => {
-    try f(resolve,reject, task) catch {
-      errno => {
-        reject(errno)
-        () => ()
-      }
+  uvrt_suspend((resolve, reject, task) => f(resolve, reject, task) catch {
+    errno => {
+      reject(errno)
+      () => ()
     }
   })
 }

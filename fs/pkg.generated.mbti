@@ -74,9 +74,10 @@ impl @io.Reader for MemFileChannel
 impl @io.Writer for MemFileChannel
 
 pub struct MemFileSystem {
+  id : String
   root : Ref[MemEntry]
 }
-fn MemFileSystem::new() -> Self
+fn MemFileSystem::new(id? : String) -> Self
 impl FileSystem for MemFileSystem
 
 type OpenFlags
@@ -123,6 +124,7 @@ pub(open) trait FileChannel : @io.Channel {
 }
 
 pub(open) trait FileSystem {
+  id(Self) -> String
   async open_file(Self, Path, OpenFlags, mode~ : AccessFlags, follow_links? : Bool) -> &FileChannel
   async attr(Self, Path, follow_links? : Bool) -> FileAttribute
   async list_directory(Self, Path) -> ArrayView[Path]

@@ -16,10 +16,10 @@ struct ArrayBlockingQueue[T] {
 
 ///|
 /// Create a new ArrayBlockingQueue with the given runtime and buffer capacity.
-pub fn [T] ArrayBlockingQueue::new(
+pub fn[T] ArrayBlockingQueue::new(
   runtime : &@rt.Runtime,
   capacity : Int,
-  default : () -> T
+  default : () -> T,
 ) -> ArrayBlockingQueue[T] {
   guard capacity > 0
   ArrayBlockingQueue::{
@@ -35,7 +35,7 @@ pub fn [T] ArrayBlockingQueue::new(
 
 ///|
 /// Returns the number of elements currently in the queue.
-pub fn [T] ArrayBlockingQueue::available(self : ArrayBlockingQueue[T]) -> Int {
+pub fn[T] ArrayBlockingQueue::available(self : ArrayBlockingQueue[T]) -> Int {
   if self.closed {
     return 0
   }
@@ -44,13 +44,13 @@ pub fn [T] ArrayBlockingQueue::available(self : ArrayBlockingQueue[T]) -> Int {
 
 ///|
 /// Returns true if the queue is closed.
-pub fn [T] ArrayBlockingQueue::is_closed(self : ArrayBlockingQueue[T]) -> Bool {
+pub fn[T] ArrayBlockingQueue::is_closed(self : ArrayBlockingQueue[T]) -> Bool {
   self.closed
 }
 
 ///|
 /// Close the queue. After closing, no more reads or writes will succeed.
-pub async fn [T] ArrayBlockingQueue::close(self : ArrayBlockingQueue[T]) -> Unit {
+pub async fn[T] ArrayBlockingQueue::close(self : ArrayBlockingQueue[T]) -> Unit {
   guard !self.closed
   self.closed = true
   // Wake up any waiting readers/writers
@@ -64,7 +64,10 @@ pub async fn [T] ArrayBlockingQueue::close(self : ArrayBlockingQueue[T]) -> Unit
 
 ///|
 /// Returns true if we can write at least `amount` elements without blocking.
-pub fn [T] ArrayBlockingQueue::can_write(self : ArrayBlockingQueue[T], amount : Int) -> Bool {
+pub fn[T] ArrayBlockingQueue::can_write(
+  self : ArrayBlockingQueue[T],
+  amount : Int,
+) -> Bool {
   !self.closed && self.buffer.available() >= amount
 }
 
@@ -76,7 +79,7 @@ pub async fn ArrayBlockingQueue::read_into(
   self : ArrayBlockingQueue[Byte],
   dst : FixedArray[Byte],
   dst_offset : Int,
-  len : Int
+  len : Int,
 ) -> Int {
   if self.closed {
     return 0
@@ -103,7 +106,7 @@ pub async fn ArrayBlockingQueue::write_from(
   self : ArrayBlockingQueue[Byte],
   src : FixedArray[Byte],
   src_offset : Int,
-  len : Int
+  len : Int,
 ) -> Int {
   if self.closed {
     return 0
@@ -123,7 +126,9 @@ pub async fn ArrayBlockingQueue::write_from(
 }
 
 ///|
-async fn [T] ArrayBlockingQueue::block_read(self : ArrayBlockingQueue[T]) -> Unit {
+async fn[T] ArrayBlockingQueue::block_read(
+  self : ArrayBlockingQueue[T],
+) -> Unit {
   guard !self.read_waiting else {
     raise fail("Someone called read() while someone is already waiting!")
   }
@@ -131,15 +136,17 @@ async fn [T] ArrayBlockingQueue::block_read(self : ArrayBlockingQueue[T]) -> Uni
   defer (fn() { self.read_waiting = false })()
   self.rt.suspend((onResolve, onReject, _) => {
     self.read_waiter = () => {
-        defer (fn() { self.read_waiter = () => () })()
-        onResolve(())
-      }
+      defer (fn() { self.read_waiter = () => () })()
+      onResolve(())
+    }
     () => onReject(@rt.CoroutineError::Cancelled)
   })
 }
 
 ///|
-async fn [T] ArrayBlockingQueue::block_write(self : ArrayBlockingQueue[T]) -> Unit {
+async fn[T] ArrayBlockingQueue::block_write(
+  self : ArrayBlockingQueue[T],
+) -> Unit {
   guard !self.write_waiting else {
     raise fail("Someone called write() while someone is already waiting!")
   }
@@ -147,47 +154,47 @@ async fn [T] ArrayBlockingQueue::block_write(self : ArrayBlockingQueue[T]) -> Un
   defer (fn() { self.write_waiting = false })()
   self.rt.suspend((onResolve, onReject, _) => {
     self.write_waiter = () => {
-        defer (fn() { self.write_waiter = () => () })()
-        onResolve(())
-      }
+      defer (fn() { self.write_waiter = () => () })()
+      onResolve(())
+    }
     () => onReject(@rt.CoroutineError::Cancelled)
   })
 }
 
 ///|
 /// Queue interface: returns the number of elements in the queue.
-pub fn [T] ArrayBlockingQueue::length(self : ArrayBlockingQueue[T]) -> Int {
+pub fn[T] ArrayBlockingQueue::length(self : ArrayBlockingQueue[T]) -> Int {
   self.buffer.length()
 }
 
 ///|
 /// Queue interface: returns the capacity of the queue.
-pub fn [T] ArrayBlockingQueue::capacity(self : ArrayBlockingQueue[T]) -> Int {
+pub fn[T] ArrayBlockingQueue::capacity(self : ArrayBlockingQueue[T]) -> Int {
   self.buffer.capacity()
 }
 
 ///|
 /// Queue interface: returns true if the queue is empty.
-pub fn [T] ArrayBlockingQueue::is_empty(self : ArrayBlockingQueue[T]) -> Bool {
+pub fn[T] ArrayBlockingQueue::is_empty(self : ArrayBlockingQueue[T]) -> Bool {
   self.buffer.is_empty()
 }
 
 ///|
 /// Queue interface: returns true if the queue is full.
-pub fn [T] ArrayBlockingQueue::is_full(self : ArrayBlockingQueue[T]) -> Bool {
+pub fn[T] ArrayBlockingQueue::is_full(self : ArrayBlockingQueue[T]) -> Bool {
   self.buffer.is_full()
 }
 
 ///|
 /// Queue interface: clear all elements from the queue.
-pub fn [T] ArrayBlockingQueue::clear(self : ArrayBlockingQueue[T]) -> Unit {
+pub fn[T] ArrayBlockingQueue::clear(self : ArrayBlockingQueue[T]) -> Unit {
   self.buffer.clear()
 }
 
 ///|
 /// Queue interface: peek at the front element without removing it (non-blocking).
 /// Returns None if the queue is empty or closed.
-pub fn [T] ArrayBlockingQueue::peek(self : ArrayBlockingQueue[T]) -> Option[T] {
+pub fn[T] ArrayBlockingQueue::peek(self : ArrayBlockingQueue[T]) -> T? {
   if self.closed {
     return None
   }
@@ -197,17 +204,16 @@ pub fn [T] ArrayBlockingQueue::peek(self : ArrayBlockingQueue[T]) -> Option[T] {
 ///|
 /// Queue interface: try to pop an element from the front (non-blocking).
 /// Returns None if the queue is empty or closed.
-pub fn [T] ArrayBlockingQueue::try_pop(self : ArrayBlockingQueue[T]) -> Option[T] raise {
+pub fn[T] ArrayBlockingQueue::try_pop(self : ArrayBlockingQueue[T]) -> T? raise {
   if self.closed {
     return None
   }
   let result = self.buffer.try_pop()
   match result {
-    Some(_) => {
+    Some(_) =>
       if self.write_waiting {
         self.rt.new_task(_ => (self.write_waiter)()).start()
       }
-    }
     None => ()
   }
   result
@@ -216,7 +222,10 @@ pub fn [T] ArrayBlockingQueue::try_pop(self : ArrayBlockingQueue[T]) -> Option[T
 ///|
 /// Queue interface: try to push an element to the back (non-blocking).
 /// Returns false if the queue is full or closed.
-pub fn [T] ArrayBlockingQueue::try_push(self : ArrayBlockingQueue[T], value : T) -> Bool raise {
+pub fn[T] ArrayBlockingQueue::try_push(
+  self : ArrayBlockingQueue[T],
+  value : T,
+) -> Bool raise {
   if self.closed {
     return false
   }
@@ -230,7 +239,7 @@ pub fn [T] ArrayBlockingQueue::try_push(self : ArrayBlockingQueue[T], value : T)
 ///|
 /// Blocking pop: pop an element from the front, blocking if empty.
 /// Returns the element if successful. Raises an error if the queue is closed while waiting.
-pub async fn [T] ArrayBlockingQueue::pop(self : ArrayBlockingQueue[T]) -> T {
+pub async fn[T] ArrayBlockingQueue::pop(self : ArrayBlockingQueue[T]) -> T {
   if self.closed {
     raise fail("Cannot pop from a closed queue")
   }
@@ -255,7 +264,10 @@ pub async fn [T] ArrayBlockingQueue::pop(self : ArrayBlockingQueue[T]) -> T {
 ///|
 /// Blocking push: push an element to the back, blocking if full.
 /// Raises an error if the queue is closed while waiting.
-pub async fn [T] ArrayBlockingQueue::push(self : ArrayBlockingQueue[T], value : T) -> Unit {
+pub async fn[T] ArrayBlockingQueue::push(
+  self : ArrayBlockingQueue[T],
+  value : T,
+) -> Unit {
   if self.closed {
     raise fail("Cannot push to a closed queue")
   }

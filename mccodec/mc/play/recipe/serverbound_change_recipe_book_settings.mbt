@@ -31,4 +31,3 @@ pub impl @mc.Packet for ChangeRecipeBookSettingsC2S with deserialize(
   let filter_active = @types.read_bool(buf)
   { book_id, book_open, filter_active }
 }
-

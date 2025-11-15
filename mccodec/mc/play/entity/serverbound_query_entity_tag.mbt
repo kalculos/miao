@@ -28,4 +28,3 @@ pub impl @mc.Packet for QueryEntityTagC2S with deserialize(
   let entity_id = @types.read_varint(buf)
   { transaction_id, entity_id }
 }
-

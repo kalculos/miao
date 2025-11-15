@@ -11,6 +11,7 @@ pub(all) struct SoundEffectS2C {
   pitch : Float // Sound pitch
   seed : Int64 // Random seed
 }
+
 ///|
 pub impl @mc.Packet for SoundEffectS2C with clientbound(_) {
   true

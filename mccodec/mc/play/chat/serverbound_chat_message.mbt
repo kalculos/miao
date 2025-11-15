@@ -17,7 +17,10 @@ pub impl @mc.Packet for ChatMessageC2S with clientbound(_) {
 }
 
 ///|
-pub impl @mc.Packet for ChatMessageC2S with serialize(self, buf : &@buffer.Buffer) {
+pub impl @mc.Packet for ChatMessageC2S with serialize(
+  self,
+  buf : &@buffer.Buffer,
+) {
   @types.write_string(buf, self.message)
   buf.write_int64(self.timestamp)
   buf.write_int64(self.salt)

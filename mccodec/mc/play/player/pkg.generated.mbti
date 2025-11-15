@@ -1,0 +1,274 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "iceBear67/miao/mccodec/mc/play/player"
+
+import(
+  "iceBear67/miao/buffer"
+  "iceBear67/miao/mccodec/mc"
+  "iceBear67/miao/mccodec/mc/types"
+  "iceBear67/mnbt/nbt"
+  "moonbitlang/x/uuid"
+)
+
+// Values
+
+// Errors
+
+// Types and methods
+pub(all) struct AwardStatisticsS2C {
+  statistics : Array[(String, String, Int)]
+}
+impl @mc.Packet for AwardStatisticsS2C
+
+pub(all) struct ChangeDifficultyS2C {
+  difficulty : Byte
+  difficulty_locked : Bool
+}
+impl @mc.Packet for ChangeDifficultyS2C
+
+pub(all) struct CombatDeathS2C {
+  player_id : Int
+  message : String
+}
+impl @mc.Packet for CombatDeathS2C
+
+pub(all) struct CommandSuggestionsResponseS2C {
+  id : Int
+  start : Int
+  length : Int
+  matches : Array[(String, String?)]
+}
+impl @mc.Packet for CommandSuggestionsResponseS2C
+
+pub(all) struct CommandsS2C {
+  nodes : Array[String]
+  root_index : Int
+}
+impl @mc.Packet for CommandsS2C
+
+pub(all) struct ConfirmTeleportationC2S {
+  teleport_id : Int
+}
+impl @mc.Packet for ConfirmTeleportationC2S
+
+pub(all) struct CustomClickActionC2S {
+  id : String
+  payload : @nbt.NBTTag
+}
+impl @mc.Packet for CustomClickActionC2S
+
+pub(all) struct EndCombatS2C {
+  duration : Int
+}
+impl @mc.Packet for EndCombatS2C
+
+pub(all) struct EnterCombatS2C {
+}
+impl @mc.Packet for EnterCombatS2C
+
+pub(all) struct GameEventS2C {
+  event : Byte
+  value : Float
+}
+impl @mc.Packet for GameEventS2C
+
+pub(all) struct LoginPlayS2C {
+  entity_id : Int
+  is_hardcore : Bool
+  dimensions : Array[String]
+  max_players : Int
+  view_distance : Int
+  simulation_distance : Int
+  reduced_debug_info : Bool
+  enable_respawn_screen : Bool
+  do_limited_crafting : Bool
+  dimension_type : String
+  dimension_name : String
+  hashed_seed : Int64
+  game_mode : Byte
+  previous_game_mode : Byte
+  is_debug : Bool
+  is_flat : Bool
+  death_location : (String, Int, Int, Int)?
+  portal_cooldown : Int
+  sea_level : Int
+  enforces_secure_chat : Bool
+}
+impl @mc.Packet for LoginPlayS2C
+
+pub(all) struct LookAtS2C {
+  feet_eyes : Int
+  target_x : Double
+  target_y : Double
+  target_z : Double
+  is_entity : Bool
+  entity_id : Int?
+  entity_anchor : Int?
+}
+impl @mc.Packet for LookAtS2C
+
+pub(all) struct MoveVehicleC2S {
+  x : Double
+  y : Double
+  z : Double
+  yaw : Float
+  pitch : Float
+  on_ground : Bool
+}
+impl @mc.Packet for MoveVehicleC2S
+
+pub(all) struct PaddleBoatC2S {
+  left_paddle_turning : Bool
+  right_paddle_turning : Bool
+}
+impl @mc.Packet for PaddleBoatC2S
+
+pub(all) struct PlayerAbilitiesC2S {
+  flags : Byte
+}
+impl @mc.Packet for PlayerAbilitiesC2S
+
+pub(all) struct PlayerAbilitiesS2C {
+  flags : Byte
+  flying_speed : Float
+  field_of_view_modifier : Float
+}
+impl @mc.Packet for PlayerAbilitiesS2C
+
+pub(all) struct PlayerActionC2S {
+  status : Int
+  location : @types.Position
+  face : Byte
+  sequence : Int
+}
+impl @mc.Packet for PlayerActionC2S
+
+pub(all) struct PlayerCommandC2S {
+  entity_id : Int
+  action_id : Int
+  jump_boost : Int
+}
+impl @mc.Packet for PlayerCommandC2S
+
+pub(all) struct PlayerInfoRemoveS2C {
+  player_uuids : Array[String]
+}
+impl @mc.Packet for PlayerInfoRemoveS2C
+
+pub(all) struct PlayerInfoUpdateS2C {
+  actions : Byte
+  players : Array[String]
+}
+impl @mc.Packet for PlayerInfoUpdateS2C
+
+pub(all) struct PlayerInputC2S {
+  flags : Byte
+}
+impl @mc.Packet for PlayerInputC2S
+
+pub(all) struct PlayerLoadedC2S {
+}
+impl @mc.Packet for PlayerLoadedC2S
+
+pub(all) struct PlayerRotationS2C {
+  yaw : Float
+  pitch : Float
+}
+impl @mc.Packet for PlayerRotationS2C
+
+pub(all) struct PlayerSessionC2S {
+  session_uuid : @uuid.UUID
+  expires_at : Int64
+  public_key : FixedArray[Byte]
+  key_signature : FixedArray[Byte]
+}
+impl @mc.Packet for PlayerSessionC2S
+
+pub(all) struct RespawnS2C {
+  dimension_type : String
+  dimension_name : String
+  hashed_seed : Int64
+  game_mode : Byte
+  previous_game_mode : Byte
+  is_debug : Bool
+  is_flat : Bool
+  copy_metadata : Bool
+  death_location : (String, Int, Int, Int)?
+  portal_cooldown : Int
+  sea_level : Int
+}
+impl @mc.Packet for RespawnS2C
+
+pub(all) struct SetCameraS2C {
+  camera_id : Int
+}
+impl @mc.Packet for SetCameraS2C
+
+pub(all) struct SetExperienceS2C {
+  experience_bar : Float
+  level : Int
+  total_experience : Int
+}
+impl @mc.Packet for SetExperienceS2C
+
+pub(all) struct SetHealthS2C {
+  health : Float
+  food : Int
+  food_saturation : Float
+}
+impl @mc.Packet for SetHealthS2C
+
+pub(all) struct SetPlayerMovementFlagsC2S {
+  on_ground : Byte
+}
+impl @mc.Packet for SetPlayerMovementFlagsC2S
+
+pub(all) struct SetPlayerPositionAndRotationC2S {
+  x : Double
+  feet_y : Double
+  z : Double
+  yaw : Float
+  pitch : Float
+  on_ground : Byte
+}
+impl @mc.Packet for SetPlayerPositionAndRotationC2S
+
+pub(all) struct SetPlayerPositionC2S {
+  x : Double
+  feet_y : Double
+  z : Double
+  on_ground : Byte
+}
+impl @mc.Packet for SetPlayerPositionC2S
+
+pub(all) struct SetPlayerRotationC2S {
+  yaw : Float
+  pitch : Float
+  on_ground : Byte
+}
+impl @mc.Packet for SetPlayerRotationC2S
+
+pub(all) struct SwingArmC2S {
+  hand : Int
+}
+impl @mc.Packet for SwingArmC2S
+
+pub(all) struct SynchronizePlayerPositionS2C {
+  x : Double
+  y : Double
+  z : Double
+  yaw : Float
+  pitch : Float
+  flags : Byte
+  teleport_id : Int
+}
+impl @mc.Packet for SynchronizePlayerPositionS2C
+
+pub(all) struct TeleportToEntityC2S {
+  target_player : @uuid.UUID
+}
+impl @mc.Packet for TeleportToEntityC2S
+
+// Type aliases
+
+// Traits
+

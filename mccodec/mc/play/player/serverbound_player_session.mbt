@@ -13,6 +13,7 @@ pub impl @mc.Packet for PlayerSessionC2S with clientbound(_) {
   false
 }
 
+///|
 pub impl @mc.Packet for PlayerSessionC2S with serialize(
   self,
   buf : &@buffer.Buffer,
@@ -20,12 +21,15 @@ pub impl @mc.Packet for PlayerSessionC2S with serialize(
   @types.write_uuid(buf, self.session_uuid)
   buf.write_int64(self.expires_at)
   @types.write_prefix_array(buf, self.public_key, @buffer.ByteSlice::write_byte)
-  @types.write_prefix_array(buf, self.key_signature, @buffer.ByteSlice::write_byte)
+  @types.write_prefix_array(
+    buf,
+    self.key_signature,
+    @buffer.ByteSlice::write_byte,
+  )
 }
 
-pub impl @mc.Packet for PlayerSessionC2S with deserialize(
-  buf : &@buffer.Buffer,
-) {
+///|
+pub impl @mc.Packet for PlayerSessionC2S with deserialize(buf : &@buffer.Buffer) {
   let session_uuid = @types.read_uuid(buf)
   let expires_at = buf.read_int64()
   let public_key = @types.read_prefix_array(buf, by => by.read_byte())

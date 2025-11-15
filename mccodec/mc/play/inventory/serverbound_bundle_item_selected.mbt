@@ -28,4 +28,3 @@ pub impl @mc.Packet for BundleItemSelectedC2S with deserialize(
   let selected_item_index = @types.read_varint(buf)
   { slot_id, selected_item_index }
 }
-

@@ -10,6 +10,7 @@ pub(all) struct TeleportEntityS2C {
   pitch : Byte // Pitch angle
   on_ground : Bool // Whether on ground
 }
+
 ///|
 pub impl @mc.Packet for TeleportEntityS2C with clientbound(_) {
   true

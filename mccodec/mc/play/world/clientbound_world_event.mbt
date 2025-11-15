@@ -7,6 +7,7 @@ pub(all) struct WorldEventS2C {
   data : Int // Event data
   disable_relative_volume : Bool // Volume control
 }
+
 ///|
 pub impl @mc.Packet for WorldEventS2C with clientbound(_) {
   true

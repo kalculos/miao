@@ -10,6 +10,7 @@ pub(all) struct BossBarS2C {
   division : Int? // Division (for add/update_style)
   flags : Byte? // Flags (for add/update_flags)
 }
+
 ///|
 pub impl @mc.Packet for BossBarS2C with clientbound(_) {
   true

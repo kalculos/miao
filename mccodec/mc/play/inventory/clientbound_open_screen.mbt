@@ -13,7 +13,10 @@ pub impl @mc.Packet for OpenScreenS2C with clientbound(_) {
 }
 
 ///|
-pub impl @mc.Packet for OpenScreenS2C with serialize(self, buf : &@buffer.Buffer) {
+pub impl @mc.Packet for OpenScreenS2C with serialize(
+  self,
+  buf : &@buffer.Buffer,
+) {
   @types.write_varint(buf, self.window_id)
   @types.write_varint(buf, self.window_type)
   @types.write_string(buf, self.window_title)

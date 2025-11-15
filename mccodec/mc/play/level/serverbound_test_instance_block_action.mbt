@@ -4,13 +4,13 @@
 pub(all) struct TestInstanceBlockActionC2S {
   location : @types.Position // Block position
   action : Int // Test action type enum(0=init, 1=query, 2=set, 3=reset, 4=save, 5=export, 6=run)
-  test_id: @types.Identifier // Test identifier
+  test_id : @types.Identifier // Test identifier
   size_x : Int // Test size X
   size_y : Int // Test size Y
   size_z : Int // Test size Z
-  rotation: Int // Test rotation enum(0=none, 1=clockwise_90, 2=clockwise_180, 3=counterclockwise_90)
+  rotation : Int // Test rotation enum(0=none, 1=clockwise_90, 2=clockwise_180, 3=counterclockwise_90)
   ignore_entities : Bool // Ignore entities flag
-  status: Int // enum(0=cleared, 1=running, 2=finished)
+  status : Int // enum(0=cleared, 1=running, 2=finished)
   error_message : String? // Error message
 }
 
@@ -51,6 +51,16 @@ pub impl @mc.Packet for TestInstanceBlockActionC2S with deserialize(
   let ignore_entities = @types.read_bool(buf)
   let status = @types.read_varint(buf)
   let error_message = @types.read_optional(buf, @types.read_string)
-  { location, action, test_id, size_x, size_y, size_z, rotation, ignore_entities, status, error_message }
+  {
+    location,
+    action,
+    test_id,
+    size_x,
+    size_y,
+    size_z,
+    rotation,
+    ignore_entities,
+    status,
+    error_message,
+  }
 }
-

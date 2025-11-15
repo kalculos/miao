@@ -16,4 +16,3 @@ pub(all) struct ClickContainerC2S {
 pub impl @mc.Packet for ClickContainerC2S with clientbound(_) {
   false
 }
-

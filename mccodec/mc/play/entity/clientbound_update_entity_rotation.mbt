@@ -7,6 +7,7 @@ pub(all) struct UpdateEntityRotationS2C {
   pitch : Byte // Pitch angle
   on_ground : Bool // On ground flag
 }
+
 ///|
 pub impl @mc.Packet for UpdateEntityRotationS2C with clientbound(_) {
   true

@@ -21,7 +21,9 @@ pub impl @mc.Packet for StoreCookiePlayS2C with serialize(
 }
 
 ///|
-pub impl @mc.Packet for StoreCookiePlayS2C with deserialize(buf : &@buffer.Buffer) raise {
+pub impl @mc.Packet for StoreCookiePlayS2C with deserialize(
+  buf : &@buffer.Buffer,
+) raise {
   let key = @types.read_identifier(buf)
   let payload = @types.read_prefix_array(buf, @buffer.ByteSlice::read_byte)
   { key, payload }

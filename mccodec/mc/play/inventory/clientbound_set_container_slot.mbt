@@ -25,7 +25,9 @@ pub impl @mc.Packet for SetContainerSlotS2C with serialize(
 }
 
 ///|
-pub impl @mc.Packet for SetContainerSlotS2C with deserialize(buf : &@buffer.Buffer) {
+pub impl @mc.Packet for SetContainerSlotS2C with deserialize(
+  buf : &@buffer.Buffer,
+) {
   let window_id = @types.read_varint(buf)
   let state_id = @types.read_varint(buf)
   let slot = buf.read_int16()

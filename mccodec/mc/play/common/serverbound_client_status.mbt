@@ -19,9 +19,6 @@ pub impl @mc.Packet for ClientStatusC2S with serialize(
 }
 
 ///|
-pub impl @mc.Packet for ClientStatusC2S with deserialize(
-  buf : &@buffer.Buffer,
-) {
+pub impl @mc.Packet for ClientStatusC2S with deserialize(buf : &@buffer.Buffer) {
   { action_id: @types.read_varint(buf) }
 }
-

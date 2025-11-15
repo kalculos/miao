@@ -7,6 +7,7 @@ pub(all) struct SetEntityVelocityS2C {
   velocity_y : Int16 // Y velocity
   velocity_z : Int16 // Z velocity
 }
+
 ///|
 pub impl @mc.Packet for SetEntityVelocityS2C with clientbound(_) {
   true

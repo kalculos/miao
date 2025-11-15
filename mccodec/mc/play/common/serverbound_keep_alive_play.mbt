@@ -24,4 +24,3 @@ pub impl @mc.Packet for ServerboundKeepAlivePlayC2S with deserialize(
 ) {
   { keep_alive_id: buf.read_int64() }
 }
-

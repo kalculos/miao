@@ -1,0 +1,18 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "iceBear67/miao/checksum"
+
+// Values
+fn adler32(Array[Byte], initial_value? : UInt) -> UInt
+
+fn crc32(Array[Byte], table? : Array[UInt]) -> UInt
+
+fn generate_crc32_table() -> Array[UInt]
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+
+// Traits
+

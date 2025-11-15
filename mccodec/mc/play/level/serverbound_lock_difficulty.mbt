@@ -24,4 +24,3 @@ pub impl @mc.Packet for LockDifficultyC2S with deserialize(
 ) {
   { locked: @types.read_bool(buf) }
 }
-

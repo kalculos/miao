@@ -30,7 +30,6 @@ test {
   assert_eq(int_to_enum(2), TestEnum::C)
   assert_eq(int_to_enum(254), TestEnum::D)
 
-
   // Byte conversions
   assert_eq(enum_to_byte(TestEnum::A), 0)
   assert_eq(enum_to_byte(TestEnum::B), 1)

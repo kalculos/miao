@@ -32,9 +32,7 @@ pub impl @mc.Packet for EncryptionResponseC2S with serialize(
 pub impl @mc.Packet for EncryptionResponseC2S with deserialize(
   buf : &@buffer.Buffer,
 ) {
-  let shared_secret = @types.read_prefix_array(buf, b => b
-    .read_byte())
-  let verify_token = @types.read_prefix_array(buf, b => b
-    .read_byte())
+  let shared_secret = @types.read_prefix_array(buf, b => b.read_byte())
+  let verify_token = @types.read_prefix_array(buf, b => b.read_byte())
   { shared_secret, verify_token }
 }

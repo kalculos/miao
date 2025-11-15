@@ -7,6 +7,7 @@ pub(all) struct ProjectilePowerS2C {
   power_y : Double // Power Y
   power_z : Double // Power Z
 }
+
 ///|
 pub impl @mc.Packet for ProjectilePowerS2C with clientbound(_) {
   true

@@ -31,7 +31,7 @@ pub(open) trait ByteSlice {
 ///|
 /// The difference of a buffer and a channel is that the buffer guarantees random access and data is 
 /// always available. It also expands its capacity automatically.
-pub(open) trait Buffer: ByteSlice { 
+pub(open) trait Buffer: ByteSlice {
   /// create a copy this buffer with same memory region, ridx and widx.
   /// It does not expands automatically.
   duplicate(Self) -> &Buffer

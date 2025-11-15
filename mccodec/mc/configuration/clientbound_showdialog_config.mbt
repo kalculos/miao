@@ -26,4 +26,3 @@ pub impl @mc.Packet for ShowDialogConfigS2C with deserialize(
   // TODO: Implement NBT reading
   panic()
 }
-

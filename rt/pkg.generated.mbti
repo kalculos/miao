@@ -1,0 +1,76 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "iceBear67/miao/rt"
+
+// Values
+let _current_runtime : Ref[() -> &Runtime]
+
+fn current_runtime() -> &Runtime
+
+// Errors
+pub(all) suberror CoroutineError {
+  Cancelled
+  ExecutionError(Error)
+}
+
+// Types and methods
+pub struct BasicContext {
+  rt : &Runtime
+  tasks : Map[Int, &Task]
+  children : Array[&Context]
+  // private fields
+}
+fn BasicContext::new(&Runtime) -> Self
+impl Context for BasicContext
+
+pub(all) struct Job {
+  context : &Context
+  task : &Task
+}
+
+type ResolvedToken
+
+pub(all) enum TaskState {
+  New
+  Running
+  Suspend
+  Cancelling
+  Cancelled
+  Completed
+}
+impl Eq for TaskState
+impl Hash for TaskState
+impl Show for TaskState
+
+// Type aliases
+pub type CancellationToken = () -> Unit raise
+
+pub type Coroutine = async (Job) -> Unit
+
+// Traits
+pub(open) trait Context {
+  runtime(Self) -> &Runtime
+  is_cancelled(Self) -> Bool
+  cancel_in_bg(Self) -> Unit raise
+  async cancel(Self) -> Unit
+  async job(Self, async (Job) -> Unit) -> &Task
+  async job_timeout(Self, timeout_millis~ : Int64, async (Job) -> Unit) -> &Task
+  async join(Self) -> Unit
+  fork(Self) -> &Context
+  async with_context(Self, (&Context) -> Unit) -> Unit
+}
+
+pub(open) trait Runtime {
+  async unsafe_suspend(Self, ((ResolvedToken) -> Unit, (Error) -> Unit, &Task) -> () -> Unit raise) -> ResolvedToken
+  new_task(Self, async (&Task) -> Unit) -> &Task
+  async sleep(Self, UInt64) -> Unit
+}
+async fn[T] &Runtime::suspend(Self, ((T) -> Unit, (Error) -> Unit, &Task) -> () -> Unit raise) -> T
+
+pub(open) trait Task {
+  id(Self) -> Int
+  state(Self) -> TaskState
+  start(Self) -> Unit raise
+  async join(Self) -> Unit
+  async cancel(Self) -> Unit
+}
+

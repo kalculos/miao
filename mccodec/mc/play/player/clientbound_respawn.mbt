@@ -14,6 +14,7 @@ pub(all) struct RespawnS2C {
   portal_cooldown : Int // Portal cooldown
   sea_level : Int // Sea level
 }
+
 ///|
 pub impl @mc.Packet for RespawnS2C with clientbound(_) {
   true

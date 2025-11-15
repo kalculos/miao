@@ -7,7 +7,7 @@ pub(all) struct MoveVehicleC2S {
   z : Double // Z position
   yaw : Float // Yaw angle
   pitch : Float // Pitch angle
-  on_ground: Bool // Whether on ground (This value does not seem to exist)
+  on_ground : Bool // Whether on ground (This value does not seem to exist)
 }
 
 ///|
@@ -29,9 +29,7 @@ pub impl @mc.Packet for MoveVehicleC2S with serialize(
 }
 
 ///|
-pub impl @mc.Packet for MoveVehicleC2S with deserialize(
-  buf : &@buffer.Buffer,
-) {
+pub impl @mc.Packet for MoveVehicleC2S with deserialize(buf : &@buffer.Buffer) {
   let x = buf.read_double()
   let y = buf.read_double()
   let z = buf.read_double()
@@ -40,4 +38,3 @@ pub impl @mc.Packet for MoveVehicleC2S with deserialize(
   let on_ground = @types.read_bool(buf)
   { x, y, z, yaw, pitch, on_ground }
 }
-

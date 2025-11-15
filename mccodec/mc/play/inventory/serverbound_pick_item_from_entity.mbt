@@ -28,4 +28,3 @@ pub impl @mc.Packet for PickItemFromEntityC2S with deserialize(
   let include_nbt = @types.read_bool(buf)
   { entity_id, include_nbt }
 }
-

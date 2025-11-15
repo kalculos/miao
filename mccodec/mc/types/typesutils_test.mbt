@@ -58,9 +58,9 @@ test "read_varint - error on oversized varint" {
   buf.write_byte(0x80) // continue bit set
   buf.write_byte(0x80) // continue bit set
   buf.write_byte(0x80) // continue bit set (this exceeds position >= 32)
-
   try {
     let _ = read_varint(buf)
+
   } catch {
     _ => assert_true(true)
   } noraise {
@@ -137,9 +137,9 @@ test "read_varlong - error on oversized varlong" {
   for i = 0; i < 10; i = i + 1 {
     buf.write_byte(0x80) // continue bit set
   }
-
   try {
     let _ = read_varlong(buf)
+
   } catch {
     _ => assert_true(true)
   } noraise {
@@ -185,9 +185,9 @@ test "read_string - error on negative length" {
 
   // Write a negative length (simulate by writing 0xFF, which is -1 as a signed byte)
   buf.write_byte(0xFF) // varint length = -1
-
   try {
     let _ = read_string(buf)
+
   } catch {
     _ => assert_true(true)
   } noraise {
@@ -203,9 +203,9 @@ test "read_string - insufficient bytes error" {
   buf.write_byte(0x05) // varint length = 5
   let arr = @encoding/utf8.encode("ab").to_fixedarray()
   buf.write(arr, 0, arr.length()) |> ignore
-
   try {
     let _ = read_string(buf)
+
   } catch {
     _ => assert_true(true)
   } noraise {
@@ -250,7 +250,7 @@ test "write_string - basic functionality" {
   write_string(buf, "hello")
   let length2 = buf.read_byte() // should be 5
   assert_eq(length2, 5)
-  let _bytes : FixedArray[Byte]= FixedArray::make(5,0)
+  let _bytes : FixedArray[Byte] = FixedArray::make(5, 0)
   buf.read(_bytes, 0, 5) |> ignore
   let bytes = _bytes.unsafe_reinterpret_as_bytes()
   let decoded = @encoding/utf8.decode(bytes)
@@ -260,7 +260,6 @@ test "write_string - basic functionality" {
 ///|
 test "read_write_roundtrip - varint" {
   let buf = @buffer.HeapByteBuf::new(1)
-
   let test_values = [0, 1, 127, 128, 255, 16383, 16384, 2097151, 2097152]
   for value in test_values {
     buf.clear()
@@ -273,8 +272,9 @@ test "read_write_roundtrip - varint" {
 ///|
 test "read_write_roundtrip - varlong" {
   let buf = @buffer.HeapByteBuf::new(1)
-
-  let test_values = [0L, 1L, 127L, 128L, 255L, 16383L, 16384L, 2097151L, 34359738367L]
+  let test_values = [
+    0L, 1L, 127L, 128L, 255L, 16383L, 16384L, 2097151L, 34359738367L,
+  ]
   for value in test_values {
     buf.clear()
     write_varlong(buf, value)
@@ -286,7 +286,6 @@ test "read_write_roundtrip - varlong" {
 ///|
 test "read_write_roundtrip - string" {
   let buf = @buffer.HeapByteBuf::new(1)
-
   let test_strings = ["", "hello", "Hello, World!", "Unicode: 你好世界"]
   for str in test_strings {
     buf.clear()

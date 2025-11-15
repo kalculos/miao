@@ -16,6 +16,7 @@ pub(all) struct SpawnEntityS2C {
   velocity_y : Int16 // Y velocity
   velocity_z : Int16 // Z velocity
 }
+
 ///|
 pub impl @mc.Packet for SpawnEntityS2C with clientbound(_) {
   true

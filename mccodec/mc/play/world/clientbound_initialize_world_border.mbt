@@ -11,6 +11,7 @@ pub(all) struct InitializeWorldBorderS2C {
   warning_blocks : Int // Warning distance
   warning_time : Int // Warning time
 }
+
 ///|
 pub impl @mc.Packet for InitializeWorldBorderS2C with clientbound(_) {
   true

@@ -4,6 +4,7 @@
 pub(all) struct SetCameraS2C {
   camera_id : Int // Camera entity ID
 }
+
 ///|
 pub impl @mc.Packet for SetCameraS2C with clientbound(_) {
   true

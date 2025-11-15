@@ -28,4 +28,3 @@ pub impl @mc.Packet for CommandSuggestionsRequestC2S with deserialize(
   let text = @types.read_string(buf)
   { transaction_id, text }
 }
-

@@ -19,7 +19,9 @@ pub impl @mc.Packet for PingResponsePlayS2C with serialize(
 }
 
 ///|
-pub impl @mc.Packet for PingResponsePlayS2C with deserialize(buf : &@buffer.Buffer) raise {
+pub impl @mc.Packet for PingResponsePlayS2C with deserialize(
+  buf : &@buffer.Buffer,
+) raise {
   let payload = buf.read_int64()
   { payload, }
 }

@@ -24,4 +24,3 @@ pub impl @mc.Packet for ChangeDifficultyC2S with deserialize(
 ) {
   { new_difficulty: @types.read_varint(buf) }
 }
-

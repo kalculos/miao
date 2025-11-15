@@ -3,14 +3,14 @@
 /// It supports efficient push/pop operations at both ends.
 struct ArrayDeque[T] {
   buf : FixedArray[T]
-  mut head : Int  // read index
-  mut tail : Int  // write index
+  mut head : Int // read index
+  mut tail : Int // write index
   mut size : Int
 }
 
 ///|
 /// Create a new ArrayDeque with the given capacity and default value.
-pub fn [T] ArrayDeque::new(capacity : Int, default : () -> T) -> ArrayDeque[T] {
+pub fn[T] ArrayDeque::new(capacity : Int, default : () -> T) -> ArrayDeque[T] {
   guard capacity > 0
   ArrayDeque::{
     buf: FixedArray::makei(capacity, _ => default()),
@@ -22,38 +22,38 @@ pub fn [T] ArrayDeque::new(capacity : Int, default : () -> T) -> ArrayDeque[T] {
 
 ///|
 /// Returns the number of elements in the deque.
-pub fn [T] ArrayDeque::length(self : ArrayDeque[T]) -> Int {
+pub fn[T] ArrayDeque::length(self : ArrayDeque[T]) -> Int {
   self.size
 }
 
 ///|
 /// Returns the capacity of the deque.
-pub fn [T] ArrayDeque::capacity(self : ArrayDeque[T]) -> Int {
+pub fn[T] ArrayDeque::capacity(self : ArrayDeque[T]) -> Int {
   self.buf.length()
 }
 
 ///|
 /// Returns true if the deque is empty.
-pub fn [T] ArrayDeque::is_empty(self : ArrayDeque[T]) -> Bool {
+pub fn[T] ArrayDeque::is_empty(self : ArrayDeque[T]) -> Bool {
   self.size == 0
 }
 
 ///|
 /// Returns true if the deque is full.
-pub fn [T] ArrayDeque::is_full(self : ArrayDeque[T]) -> Bool {
+pub fn[T] ArrayDeque::is_full(self : ArrayDeque[T]) -> Bool {
   self.size == self.buf.length()
 }
 
 ///|
 /// Returns the number of available slots in the deque.
-pub fn [T] ArrayDeque::available(self : ArrayDeque[T]) -> Int {
+pub fn[T] ArrayDeque::available(self : ArrayDeque[T]) -> Int {
   self.buf.length() - self.size
 }
 
 ///|
 /// Push a value to the back of the deque.
 /// Returns true if successful, false if the deque is full.
-pub fn [T] ArrayDeque::push_back(self : ArrayDeque[T], value : T) -> Bool {
+pub fn[T] ArrayDeque::push_back(self : ArrayDeque[T], value : T) -> Bool {
   if self.is_full() {
     return false
   }
@@ -66,7 +66,7 @@ pub fn [T] ArrayDeque::push_back(self : ArrayDeque[T], value : T) -> Bool {
 ///|
 /// Pop a value from the front of the deque.
 /// Returns Some(value) if successful, None if the deque is empty.
-pub fn [T] ArrayDeque::pop_front(self : ArrayDeque[T]) -> Option[T] {
+pub fn[T] ArrayDeque::pop_front(self : ArrayDeque[T]) -> T? {
   if self.is_empty() {
     return None
   }
@@ -78,7 +78,7 @@ pub fn [T] ArrayDeque::pop_front(self : ArrayDeque[T]) -> Option[T] {
 
 ///|
 /// Peek at the front element without removing it.
-pub fn [T] ArrayDeque::peek_front(self : ArrayDeque[T]) -> Option[T] {
+pub fn[T] ArrayDeque::peek_front(self : ArrayDeque[T]) -> T? {
   if self.is_empty() {
     return None
   }
@@ -92,7 +92,7 @@ pub fn ArrayDeque::read_into(
   self : ArrayDeque[Byte],
   dst : FixedArray[Byte],
   dst_offset : Int,
-  len : Int
+  len : Int,
 ) -> Int {
   let to_read = @cmp.minimum(len, self.size)
   if to_read == 0 {
@@ -102,10 +102,15 @@ pub fn ArrayDeque::read_into(
   // Handle wrap-around case
   if self.head + to_read > buf_len {
     let first_part = buf_len - self.head
-    self.buf.blit_to(dst, len=first_part, src_offset=self.head, dst_offset=dst_offset)
-    self.buf.blit_to(dst, len=to_read - first_part, src_offset=0, dst_offset=dst_offset + first_part)
+    self.buf.blit_to(dst, len=first_part, src_offset=self.head, dst_offset~)
+    self.buf.blit_to(
+      dst,
+      len=to_read - first_part,
+      src_offset=0,
+      dst_offset=dst_offset + first_part,
+    )
   } else {
-    self.buf.blit_to(dst, len=to_read, src_offset=self.head, dst_offset=dst_offset)
+    self.buf.blit_to(dst, len=to_read, src_offset=self.head, dst_offset~)
   }
   self.head = (self.head + to_read) % buf_len
   self.size = self.size - to_read
@@ -119,7 +124,7 @@ pub fn ArrayDeque::write_from(
   self : ArrayDeque[Byte],
   src : FixedArray[Byte],
   src_offset : Int,
-  len : Int
+  len : Int,
 ) -> Int {
   let to_write = @cmp.minimum(len, self.available())
   if to_write == 0 {
@@ -129,10 +134,15 @@ pub fn ArrayDeque::write_from(
   // Handle wrap-around case
   if self.tail + to_write > buf_len {
     let first_part = buf_len - self.tail
-    src.blit_to(self.buf, len=first_part, src_offset=src_offset, dst_offset=self.tail)
-    src.blit_to(self.buf, len=to_write - first_part, src_offset=src_offset + first_part, dst_offset=0)
+    src.blit_to(self.buf, len=first_part, src_offset~, dst_offset=self.tail)
+    src.blit_to(
+      self.buf,
+      len=to_write - first_part,
+      src_offset=src_offset + first_part,
+      dst_offset=0,
+    )
   } else {
-    src.blit_to(self.buf, len=to_write, src_offset=src_offset, dst_offset=self.tail)
+    src.blit_to(self.buf, len=to_write, src_offset~, dst_offset=self.tail)
   }
   self.tail = (self.tail + to_write) % buf_len
   self.size = self.size + to_write
@@ -141,7 +151,7 @@ pub fn ArrayDeque::write_from(
 
 ///|
 /// Clear all elements from the deque.
-pub fn [T] ArrayDeque::clear(self : ArrayDeque[T]) -> Unit {
+pub fn[T] ArrayDeque::clear(self : ArrayDeque[T]) -> Unit {
   self.head = 0
   self.tail = 0
   self.size = 0
@@ -150,20 +160,20 @@ pub fn [T] ArrayDeque::clear(self : ArrayDeque[T]) -> Unit {
 ///|
 /// Queue interface: peek at the front element.
 /// Alias for peek_front().
-pub fn [T] ArrayDeque::peek(self : ArrayDeque[T]) -> Option[T] {
+pub fn[T] ArrayDeque::peek(self : ArrayDeque[T]) -> T? {
   self.peek_front()
 }
 
 ///|
 /// Queue interface: try to pop from front (non-blocking).
 /// Alias for pop_front().
-pub fn [T] ArrayDeque::try_pop(self : ArrayDeque[T]) -> Option[T] {
+pub fn[T] ArrayDeque::try_pop(self : ArrayDeque[T]) -> T? {
   self.pop_front()
 }
 
 ///|
 /// Queue interface: try to push to back (non-blocking).
 /// Alias for push_back().
-pub fn [T] ArrayDeque::try_push(self : ArrayDeque[T], value : T) -> Bool {
+pub fn[T] ArrayDeque::try_push(self : ArrayDeque[T], value : T) -> Bool {
   self.push_back(value)
 }

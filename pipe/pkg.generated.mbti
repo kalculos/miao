@@ -1,0 +1,62 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "iceBear67/miao/pipe"
+
+import(
+  "iceBear67/miao/io"
+  "iceBear67/miao/rt"
+)
+
+// Values
+
+// Errors
+
+// Types and methods
+type ArrayBlockingQueue[T]
+fn[T] ArrayBlockingQueue::available(Self[T]) -> Int
+fn[T] ArrayBlockingQueue::can_write(Self[T], Int) -> Bool
+fn[T] ArrayBlockingQueue::capacity(Self[T]) -> Int
+fn[T] ArrayBlockingQueue::clear(Self[T]) -> Unit
+async fn[T] ArrayBlockingQueue::close(Self[T]) -> Unit
+fn[T] ArrayBlockingQueue::is_closed(Self[T]) -> Bool
+fn[T] ArrayBlockingQueue::is_empty(Self[T]) -> Bool
+fn[T] ArrayBlockingQueue::is_full(Self[T]) -> Bool
+fn[T] ArrayBlockingQueue::length(Self[T]) -> Int
+fn[T] ArrayBlockingQueue::new(&@rt.Runtime, Int, () -> T) -> Self[T]
+fn[T] ArrayBlockingQueue::peek(Self[T]) -> T?
+async fn[T] ArrayBlockingQueue::pop(Self[T]) -> T
+async fn[T] ArrayBlockingQueue::push(Self[T], T) -> Unit
+async fn ArrayBlockingQueue::read_into(Self[Byte], FixedArray[Byte], Int, Int) -> Int
+fn[T] ArrayBlockingQueue::try_pop(Self[T]) -> T? raise
+fn[T] ArrayBlockingQueue::try_push(Self[T], T) -> Bool raise
+async fn ArrayBlockingQueue::write_from(Self[Byte], FixedArray[Byte], Int, Int) -> Int
+
+type ArrayDeque[T]
+fn[T] ArrayDeque::available(Self[T]) -> Int
+fn[T] ArrayDeque::capacity(Self[T]) -> Int
+fn[T] ArrayDeque::clear(Self[T]) -> Unit
+fn[T] ArrayDeque::is_empty(Self[T]) -> Bool
+fn[T] ArrayDeque::is_full(Self[T]) -> Bool
+fn[T] ArrayDeque::length(Self[T]) -> Int
+fn[T] ArrayDeque::new(Int, () -> T) -> Self[T]
+fn[T] ArrayDeque::peek(Self[T]) -> T?
+fn[T] ArrayDeque::peek_front(Self[T]) -> T?
+fn[T] ArrayDeque::pop_front(Self[T]) -> T?
+fn[T] ArrayDeque::push_back(Self[T], T) -> Bool
+fn ArrayDeque::read_into(Self[Byte], FixedArray[Byte], Int, Int) -> Int
+fn[T] ArrayDeque::try_pop(Self[T]) -> T?
+fn[T] ArrayDeque::try_push(Self[T], T) -> Bool
+fn ArrayDeque::write_from(Self[Byte], FixedArray[Byte], Int, Int) -> Int
+
+type BufferedPipe
+fn BufferedPipe::new(runtime? : &@rt.Runtime, buffer_size? : Int) -> (&@io.Reader, &PipeWriter)
+impl @io.Reader for BufferedPipe
+impl @io.Writer for BufferedPipe
+impl PipeWriter for BufferedPipe
+
+// Type aliases
+
+// Traits
+pub trait PipeWriter : @io.Writer {
+  can_write(Self, Int) -> Bool
+}
+

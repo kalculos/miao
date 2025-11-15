@@ -28,4 +28,3 @@ pub impl @mc.Packet for SetBeaconEffectC2S with deserialize(
   let secondary_effect = @types.read_optional(buf, @types.read_varint)
   { primary_effect, secondary_effect }
 }
-

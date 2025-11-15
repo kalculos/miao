@@ -13,6 +13,7 @@ pub(all) struct MapDataS2C {
   z : Byte? // Map Z offset (if columns > 0)
   data : Array[Byte]? // Map pixel data (if columns > 0)
 }
+
 ///|
 pub impl @mc.Packet for MapDataS2C with clientbound(_) {
   true

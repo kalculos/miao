@@ -23,12 +23,9 @@ pub impl @mc.Packet for SetTestBlockC2S with serialize(
 }
 
 ///|
-pub impl @mc.Packet for SetTestBlockC2S with deserialize(
-  buf : &@buffer.Buffer,
-) {
+pub impl @mc.Packet for SetTestBlockC2S with deserialize(buf : &@buffer.Buffer) {
   let location = @types.read_position(buf)
   let block_type = @types.read_varint(buf)
   let message = @types.read_string(buf)
   { location, block_type, message }
 }
-

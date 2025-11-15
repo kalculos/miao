@@ -24,4 +24,3 @@ pub impl @mc.Packet for ConfirmTeleportationC2S with deserialize(
 ) {
   { teleport_id: @types.read_varint(buf) }
 }
-

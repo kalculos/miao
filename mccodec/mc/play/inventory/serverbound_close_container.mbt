@@ -24,4 +24,3 @@ pub impl @mc.Packet for CloseContainerC2S with deserialize(
 ) {
   { window_id: @types.read_varint(buf) }
 }
-

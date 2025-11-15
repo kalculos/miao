@@ -12,7 +12,10 @@ pub impl @mc.Packet for DebugSampleS2C with clientbound(_) {
 }
 
 ///|
-pub impl @mc.Packet for DebugSampleS2C with serialize(self, buf : &@buffer.Buffer) raise {
+pub impl @mc.Packet for DebugSampleS2C with serialize(
+  self,
+  buf : &@buffer.Buffer,
+) raise {
   @types.write_prefix_array(buf, self.sample, (buf, data) => buf.write_int64(
     data,
   ))

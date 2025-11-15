@@ -2,7 +2,7 @@
 pub(all) enum SockAddr {
   Inet(SockAddrIn)
   Local
-  Unix(path~: String)
+  Unix(path~ : String)
   File
   Unspec
 } derive(Hash, Eq, Show)
@@ -20,7 +20,10 @@ let ipv6_re : @regexp.Regexp = (try? @regexp.compile(
 
 ///|
 /// Utility to construct SockAddr from host and port string, distinguishing IPv4/IPv6
-pub fn SockAddrIn::from_host_port(host : String, port : UInt16) -> SockAddrIn raise {
+pub fn SockAddrIn::from_host_port(
+  host : String,
+  port : UInt16,
+) -> SockAddrIn raise {
   // Use regexp to check for IPv6 (contains ':', possibly brackets)
   let is_ipv6 = ipv6_re.execute(host).matched() || host.contains(":")
   let h = if host.has_prefix("[") && host.has_suffix("]") {

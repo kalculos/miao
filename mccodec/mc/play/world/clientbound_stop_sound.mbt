@@ -6,6 +6,7 @@ pub(all) struct StopSoundS2C {
   source : Int? // Sound source (if flag set)
   sound : String? // Sound identifier (if flag set)
 }
+
 ///|
 pub impl @mc.Packet for StopSoundS2C with clientbound(_) {
   true

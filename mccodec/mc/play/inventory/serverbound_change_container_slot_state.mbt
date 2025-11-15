@@ -31,4 +31,3 @@ pub impl @mc.Packet for ChangeContainerSlotStateC2S with deserialize(
   let state = @types.read_bool(buf)
   { slot_id, window_id, state }
 }
-

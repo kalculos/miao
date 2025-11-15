@@ -7,6 +7,7 @@ pub(all) struct BlockActionS2C {
   action_param : Byte // Action parameter
   block_type : Int // Block type
 }
+
 ///|
 pub impl @mc.Packet for BlockActionS2C with clientbound(_) {
   true

@@ -28,4 +28,3 @@ pub impl @mc.Packet for StoreCookieConfigS2C with deserialize(
   let payload = @types.read_prefix_array(buf, b => b.read_byte())
   { key, payload }
 }
-

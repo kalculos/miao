@@ -19,9 +19,6 @@ pub impl @mc.Packet for RenameItemC2S with serialize(
 }
 
 ///|
-pub impl @mc.Packet for RenameItemC2S with deserialize(
-  buf : &@buffer.Buffer,
-) {
+pub impl @mc.Packet for RenameItemC2S with deserialize(buf : &@buffer.Buffer) {
   { item_name: @types.read_string(buf) }
 }
-

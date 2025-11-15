@@ -19,9 +19,6 @@ pub impl @mc.Packet for SetSeenRecipeC2S with serialize(
 }
 
 ///|
-pub impl @mc.Packet for SetSeenRecipeC2S with deserialize(
-  buf : &@buffer.Buffer,
-) {
+pub impl @mc.Packet for SetSeenRecipeC2S with deserialize(buf : &@buffer.Buffer) {
   { recipe_id: @types.read_varint(buf) }
 }
-

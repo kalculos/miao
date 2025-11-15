@@ -28,4 +28,3 @@ pub impl @mc.Packet for SeenAdvancementsC2S with deserialize(
   let tab_id = @types.read_optional(buf, @types.read_identifier)
   { action, tab_id }
 }
-
