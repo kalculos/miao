@@ -39,7 +39,7 @@ pub impl Hash for Path with hash_combine(self, hasher) {
 
 ///|
 pub impl Eq for Path with equal(self, another) {
-  guard another.fs.id() == self.fs.id()
+  guard another.fs.id() == self.fs.id() else { return false }
   let a = self.components
   let b = another.components
   guard a.length() == b.length() else { return false }
