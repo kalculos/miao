@@ -33,6 +33,7 @@ pub(open) trait FileChannel: @io.Channel {
 ///  string (path) given from the filesystem. A FileSystem does not strictly related to a specific disk partition or 
 /// any filesystem softwares. For example, the whole accessible local storage is considered as a FileSystem.
 pub(open) trait FileSystem {
+  id(Self) -> String
   ///| Open a file and return its corresponding FileChannnel
   async open_file(
     Self,

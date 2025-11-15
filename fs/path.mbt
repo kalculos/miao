@@ -39,10 +39,7 @@ pub impl Hash for Path with hash_combine(self, hasher) {
 
 ///|
 pub impl Eq for Path with equal(self, another) {
-  // Note: Currently only compares components, not filesystem.
-  // This is a known limitation - paths from different filesystems
-  // with same components will be considered equal.
-  // TODO: Find a way to compare trait references for equality
+  guard another.fs.id() == self.fs.id()
   let a = self.components
   let b = another.components
   guard a.length() == b.length() else { return false }
@@ -61,7 +58,7 @@ pub fn path(
   using_fs? : &FileSystem = default_file_system.val.unwrap(),
 ) -> Path { // todo illegal path detection?
   //todo windows support?
-  let components = str.split("/").to_array().filter(fn(s) { s.length() > 0 })
+  let components = str.split("/").filter(fn(s) { s.length() > 0 }).to_array()
   let path = Path::{ fs: using_fs, components, absolute: false }
   for root in using_fs.system_roots() {
     if path.starts_with_path(root) {

@@ -57,12 +57,13 @@ fn mementry_new_link(name : String, target : Path) -> MemEntry {
 
 ///|
 pub struct MemFileSystem {
+  id : String
   root : Ref[MemEntry]
 }
 
 ///|
-pub fn MemFileSystem::new() -> MemFileSystem {
-  MemFileSystem::{ root: { val: mementry_new_dir("") } }
+pub fn MemFileSystem::new(id? : String = "inmem") -> MemFileSystem {
+  MemFileSystem::{ id, root: { val: mementry_new_dir("") } }
 }
 
 ///|
@@ -71,10 +72,7 @@ fn split_components(p : Path) -> Array[String] {
   let res : Array[String] = []
   for c in p.components {
     let s = c.to_string()
-    // Filter out empty components (from paths like "/" which split to ["", ""])
-    if s.length() > 0 {
-      res.push(s)
-    }
+    res.push(s)
   }
   res
 }
@@ -236,6 +234,11 @@ pub impl @io.Reader for MemFileChannel with close(self) {
 ///|
 pub impl @io.Reader for MemFileChannel with is_closed(self) {
   self.closed
+}
+
+///|
+pub impl FileSystem for MemFileSystem with id(self) {
+  self.id
 }
 
 ///|
