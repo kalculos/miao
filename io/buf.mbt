@@ -10,7 +10,12 @@ pub fn ByteBufReader::new(buf : &@buffer.Buffer) -> ByteBufReader {
 }
 
 ///|
-pub impl Reader for ByteBufReader with read(self, dst : FixedArray[Byte], off : Int, len : Int) -> Int {
+pub impl Reader for ByteBufReader with read(
+  self,
+  dst : FixedArray[Byte],
+  off : Int,
+  len : Int,
+) -> Int {
   if self.closed {
     return 0
   }
@@ -45,7 +50,12 @@ pub fn ByteBufWriter::new(buf : &@buffer.Buffer) -> ByteBufWriter {
 }
 
 ///|
-pub impl Writer for ByteBufWriter with write(self, arr : FixedArray[Byte], off : Int, len : Int) -> Int {
+pub impl Writer for ByteBufWriter with write(
+  self,
+  arr : FixedArray[Byte],
+  off : Int,
+  len : Int,
+) -> Int {
   if self.closed {
     return 0
   }
