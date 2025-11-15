@@ -34,4 +34,5 @@ jobs:
           moon check
       - name: Moon test
         run: |
-          moon test
+          moon test 2>&1 | tee /dev/shm/log
+          grep "0 errors" /dev/shm/log
