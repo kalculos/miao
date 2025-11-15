@@ -10,7 +10,7 @@ fn LibuvFileSystem::uv(self : LibuvFileSystem) -> @uv.Loop {
 
 ///|
 fn uv_error_to_file_error(err : Error, default_msg : String) -> @fs.FileError {
-  let err_str = err.to_bytes() |> @encoding/utf8.decode_lossy
+  let err_str = err.to_string()
   // Try to match common libuv error codes
   if err_str.contains("ENOENT") {
     @fs.FileError::NotFound(msg=err_str)
@@ -62,8 +62,7 @@ impl @fs.FileSystem for LibuvFileSystem with attr(self, path, follow_links?) {
   let uv = self.uv()
   let follow_links = follow_links.unwrap_or(true)
   let path_bytes = path.to_bytes()
-  match
-    try? uvrt_op_suspend((resolve, reject, _) => {
+  match (try? uvrt_op_suspend((resolve, reject, _) => {
       let on_stat : (@uv.Stat) -> Unit = stat => resolve(@fs.FileAttribute::{
         last_modified_time: @time.Instant::new(
           stat.mtim_sec(),
@@ -90,7 +89,7 @@ impl @fs.FileSystem for LibuvFileSystem with attr(self, path, follow_links?) {
         defer reject(@rt.CoroutineError::Cancelled)
         handle.cancel()
       }
-    }) {
+    })) {
     Ok(attr) => Ok(attr)
     Err(@rt.CoroutineError::Cancelled) => raise @rt.CoroutineError::Cancelled
     Err(@rt.CoroutineError::ExecutionError(err)) =>
@@ -103,8 +102,7 @@ impl @fs.FileSystem for LibuvFileSystem with list_directory(self, path) {
   let path_bytes = path.to_bytes()
   let uv = self.uv()
   //todo need a async iterator that utilizes structured concurrency..
-  match
-    try? uvrt_op_suspend((resolve, reject, _) => {
+  match (try? uvrt_op_suspend((resolve, reject, _) => {
       let mut cancelled = false
       let handle = uv.fs_scandir(
         path_bytes,
@@ -128,7 +126,7 @@ impl @fs.FileSystem for LibuvFileSystem with list_directory(self, path) {
         cancelled = true
         handle.cancel()
       }
-    }) {
+    })) {
     Ok(paths) => Ok(paths)
     Err(@rt.CoroutineError::Cancelled) => raise @rt.CoroutineError::Cancelled
     Err(@rt.CoroutineError::ExecutionError(err)) =>
@@ -169,8 +167,7 @@ impl @fs.FileSystem for LibuvFileSystem with can_access(self, path, mode) {
 ///|
 impl @fs.FileSystem for LibuvFileSystem with delete(self, path) {
   let uv = self.uv()
-  match
-    try? uvrt_op_suspend((a, b, _) => {
+  match (try? uvrt_op_suspend((a, b, _) => {
       let handle = uv.fs_unlink(
         @encoding/utf8.encode(path.to_unix_path()),
         () => a(()),
@@ -180,7 +177,7 @@ impl @fs.FileSystem for LibuvFileSystem with delete(self, path) {
         defer b(@rt.CoroutineError::Cancelled)
         handle.cancel()
       }
-    }) {
+    })) {
     Ok(()) => Ok(())
     Err(@rt.CoroutineError::Cancelled) => raise @rt.CoroutineError::Cancelled
     Err(@rt.CoroutineError::ExecutionError(err)) =>
@@ -196,8 +193,7 @@ impl @fs.FileSystem for LibuvFileSystem with exists(self, path) {
 ///|
 impl @fs.FileSystem for LibuvFileSystem with read_symbol_link(self, path) {
   let uv = self.uv()
-  match
-    try? uvrt_op_suspend((resolve, reject, _) => {
+  match (try? uvrt_op_suspend((resolve, reject, _) => {
       let handle = uv.fs_readlink(
         @encoding/utf8.encode(path.to_unix_path()),
         bytes => @fs.path(
@@ -211,7 +207,7 @@ impl @fs.FileSystem for LibuvFileSystem with read_symbol_link(self, path) {
         defer reject(@rt.CoroutineError::Cancelled)
         handle.cancel()
       }
-    }) {
+    })) {
     Ok(p) => Ok(p)
     Err(@rt.CoroutineError::Cancelled) => raise @rt.CoroutineError::Cancelled
     Err(@rt.CoroutineError::ExecutionError(err)) =>
@@ -224,8 +220,7 @@ impl @fs.FileSystem for LibuvFileSystem with rename(self, src, dst, copy_attr~) 
   ignore(copy_attr)
   let uv = self.uv()
   // todo: support copy_attr
-  match
-    try? uvrt_op_suspend((resolve, reject, _) => {
+  match (try? uvrt_op_suspend((resolve, reject, _) => {
       let handle = uv.fs_rename(
         @encoding/utf8.encode(src.to_unix_path()),
         @encoding/utf8.encode(dst.to_unix_path()),
@@ -236,7 +231,7 @@ impl @fs.FileSystem for LibuvFileSystem with rename(self, src, dst, copy_attr~) 
         defer reject(@rt.CoroutineError::Cancelled)
         handle.cancel()
       }
-    }) {
+    })) {
     Ok(()) => Ok(())
     Err(@rt.CoroutineError::Cancelled) => raise @rt.CoroutineError::Cancelled
     Err(@rt.CoroutineError::ExecutionError(err)) =>
@@ -263,8 +258,7 @@ impl @fs.FileSystem for LibuvFileSystem with system_roots(self) {
 ///|
 impl @fs.FileSystem for LibuvFileSystem with real_path(self, path) {
   let uv = self.uv()
-  match
-    try? uvrt_op_suspend((resolve, reject, _) => {
+  match (try? uvrt_op_suspend((resolve, reject, _) => {
       let handle = uv.fs_realpath(
         @encoding/utf8.encode(path.to_unix_path()),
         bytes => resolve(
@@ -276,7 +270,7 @@ impl @fs.FileSystem for LibuvFileSystem with real_path(self, path) {
         defer reject(@rt.CoroutineError::Cancelled)
         handle.cancel()
       }
-    }) {
+    })) {
     Ok(p) => Ok(p)
     Err(@rt.CoroutineError::Cancelled) => raise @rt.CoroutineError::Cancelled
     Err(@rt.CoroutineError::ExecutionError(err)) =>

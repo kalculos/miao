@@ -85,7 +85,7 @@ async fn LibuvFile::new(
   let uv = rt.uv
   let path_bytes = @encoding/utf8.encode(path.to_unix_path())
   let fd = match
-    try? uvrt_op_suspend((resolve, reject, _) => {
+    (try? uvrt_op_suspend((resolve, reject, _) => {
       let handle = uv.fs_open(
         path_bytes,
         flag.to_uv_flags(),
@@ -94,11 +94,11 @@ async fn LibuvFile::new(
         err => reject(err),
       )
       () => handle.cancel()
-    }) {
+    })) {
     Ok(file) => file
     Err(@rt.CoroutineError::Cancelled) => raise @rt.CoroutineError::Cancelled
     Err(@rt.CoroutineError::ExecutionError(err)) => {
-      let err_str = err.to_bytes() |> @encoding/utf8.decode_lossy
+      let err_str = err.to_string()
       return if err_str.contains("ENOENT") {
         Err(@fs.FileError::NotFound(msg=err_str))
       } else if err_str.contains("EACCES") || err_str.contains("EPERM") {
@@ -115,11 +115,11 @@ async fn LibuvFile::new(
     }
   }
   let attr = match
-    try? gather_fattr(rt, fd) {
+    (try? gather_fattr(rt, fd) {
     Ok(a) => a
     Err(@rt.CoroutineError::Cancelled) => raise @rt.CoroutineError::Cancelled
     Err(@rt.CoroutineError::ExecutionError(err)) => {
-      let err_str = err.to_bytes() |> @encoding/utf8.decode_lossy
+      let err_str = err.to_string()
       return Err(@fs.FileError::IoError(msg="Failed to get file attributes: \{err_str}"))
     }
   }
