@@ -46,11 +46,8 @@ async test "encode simple DNS query message" {
     Ok(buf) => {
       inspect(buf.readable_bytes() > 0, content="true")
       
-      // Decode it back
-      let data : FixedArray[Byte] = FixedArray::make(buf.readable_bytes(), 0)
-      buf.read(data, 0, buf.readable_bytes()) |> ignore
-      
-      match decode_message(data) {
+      // Decode it back directly from buffer
+      match decode_message(buf) {
         Ok(decoded) => {
           inspect(decoded.header.id, content="100")
           inspect(decoded.questions.length(), content="1")

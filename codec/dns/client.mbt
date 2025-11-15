@@ -55,13 +55,9 @@ pub async fn DnsClient::query(
   // Send the query via UDP
   match @net.dial_udp(self.server) {
     Ok(conn) => {
-      // Prepare query data
-      let query_data : FixedArray[Byte] = FixedArray::make(encoded.readable_bytes(), 0)
-      encoded.read(query_data, 0, encoded.readable_bytes()) |> ignore
-      
-      // Send the DNS query
-      let bytes_written = (@io.Writer::write(conn, query_data, 0, query_data.length()) : Int)
-      if bytes_written != query_data.length() {
+      // Send the DNS query using write_buffer
+      let bytes_written = (@io.Writer::write_buffer(conn, encoded) : Int)
+      if bytes_written != encoded.readable_bytes() {
         (@io.Channel::close(conn) : Unit)
         return Error(InvalidFormat("Failed to send complete query"))
       }
@@ -69,9 +65,9 @@ pub async fn DnsClient::query(
       // Flush to ensure data is sent
       (@net.Connection::flush(conn) : Unit)
       
-      // Read the response (DNS responses are typically small, use 512 bytes buffer)
-      let response_data : FixedArray[Byte] = FixedArray::make(512, 0)
-      let bytes_read = (@io.Reader::read(conn, response_data, 0, 512) : Int)
+      // Read the response directly into a buffer
+      let response_buf = @buffer.HeapByteBuf::new(512)
+      let bytes_read = (@io.Reader::read_buffer_to(conn, response_buf as &@buffer.Buffer) : Int)
       
       // Close the connection
       (@io.Channel::close(conn) : Unit)
@@ -80,13 +76,8 @@ pub async fn DnsClient::query(
         return Error(InvalidFormat("No response received"))
       }
       
-      // Decode the response
-      let response_slice : FixedArray[Byte] = FixedArray::make(bytes_read, 0)
-      for i = 0; i < bytes_read; i = i + 1 {
-        response_slice[i] = response_data[i]
-      }
-      
-      match decode_message(response_slice) {
+      // Decode the response from buffer
+      match decode_message(response_buf as &@buffer.Buffer) {
         Ok(response_msg) => Success(response_msg)
         Err(e) => Error(e)
       }

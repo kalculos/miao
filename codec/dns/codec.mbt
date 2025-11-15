@@ -250,7 +250,16 @@ pub fn encode_message(msg : Message) -> Result[&@buffer.Buffer, DnsError] {
 }
 
 ///| Decode a complete DNS message from buffer
-pub fn decode_message(data : FixedArray[Byte]) -> Result[Message, DnsError] {
+pub fn decode_message(buf : &@buffer.Buffer) -> Result[Message, DnsError] {
+  // Read all data from buffer into a FixedArray for parsing
+  let data_len = buf.readable_bytes()
+  if data_len < 12 {
+    return Err(BufferTooSmall("Message must be at least 12 bytes"))
+  }
+  
+  let data : FixedArray[Byte] = FixedArray::make(data_len, 0)
+  buf.read(data, 0, data_len) |> ignore
+  
   // Decode header
   let header_result = decode_header(data)
   match header_result {
