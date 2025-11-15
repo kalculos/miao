@@ -167,13 +167,86 @@ pub fn HttpHeaders::length(self : HttpHeaders) -> Int {
   self.headers.length()
 }
 
+///| HTTP Content Reader for lazy body reading
+pub struct HttpContentReader {
+  reader : &@io.Reader
+  content_length : Int
+  mut bytes_read : Int
+}
+
+///| Create a new HttpContentReader
+pub fn HttpContentReader::new(reader : &@io.Reader, content_length : Int) -> HttpContentReader {
+  { reader, content_length, bytes_read: 0 }
+}
+
+///| Read all remaining content
+pub async fn HttpContentReader::read_all(self : HttpContentReader) -> Bytes raise {
+  let remaining = self.content_length - self.bytes_read
+  if remaining <= 0 {
+    return b""
+  }
+  
+  let arr : FixedArray[Byte] = FixedArray::make(remaining, 0)
+  let mut total_read = 0
+  
+  while total_read < remaining {
+    let read = self.reader.read(arr, total_read, remaining - total_read)
+    if read == 0 {
+      raise fail("Unexpected EOF: expected " + remaining.to_string() + " bytes, got " + total_read.to_string())
+    }
+    total_read = total_read + read
+  }
+  
+  self.bytes_read = self.bytes_read + total_read
+  Bytes::from_array(arr)
+}
+
+///| Read up to n bytes from the content
+pub async fn HttpContentReader::read(self : HttpContentReader, n : Int) -> Bytes raise {
+  let remaining = self.content_length - self.bytes_read
+  let to_read = if n < remaining { n } else { remaining }
+  
+  if to_read <= 0 {
+    return b""
+  }
+  
+  let arr : FixedArray[Byte] = FixedArray::make(to_read, 0)
+  let mut total_read = 0
+  
+  while total_read < to_read {
+    let read = self.reader.read(arr, total_read, to_read - total_read)
+    if read == 0 {
+      break
+    }
+    total_read = total_read + read
+  }
+  
+  self.bytes_read = self.bytes_read + total_read
+  Bytes::from_array(arr)
+}
+
+///| Get the total content length
+pub fn HttpContentReader::content_length(self : HttpContentReader) -> Int {
+  self.content_length
+}
+
+///| Get the number of bytes already read
+pub fn HttpContentReader::bytes_read(self : HttpContentReader) -> Int {
+  self.bytes_read
+}
+
+///| Check if there's more content to read
+pub fn HttpContentReader::has_more(self : HttpContentReader) -> Bool {
+  self.bytes_read < self.content_length
+}
+
 ///| HTTP Request
 pub struct HttpRequest {
   http_method : HttpMethod
   uri : String
   version : HttpVersion
   headers : HttpHeaders
-  mut body : Bytes
+  content_reader : HttpContentReader?
 }
 
 ///| Create new HttpRequest
@@ -182,7 +255,7 @@ pub fn HttpRequest::new(
   uri : String,
   version : HttpVersion
 ) -> HttpRequest {
-  { http_method, uri, version, headers: HttpHeaders::new(), body: b"" }
+  { http_method, uri, version, headers: HttpHeaders::new(), content_reader: None }
 }
 
 ///| Get method from request
@@ -190,9 +263,9 @@ pub fn HttpRequest::method(self : HttpRequest) -> HttpMethod {
   self.http_method
 }
 
-///| Set body for request
-pub fn HttpRequest::set_body(self : HttpRequest, body : Bytes) -> Unit {
-  self.body = body
+///| Get the content reader if available
+pub fn HttpRequest::content_reader(self : HttpRequest) -> HttpContentReader? {
+  self.content_reader
 }
 
 ///| HTTP Response
@@ -200,15 +273,10 @@ pub struct HttpResponse {
   version : HttpVersion
   status : HttpStatus
   headers : HttpHeaders
-  mut body : Bytes
+  content_reader : HttpContentReader?
 }
 
 ///| Create new HttpResponse
 pub fn HttpResponse::new(version : HttpVersion, status : HttpStatus) -> HttpResponse {
-  { version, status, headers: HttpHeaders::new(), body: b"" }
-}
-
-///| Set body for response
-pub fn HttpResponse::set_body(self : HttpResponse, body : Bytes) -> Unit {
-  self.body = body
+  { version, status, headers: HttpHeaders::new(), content_reader: None }
 }

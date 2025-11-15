@@ -19,25 +19,25 @@ pub async fn HttpReader::read_request(self : HttpReader) -> HttpRequest raise {
   // Parse headers
   let headers = self.read_headers()
   
-  // Parse body based on Content-Length
-  let body = match headers.get("Content-Length") {
+  // Create content reader if Content-Length is present
+  let content_reader = match headers.get("Content-Length") {
     Some(length_str) => {
       let length = length_str.parse_int()
       match length {
         Some(len) => {
           if len > 0 {
-            self.read_bytes(len)
+            Some(HttpContentReader::new(self.reader, len))
           } else {
-            b""
+            None
           }
         }
         None => raise fail("Invalid Content-Length: " + length_str)
       }
     }
-    None => b""
+    None => None
   }
   
-  { http_method, uri, version, headers, body }
+  { http_method, uri, version, headers, content_reader }
 }
 
 ///| Read HTTP response from the underlying reader
@@ -49,25 +49,25 @@ pub async fn HttpReader::read_response(self : HttpReader) -> HttpResponse raise 
   // Parse headers
   let headers = self.read_headers()
   
-  // Parse body based on Content-Length
-  let body = match headers.get("Content-Length") {
+  // Create content reader if Content-Length is present
+  let content_reader = match headers.get("Content-Length") {
     Some(length_str) => {
       let length = length_str.parse_int()
       match length {
         Some(len) => {
           if len > 0 {
-            self.read_bytes(len)
+            Some(HttpContentReader::new(self.reader, len))
           } else {
-            b""
+            None
           }
         }
         None => raise fail("Invalid Content-Length: " + length_str)
       }
     }
-    None => b""
+    None => None
   }
   
-  { version, status, headers, body }
+  { version, status, headers, content_reader }
 }
 
 ///| Parse request line (e.g., "GET /path HTTP/1.1")
@@ -168,37 +168,12 @@ async fn HttpReader::read_line(self : HttpReader) -> String raise {
     prev_byte = byte
   }
   
-  // Convert bytes to string
+  // Convert bytes to string using UTF-8 decoding
   let arr : FixedArray[Byte] = FixedArray::make(line_bytes.length(), 0)
   for i = 0; i < line_bytes.length(); i = i + 1 {
     arr[i] = line_bytes[i]
   }
-  bytes_to_string(Bytes::from_array(arr))
-}
-
-///| Read specific number of bytes from the reader
-async fn HttpReader::read_bytes(self : HttpReader, length : Int) -> Bytes raise {
-  let arr : FixedArray[Byte] = FixedArray::make(length, 0)
-  let mut total_read = 0
-  
-  while total_read < length {
-    let read = self.reader.read(arr, total_read, length - total_read)
-    if read == 0 {
-      raise fail("Unexpected EOF: expected " + length.to_string() + " bytes, got " + total_read.to_string())
-    }
-    total_read = total_read + read
-  }
-  
-  Bytes::from_array(arr)
-}
-
-///| Convert Bytes to String (UTF-8)
-fn bytes_to_string(bytes : Bytes) -> String {
-  let mut result = ""
-  for i = 0; i < bytes.length(); i = i + 1 {
-    result = result + bytes[i].to_int().unsafe_to_char().to_string()
-  }
-  result
+  @encoding/utf8.decode(Bytes::from_array(arr))
 }
 
 ///| Helper to find index of character in string

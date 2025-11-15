@@ -13,7 +13,8 @@ pub fn HttpWriter::new(writer : &@io.Writer) -> HttpWriter {
 ///| Write HTTP request to the underlying writer
 pub async fn HttpWriter::write_request(
   self : HttpWriter,
-  request : HttpRequest
+  request : HttpRequest,
+  body : Bytes?
 ) -> Unit raise {
   // Write request line
   self.write_string(request.method().to_string())
@@ -35,16 +36,22 @@ pub async fn HttpWriter::write_request(
   // Empty line after headers
   self.write_string("\r\n")
   
-  // Write body
-  if request.body.length() > 0 {
-    self.write_bytes(request.body)
+  // Write body if provided
+  match body {
+    Some(b) => {
+      if b.length() > 0 {
+        self.write_bytes(b)
+      }
+    }
+    None => ()
   }
 }
 
 ///| Write HTTP response to the underlying writer
 pub async fn HttpWriter::write_response(
   self : HttpWriter,
-  response : HttpResponse
+  response : HttpResponse,
+  body : Bytes?
 ) -> Unit raise {
   // Write status line
   self.write_string(response.version.to_string())
@@ -66,19 +73,24 @@ pub async fn HttpWriter::write_response(
   // Empty line after headers
   self.write_string("\r\n")
   
-  // Write body
-  if response.body.length() > 0 {
-    self.write_bytes(response.body)
+  // Write body if provided
+  match body {
+    Some(b) => {
+      if b.length() > 0 {
+        self.write_bytes(b)
+      }
+    }
+    None => ()
   }
 }
 
-///| Write string to the writer
+///| Write string to the writer using UTF-8 encoding
 async fn HttpWriter::write_string(self : HttpWriter, s : String) -> Unit {
-  // Convert string to UTF-8 bytes
-  let len = s.length()
+  let bytes = @encoding/utf8.encode(s)
+  let len = bytes.length()
   let arr : FixedArray[Byte] = FixedArray::make(len, 0)
   for i = 0; i < len; i = i + 1 {
-    arr[i] = s[i].land(0xFF).to_byte()
+    arr[i] = bytes[i]
   }
   let mut total_written = 0
   while total_written < len {
