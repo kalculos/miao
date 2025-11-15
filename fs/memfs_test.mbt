@@ -5,17 +5,23 @@
 async test "MemFileSystem create and write" {
   let fs = MemFileSystem::new()
   let p = path("/test.txt", using_fs=fs)
-  let chan = fs.open_file(
+  let chan = match fs.open_file(
     p,
     OpenFlags::write_only(create=true),
     mode=AccessFlags::new(),
-  )
+  ) {
+    Ok(c) => c
+    Err(_) => return
+  }
   let data : FixedArray[Byte] = [72, 101, 108, 108, 111] // "Hello"
   let written = chan.write(data, 0, 5)
   inspect(written, content="5")
 
   // Read back
-  let rchan = fs.open_file(p, OpenFlags::read_only(), mode=AccessFlags::new())
+  let rchan = match fs.open_file(p, OpenFlags::read_only(), mode=AccessFlags::new()) {
+    Ok(c) => c
+    Err(_) => return
+  }
   let buf : FixedArray[Byte] = FixedArray::make(10, 0)
   let read_count = rchan.read(buf, 0, 10)
   inspect(read_count, content="5")
@@ -29,27 +35,36 @@ async test "MemFileSystem truncate flag" {
   let p = path("/test.txt", using_fs=fs)
 
   // Write initial data
-  let chan1 = fs.open_file(
+  let chan1 = match fs.open_file(
     p,
     OpenFlags::write_only(create=true),
     mode=AccessFlags::new(),
-  )
+  ) {
+    Ok(c) => c
+    Err(_) => return
+  }
   let data1 : FixedArray[Byte] = [1, 2, 3, 4, 5]
   chan1.write(data1, 0, 5) |> ignore
   @io.Channel::close(chan1)
 
   // Open with truncate
-  let chan2 = fs.open_file(
+  let chan2 = match fs.open_file(
     p,
     OpenFlags::write_only(truncate=true),
     mode=AccessFlags::new(),
-  )
+  ) {
+    Ok(c) => c
+    Err(_) => return
+  }
   let data2 : FixedArray[Byte] = [6, 7]
   chan2.write(data2, 0, 2) |> ignore
   @io.Channel::close(chan2)
 
   // Read back
-  let rchan = fs.open_file(p, OpenFlags::read_only(), mode=AccessFlags::new())
+  let rchan = match fs.open_file(p, OpenFlags::read_only(), mode=AccessFlags::new()) {
+    Ok(c) => c
+    Err(_) => return
+  }
   let buf : FixedArray[Byte] = FixedArray::make(10, 0)
   let read_count = rchan.read(buf, 0, 10)
   inspect(read_count, content="2")

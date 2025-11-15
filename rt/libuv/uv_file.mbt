@@ -81,26 +81,57 @@ async fn LibuvFile::new(
   path~ : @fs.Path,
   flag~ : @fs.OpenFlags,
   mode~ : @fs.AccessFlags,
-) -> LibuvFile {
+) -> Result[@fs.FileChannel, @fs.FileError] {
   let uv = rt.uv
   let path_bytes = @encoding/utf8.encode(path.to_unix_path())
-  let fd = uvrt_op_suspend((resolve, reject, _) => {
-    let handle = uv.fs_open(
-      path_bytes,
-      flag.to_uv_flags(),
-      to_uv_access(mode) |> access_flag_inner,
-      file => resolve(file),
-      err => reject(err),
-    )
-    () => handle.cancel()
-  })
-  LibuvFile::{
-    fd,
-    closed: false,
-    access: flag,
-    info: @fs.FileInfo::{ attribute: gather_fattr(rt, fd), path },
-    uv: rt.uv,
+  let fd = match
+    try? uvrt_op_suspend((resolve, reject, _) => {
+      let handle = uv.fs_open(
+        path_bytes,
+        flag.to_uv_flags(),
+        to_uv_access(mode) |> access_flag_inner,
+        file => resolve(file),
+        err => reject(err),
+      )
+      () => handle.cancel()
+    }) {
+    Ok(file) => file
+    Err(@rt.CoroutineError::Cancelled) => raise @rt.CoroutineError::Cancelled
+    Err(@rt.CoroutineError::ExecutionError(err)) => {
+      let err_str = err.to_bytes() |> @encoding/utf8.decode_lossy
+      return if err_str.contains("ENOENT") {
+        Err(@fs.FileError::NotFound(msg=err_str))
+      } else if err_str.contains("EACCES") || err_str.contains("EPERM") {
+        Err(@fs.FileError::PermissionDenied(msg=err_str))
+      } else if err_str.contains("EEXIST") {
+        Err(@fs.FileError::AlreadyExists(msg=err_str))
+      } else if err_str.contains("ENOTDIR") {
+        Err(@fs.FileError::NotADirectory(msg=err_str))
+      } else if err_str.contains("EISDIR") {
+        Err(@fs.FileError::IsADirectory(msg=err_str))
+      } else {
+        Err(@fs.FileError::IoError(msg="Failed to open file: \{err_str}"))
+      }
+    }
   }
+  let attr = match
+    try? gather_fattr(rt, fd) {
+    Ok(a) => a
+    Err(@rt.CoroutineError::Cancelled) => raise @rt.CoroutineError::Cancelled
+    Err(@rt.CoroutineError::ExecutionError(err)) => {
+      let err_str = err.to_bytes() |> @encoding/utf8.decode_lossy
+      return Err(@fs.FileError::IoError(msg="Failed to get file attributes: \{err_str}"))
+    }
+  }
+  Ok(
+    LibuvFile::{
+      fd,
+      closed: false,
+      access: flag,
+      info: @fs.FileInfo::{ attribute: attr, path },
+      uv: rt.uv,
+    } as @fs.FileChannel,
+  )
 }
 
 ///|
