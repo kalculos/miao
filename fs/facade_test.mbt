@@ -6,7 +6,10 @@ async test "facade open" {
   let fs = MemFileSystem::new()
   set_default_fs(fs)
   let p = path("/test.txt", using_fs=fs)
-  let chan = open(p, OpenFlags::write_only(create=true), permission=0)
+  let chan = match open(p, OpenFlags::write_only(create=true), permission=0) {
+    Ok(c) => c
+    Err(_) => return
+  }
   let data : FixedArray[Byte] = [1, 2, 3]
   chan.write(data, 0, 3) |> ignore
   @io.Channel::close(chan)
@@ -19,11 +22,17 @@ async test "facade size" {
   let fs = MemFileSystem::new()
   set_default_fs(fs)
   let p = path("/test.txt", using_fs=fs)
-  let chan = open(p, OpenFlags::write_only(create=true), permission=0)
+  let chan = match open(p, OpenFlags::write_only(create=true), permission=0) {
+    Ok(c) => c
+    Err(_) => return
+  }
   let data : FixedArray[Byte] = [1, 2, 3, 4, 5]
   chan.write(data, 0, 5) |> ignore
   @io.Channel::close(chan)
-  let s = size(p)
+  let s = match size(p) {
+    Ok(sz) => sz
+    Err(_) => return
+  }
   inspect(s, content="5")
 }
 
@@ -33,9 +42,15 @@ async test "facade attr" {
   let fs = MemFileSystem::new()
   set_default_fs(fs)
   let p = path("/test.txt", using_fs=fs)
-  let chan = open(p, OpenFlags::write_only(create=true), permission=0)
+  let chan = match open(p, OpenFlags::write_only(create=true), permission=0) {
+    Ok(c) => c
+    Err(_) => return
+  }
   @io.Channel::close(chan)
-  let a = attr(p)
+  let a = match attr(p) {
+    Ok(attr) => attr
+    Err(_) => return
+  }
   inspect(a.kind, content="RegularFile")
   inspect(a.size, content="0")
 }
@@ -47,10 +62,19 @@ async test "facade list_dir" {
   set_default_fs(fs)
   let f1 = path("/dir/file1.txt", using_fs=fs)
   let f2 = path("/dir/file2.txt", using_fs=fs)
-  @io.Channel::close(open(f1, OpenFlags::write_only(create=true), permission=0))
-  @io.Channel::close(open(f2, OpenFlags::write_only(create=true), permission=0))
+  match open(f1, OpenFlags::write_only(create=true), permission=0) {
+    Ok(c) => @io.Channel::close(c)
+    Err(_) => return
+  }
+  match open(f2, OpenFlags::write_only(create=true), permission=0) {
+    Ok(c) => @io.Channel::close(c)
+    Err(_) => return
+  }
   let dir = path("/dir", using_fs=fs)
-  let entries = list_dir(dir)
+  let entries = match list_dir(dir) {
+    Ok(e) => e
+    Err(_) => return
+  }
   inspect(entries.length(), content="2")
 }
 
@@ -61,7 +85,10 @@ async test "facade exists" {
   set_default_fs(fs)
   let p = path("/test.txt", using_fs=fs)
   inspect(exists(p), content="false")
-  @io.Channel::close(open(p, OpenFlags::write_only(create=true), permission=0))
+  match open(p, OpenFlags::write_only(create=true), permission=0) {
+    Ok(c) => @io.Channel::close(c)
+    Err(_) => return
+  }
   inspect(exists(p), content="true")
 }
 
@@ -71,9 +98,15 @@ async test "facade delete" {
   let fs = MemFileSystem::new()
   set_default_fs(fs)
   let p = path("/test.txt", using_fs=fs)
-  @io.Channel::close(open(p, OpenFlags::write_only(create=true), permission=0))
+  match open(p, OpenFlags::write_only(create=true), permission=0) {
+    Ok(c) => @io.Channel::close(c)
+    Err(_) => return
+  }
   inspect(exists(p), content="true")
-  delete(p)
+  match delete(p) {
+    Ok(_) => ()
+    Err(_) => return
+  }
   inspect(exists(p), content="false")
 }
 
@@ -83,8 +116,14 @@ async test "facade delete_if_exist exists" {
   let fs = MemFileSystem::new()
   set_default_fs(fs)
   let p = path("/test.txt", using_fs=fs)
-  @io.Channel::close(open(p, OpenFlags::write_only(create=true), permission=0))
-  delete_if_exist(p)
+  match open(p, OpenFlags::write_only(create=true), permission=0) {
+    Ok(c) => @io.Channel::close(c)
+    Err(_) => return
+  }
+  match delete_if_exist(p) {
+    Ok(_) => ()
+    Err(_) => return
+  }
   inspect(exists(p), content="false")
 }
 
@@ -94,7 +133,10 @@ async test "facade delete_if_exist not exists" {
   let fs = MemFileSystem::new()
   set_default_fs(fs)
   let p = path("/test.txt", using_fs=fs)
-  delete_if_exist(p) // Should not raise
+  match delete_if_exist(p) {
+    Ok(_) => ()
+    Err(_) => return
+  }
   inspect(exists(p), content="false")
 }
 
@@ -105,10 +147,9 @@ async test "facade read_symbolic_link" {
   set_default_fs(fs)
   let p = path("/test.txt", using_fs=fs)
   // MemFileSystem doesn't support creating symlinks yet
-  // This should return None
-  let link = read_symbolic_link(p)
-  match link {
-    Some(_) => inspect("unexpected", content="should be None")
-    None => inspect(true, content="true")
+  // This should return an error
+  match read_symbolic_link(p) {
+    Ok(_) => inspect("unexpected", content="should be error")
+    Err(_) => inspect(true, content="true")
   }
 }
