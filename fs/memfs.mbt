@@ -137,103 +137,109 @@ fn build_attr(entry : MemEntry) -> FileAttribute {
 
 ///|
 struct MemFileChannel {
-  entry : MemEntry
+  entry_ref : Ref[MemEntry]
   mut pos : Int
   mut closed : Bool
   access : OpenFlags
-  info : FileInfo
+  path : Path
 }
 
 ///|
 fn memfilechannel_new(
-  entry : MemEntry,
+  entry_ref : Ref[MemEntry],
   flag : OpenFlags,
   path : Path,
 ) -> MemFileChannel {
-  MemFileChannel::{
-    entry,
-    pos: 0,
-    closed: false,
-    access: flag,
-    info: FileInfo::{ attribute: build_attr(entry), path },
-  }
+  MemFileChannel::{ entry_ref, pos: 0, closed: false, access: flag, path }
 }
 
 ///|
-impl FileChannel for MemFileChannel with access(self) {
+pub impl FileChannel for MemFileChannel with access(self) {
   self.access
 }
 
 ///|
-impl FileChannel for MemFileChannel with info(self) {
-  self.info
+pub impl FileChannel for MemFileChannel with info(self) {
+  FileInfo::{ attribute: build_attr(self.entry_ref.val), path: self.path }
 }
 
 ///|
-impl @io.Channel for MemFileChannel with close(self) {
+pub impl @io.Channel for MemFileChannel with close(self) {
   self.closed = true
 }
 
 ///|
-impl @io.Channel for MemFileChannel with is_closed(self) {
+pub impl @io.Channel for MemFileChannel with is_closed(self) {
   self.closed
 }
 
 ///|
-impl @io.Reader for MemFileChannel with read(self, dst, off, len) {
+pub impl @io.Reader for MemFileChannel with read(self, dst, off, len) {
   guard !self.closed else { return 0 }
-  let avail = self.entry.content.length() - self.pos
+  guard self.access.has_read() else {
+    raise fail("file not opened for reading")
+  }
+  let entry = self.entry_ref.val
+  let avail = entry.content.length() - self.pos
   if avail <= 0 {
     return 0
   }
   let toread = if avail < len { avail } else { len }
   for i in 0..<toread {
-    dst[off + i] = self.entry.content[self.pos + i]
+    dst[off + i] = entry.content[self.pos + i]
   }
   self.pos = self.pos + toread
-  self.entry.last_access = @time.Instant::now()
+  self.entry_ref.val.last_access = @time.Instant::now()
   toread
 }
 
 ///|
-impl @io.Writer for MemFileChannel with write(self, arr, off, len) {
+pub impl @io.Writer for MemFileChannel with write(self, arr, off, len) {
   guard !self.closed else { return 0 }
+  guard self.access.has_write() else {
+    raise fail("file not opened for writing")
+  }
+  let entry = self.entry_ref.val
+  // If append mode, always write at end
+  if self.access.is_append() {
+    self.pos = entry.content.length()
+  }
   // ensure capacity
   let needed = self.pos + len
-  while self.entry.content.length() < needed {
-    self.entry.content.push(0)
+  while entry.content.length() < needed {
+    entry.content.push(0)
   }
   for i in 0..<len {
-    self.entry.content[self.pos + i] = arr[off + i]
+    entry.content[self.pos + i] = arr[off + i]
   }
   self.pos = self.pos + len
-  self.entry.last_modified = @time.Instant::now()
-  self.entry.last_access = @time.Instant::now()
+  self.entry_ref.val.last_modified = @time.Instant::now()
+  self.entry_ref.val.last_access = @time.Instant::now()
   len
 }
 
 ///|
-impl @io.Writer for MemFileChannel with close(self) {
+pub impl @io.Writer for MemFileChannel with close(self) {
   self.closed = true
 }
 
 ///|
-impl @io.Writer for MemFileChannel with is_closed(self) {
+pub impl @io.Writer for MemFileChannel with is_closed(self) {
   self.closed
 }
 
 ///|
-impl @io.Reader for MemFileChannel with close(self) {
+pub impl @io.Reader for MemFileChannel with close(self) {
   self.closed = true
 }
 
 ///|
-impl @io.Reader for MemFileChannel with is_closed(self) {
+pub impl @io.Reader for MemFileChannel with is_closed(self) {
   self.closed
 }
 
 ///|
-impl FileSystem for MemFileSystem with open_file(
+pub impl FileSystem for MemFileSystem with open_file(
   self,
   path,
   flag,
@@ -250,15 +256,31 @@ impl FileSystem for MemFileSystem with open_file(
   if create {
     self.find(parent, create_dirs=true) |> ignore
   }
-  match self.find(p, create_dirs=false) {
-    Some(node) => memfilechannel_new(node, flag, p)
+  match self.find_ref(p, create_dirs=false) {
+    Some(node_ref) => {
+      // File exists
+      if create && flag.is_exclusive() {
+        raise fail("file already exists (exclusive flag)")
+      }
+      let node = node_ref.val
+      // Truncate if flag is set
+      if flag.is_truncate() {
+        node.content.clear()
+      }
+      memfilechannel_new(node_ref, flag, p)
+    }
     None =>
       if create {
         let name = p.components[p.components.length() - 1]
         let file = mementry_new_file(name.to_string())
-        let parent_node = self.find(parent, create_dirs=true).unwrap()
-        parent_node.children.set(file.name, { val: file })
-        memfilechannel_new(file, flag, p)
+        let file_ref : Ref[MemEntry] = { val: file }
+        match self.find_ref(parent, create_dirs=true) {
+          Some(parent_ref) => {
+            parent_ref.val.children.set(file.name, file_ref)
+            memfilechannel_new(file_ref, flag, p)
+          }
+          None => raise fail("parent not found")
+        }
       } else {
         raise fail("file not found")
       }
@@ -266,7 +288,7 @@ impl FileSystem for MemFileSystem with open_file(
 }
 
 ///|
-impl FileSystem for MemFileSystem with attr(self, path, follow_links?) {
+pub impl FileSystem for MemFileSystem with attr(self, path, follow_links?) {
   ignore(follow_links)
   match self.find(path, create_dirs=false) {
     Some(node) => build_attr(node)
@@ -275,7 +297,7 @@ impl FileSystem for MemFileSystem with attr(self, path, follow_links?) {
 }
 
 ///|
-impl FileSystem for MemFileSystem with list_directory(self, path) {
+pub impl FileSystem for MemFileSystem with list_directory(self, path) {
   match self.find(path, create_dirs=false) {
     Some(node) if node.kind == FileKind::Directory => {
       let res : Array[Path] = []
@@ -287,7 +309,7 @@ impl FileSystem for MemFileSystem with list_directory(self, path) {
 }
 
 ///|
-impl FileSystem for MemFileSystem with can_access(self, path, flag) {
+pub impl FileSystem for MemFileSystem with can_access(self, path, flag) {
   ignore(flag)
   match self.find(path, create_dirs=false) {
     Some(_) => true
@@ -296,7 +318,7 @@ impl FileSystem for MemFileSystem with can_access(self, path, flag) {
 }
 
 ///|
-impl FileSystem for MemFileSystem with delete(self, path) {
+pub impl FileSystem for MemFileSystem with delete(self, path) {
   let p = path
   let parent = match p.parent() {
     Some(v) => v
@@ -320,12 +342,12 @@ impl FileSystem for MemFileSystem with delete(self, path) {
 }
 
 ///|
-impl FileSystem for MemFileSystem with exists(self, path) {
+pub impl FileSystem for MemFileSystem with exists(self, path) {
   self.can_access(path, AccessFlags::new())
 }
 
 ///|
-impl FileSystem for MemFileSystem with read_symbol_link(self, path) {
+pub impl FileSystem for MemFileSystem with read_symbol_link(self, path) {
   match self.find(path, create_dirs=false) {
     Some(node) if node.kind == FileKind::Link => node.target.unwrap()
     _ => raise fail("not a symlink")
@@ -333,7 +355,7 @@ impl FileSystem for MemFileSystem with read_symbol_link(self, path) {
 }
 
 ///|
-impl FileSystem for MemFileSystem with rename(self, src, dst, copy_attr~) {
+pub impl FileSystem for MemFileSystem with rename(self, src, dst, copy_attr~) {
   ignore(copy_attr)
   let s = src
   let d = dst
@@ -349,7 +371,11 @@ impl FileSystem for MemFileSystem with rename(self, src, dst, copy_attr~) {
     Some(v) => v
     None => raise fail("src parent not found")
   }
-  let dnode_parent = self.find(dparent, create_dirs=true).unwrap()
+  // Don't auto-create destination parent - it must exist
+  let dnode_parent = match self.find(dparent, create_dirs=false) {
+    Some(v) => v
+    None => raise fail("dst parent not found")
+  }
   let name = s.components[s.components.length() - 1].to_string()
   match snode_parent.children.get(name) {
     Some(node) => {
@@ -364,19 +390,19 @@ impl FileSystem for MemFileSystem with rename(self, src, dst, copy_attr~) {
 }
 
 ///|
-impl FileSystem for MemFileSystem with real_path(self, path) {
+pub impl FileSystem for MemFileSystem with real_path(self, path) {
   ignore(self)
   path
 }
 
 ///|
-impl FileSystem for MemFileSystem with cwd(self) {
+pub impl FileSystem for MemFileSystem with cwd(self) {
   // Create path directly to avoid recursion through path() -> system_roots()
   Path::{ fs: self, components: [], absolute: true }
 }
 
 ///|
-impl FileSystem for MemFileSystem with system_roots(self) {
+pub impl FileSystem for MemFileSystem with system_roots(self) {
   // Create path directly to avoid recursion
   [Path::{ fs: self, components: [], absolute: true }]
 }

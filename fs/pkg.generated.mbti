@@ -68,11 +68,16 @@ impl Show for FileKind
 type MemEntry
 
 type MemFileChannel
+impl FileChannel for MemFileChannel
+impl @io.Channel for MemFileChannel
+impl @io.Reader for MemFileChannel
+impl @io.Writer for MemFileChannel
 
 pub struct MemFileSystem {
   root : Ref[MemEntry]
 }
 fn MemFileSystem::new() -> Self
+impl FileSystem for MemFileSystem
 
 type OpenFlags
 fn OpenFlags::has_read(Self) -> Bool

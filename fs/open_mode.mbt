@@ -138,17 +138,19 @@ pub fn OpenFlags::is_exclusive(self : OpenFlags) -> Bool {
 
 ///|
 pub fn OpenFlags::has_read(self : OpenFlags) -> Bool {
-  (self.0 & _O_RDONLY) != 0
+  let mode = self.0 & 0b11
+  mode == _O_RDONLY || mode == _O_RDWR
 }
 
 ///|
 pub fn OpenFlags::has_write(self : OpenFlags) -> Bool {
-  (self.0 & _O_WRONLY) != 0
+  let mode = self.0 & 0b11
+  mode == _O_WRONLY || mode == _O_RDWR
 }
 
 ///|
 pub fn OpenFlags::is_read_write(self : OpenFlags) -> Bool {
-  (self.0 & _O_RDWR) != 0
+  (self.0 & 0b11) == _O_RDWR
 }
 
 ///|

@@ -39,6 +39,10 @@ pub impl Hash for Path with hash_combine(self, hasher) {
 
 ///|
 pub impl Eq for Path with equal(self, another) {
+  // Note: Currently only compares components, not filesystem.
+  // This is a known limitation - paths from different filesystems
+  // with same components will be considered equal.
+  // TODO: Find a way to compare trait references for equality
   let a = self.components
   let b = another.components
   guard a.length() == b.length() else { return false }
@@ -57,7 +61,7 @@ pub fn path(
   using_fs? : &FileSystem = default_file_system.val.unwrap(),
 ) -> Path { // todo illegal path detection?
   //todo windows support?
-  let components = str.split("/").to_array()
+  let components = str.split("/").to_array().filter(fn(s) { s.length() > 0 })
   let path = Path::{ fs: using_fs, components, absolute: false }
   for root in using_fs.system_roots() {
     if path.starts_with_path(root) {
@@ -90,11 +94,18 @@ pub fn Path::root(self : Path) -> Path {
 ///|
 /// Return the parent path, or none if has no parent.
 pub fn Path::parent(self : Path) -> Path? {
-  guard self.components.length() > 1 else { return None }
-  return Some(Path::{
-    ..self,
-    components: self.components[:self.components.length() - 1],
-  })
+  if self.components.length() > 1 {
+    return Some(Path::{
+      ..self,
+      components: self.components[:self.components.length() - 1],
+    })
+  }
+  // If we have exactly 1 component and are absolute, parent is root
+  if self.components.length() == 1 && self.absolute {
+    return Some(self.root())
+  }
+  // Otherwise no parent (either root itself, or relative single component)
+  None
 }
 
 ///|
@@ -117,7 +128,9 @@ pub fn Path::resolve_path(self : Path, another : Path) -> Path {
 ///  or other is absolute, then this method returns other. If other is an empty path then this method returns this path's parent, or where this path doesn't
 ///  have a parent, the empty path.
 pub fn Path::sibling(self : Path, another : String) -> Path {
-  guard self.parent() is Some(parent) else { return path(another) }
+  guard self.parent() is Some(parent) else {
+    return path(another, using_fs=self.fs)
+  }
   parent.resolve(another)
 }
 
@@ -179,12 +192,12 @@ pub fn Path::starts_with_path(self : Path, prefix : Path) -> Bool {
 
 ///|
 pub fn Path::starts_with(self : Path, prefix : String) -> Bool {
-  self.starts_with_path(path(prefix))
+  self.starts_with_path(path(prefix, using_fs=self.fs))
 }
 
 ///|
 pub fn Path::resolve(self : Path, child : String) -> Path {
-  self.resolve_path(path(child))
+  self.resolve_path(path(child, using_fs=self.fs))
 }
 
 ///|
@@ -194,7 +207,7 @@ pub fn Path::resolve(self : Path, child : String) -> Path {
 /// p.relativize(p .resolve(q)).equals(q)
 /// When symbolic links are supported, then whether the resulting path, when resolved against this path, yields a path that can be used to locate the same file as other is implementation dependent. For example, if this path is "/a/b" and the given path is "/a/x" then the resulting relative path may be "../x". If "b" is a symbolic link then is implementation dependent if "a/b/../x" would locate the same file as "/a/x".
 pub fn Path::relativize(self : Path, other : String) -> Path {
-  self.relativize_path(path(other))
+  self.relativize_path(path(other, using_fs=self.fs))
 }
 
 ///|
