@@ -12,9 +12,9 @@ pub struct AccessFlags(Int)
 
 ///|
 pub fn AccessFlags::new(
-  read? : Bool=false,
-  write? : Bool=false,
-  execute? : Bool=false,
+  read? : Bool = false,
+  write? : Bool = false,
+  execute? : Bool = false,
 ) -> AccessFlags {
   let mut flag = 0
   if read {
@@ -29,12 +29,17 @@ pub fn AccessFlags::new(
   flag
 }
 
-pub fn AccessFlags::read(self: AccessFlags) -> Bool{
+///|
+pub fn AccessFlags::read(self : AccessFlags) -> Bool {
   (self.0 & _A_READ) != 0
 }
-pub fn AccessFlags::write(self: AccessFlags) -> Bool{
+
+///|
+pub fn AccessFlags::write(self : AccessFlags) -> Bool {
   (self.0 & _A_WRITE) != 0
 }
-pub fn AccessFlags::execute(self: AccessFlags) -> Bool{
+
+///|
+pub fn AccessFlags::execute(self : AccessFlags) -> Bool {
   (self.0 & _A_EXECUTE) != 0
 }

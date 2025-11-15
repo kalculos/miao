@@ -1,6 +1,12 @@
 {
-    "import":[
-      "iceBear67/miao/io",
-      "iceBear67/time"
-    ]
+  "import": [
+    "iceBear67/miao/io",
+    "iceBear67/time"
+  ],
+  "wbtest-import": [
+    "moonbitlang/async"
+  ],
+  "test-import": [
+    "moonbitlang/async"
+  ]
 }

@@ -4,7 +4,7 @@ struct LibuvFileSystem {
 }
 
 ///|
-fn LibuvFileSystem::uv(self: LibuvFileSystem) -> @uv.Loop {
+fn LibuvFileSystem::uv(self : LibuvFileSystem) -> @uv.Loop {
   self.rt.uv
 }
 
@@ -25,7 +25,12 @@ impl @fs.FileSystem for LibuvFileSystem with open_file(
 }
 
 ///|
-fn @fs.Path::to_bytes(self: @fs.Path) -> Bytes {
+impl @fs.FileSystem for LibuvFileSystem with id(self) {
+  "libuv"
+}
+
+///|
+fn @fs.Path::to_bytes(self : @fs.Path) -> Bytes {
   @encoding/utf8.encode(self.to_unix_path())
 }
 
@@ -58,9 +63,9 @@ impl @fs.FileSystem for LibuvFileSystem with attr(self, path, follow_links?) {
       uv.fs_lstat(path_bytes, on_stat, err => reject(err))
     }
     () => {
-        defer reject(@rt.CoroutineError::Cancelled)
-        handle.cancel()
-      }
+      defer reject(@rt.CoroutineError::Cancelled)
+      handle.cancel()
+    }
   })
 }
 
@@ -89,10 +94,10 @@ impl @fs.FileSystem for LibuvFileSystem with list_directory(self, path) {
       err => reject(err),
     )
     () => {
-        defer reject(@rt.CoroutineError::Cancelled)
-        cancelled = true
-        handle.cancel()
-      }
+      defer reject(@rt.CoroutineError::Cancelled)
+      cancelled = true
+      handle.cancel()
+    }
   })
 }
 
@@ -106,7 +111,7 @@ fn to_uv_access(mode : @fs.AccessFlags) -> @uv.AccessFlags {
 }
 
 ///|
-fn access_flag_inner(flag: @uv.AccessFlags) -> Int = "%identity"
+fn access_flag_inner(flag : @uv.AccessFlags) -> Int = "%identity"
 
 ///|
 impl @fs.FileSystem for LibuvFileSystem with can_access(self, path, mode) {
@@ -120,9 +125,9 @@ impl @fs.FileSystem for LibuvFileSystem with can_access(self, path, mode) {
       _ => resolve(false),
     )
     () => {
-        defer reject(@rt.CoroutineError::Cancelled)
-        handle.cancel()
-      }
+      defer reject(@rt.CoroutineError::Cancelled)
+      handle.cancel()
+    }
   })
 }
 
@@ -136,9 +141,9 @@ impl @fs.FileSystem for LibuvFileSystem with delete(self, path) {
       err => b(err),
     )
     () => {
-        defer b(@rt.CoroutineError::Cancelled)
-        handle.cancel()
-      }
+      defer b(@rt.CoroutineError::Cancelled)
+      handle.cancel()
+    }
   })
 }
 
@@ -161,9 +166,9 @@ impl @fs.FileSystem for LibuvFileSystem with read_symbol_link(self, path) {
       err => reject(err),
     )
     () => {
-        defer reject(@rt.CoroutineError::Cancelled)
-        handle.cancel()
-      }
+      defer reject(@rt.CoroutineError::Cancelled)
+      handle.cancel()
+    }
   })
 }
 
@@ -180,9 +185,9 @@ impl @fs.FileSystem for LibuvFileSystem with rename(self, src, dst, copy_attr~) 
       err => reject(err),
     )
     () => {
-        defer reject(@rt.CoroutineError::Cancelled)
-        handle.cancel()
-      }
+      defer reject(@rt.CoroutineError::Cancelled)
+      handle.cancel()
+    }
   })
 }
 
@@ -214,8 +219,8 @@ impl @fs.FileSystem for LibuvFileSystem with real_path(self, path) {
       err => reject(err),
     )
     () => {
-        defer reject(@rt.CoroutineError::Cancelled)
-        handle.cancel()
-      }
+      defer reject(@rt.CoroutineError::Cancelled)
+      handle.cancel()
+    }
   })
 }

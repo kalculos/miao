@@ -10,19 +10,20 @@ let _O_RDONLY = 1
 ///|
 let _O_WRONLY = 2
 
+///|
 let _O_RDWR = 3 // 011
 
 ///|
-let _O_APPEND: Int = 1 << 2
+let _O_APPEND : Int = 1 << 2
 
 ///|
-let _O_CREATE: Int = 1 << 3
+let _O_CREATE : Int = 1 << 3
 
 ///|
-let _O_TRUNCATE: Int = 1 << 4
+let _O_TRUNCATE : Int = 1 << 4
 
 ///|
-let _O_EXCLUSIVE: Int = (1 << 5)
+let _O_EXCLUSIVE : Int = 1 << 5
 
 ///|
 /// Creates file open flags for read-only access.
@@ -115,38 +116,49 @@ pub fn OpenFlags::read_write(
   flags
 }
 
-pub fn OpenFlags::is_append(self: OpenFlags) -> Bool {
+///|
+pub fn OpenFlags::is_append(self : OpenFlags) -> Bool {
   (self.0 & _O_APPEND) != 0
 }
 
-pub fn OpenFlags::is_create(self: OpenFlags) -> Bool {
+///|
+pub fn OpenFlags::is_create(self : OpenFlags) -> Bool {
   (self.0 & _O_CREATE) != 0
 }
 
-pub fn OpenFlags::is_truncate(self: OpenFlags) -> Bool {
+///|
+pub fn OpenFlags::is_truncate(self : OpenFlags) -> Bool {
   (self.0 & _O_TRUNCATE) != 0
 }
 
-pub fn OpenFlags::is_exclusive(self: OpenFlags) -> Bool {
+///|
+pub fn OpenFlags::is_exclusive(self : OpenFlags) -> Bool {
   (self.0 & _O_EXCLUSIVE) != 0
 }
 
-pub fn OpenFlags::has_read(self: OpenFlags) -> Bool {
-  (self.0 & _O_RDONLY) != 0
+///|
+pub fn OpenFlags::has_read(self : OpenFlags) -> Bool {
+  let mode = self.0 & 0b11
+  mode == _O_RDONLY || mode == _O_RDWR
 }
 
-pub fn OpenFlags::has_write(self: OpenFlags) -> Bool {
-  (self.0 & _O_WRONLY) != 0
+///|
+pub fn OpenFlags::has_write(self : OpenFlags) -> Bool {
+  let mode = self.0 & 0b11
+  mode == _O_WRONLY || mode == _O_RDWR
 }
 
-pub fn OpenFlags::is_read_write(self: OpenFlags) -> Bool {
-  (self.0 & _O_RDWR) != 0
+///|
+pub fn OpenFlags::is_read_write(self : OpenFlags) -> Bool {
+  (self.0 & 0b11) == _O_RDWR
 }
 
-pub fn OpenFlags::is_read_only(self: OpenFlags) -> Bool {
+///|
+pub fn OpenFlags::is_read_only(self : OpenFlags) -> Bool {
   (self.0 & 0b11) == _O_RDONLY
 }
 
-pub fn OpenFlags::is_write_only(self: OpenFlags) -> Bool {
+///|
+pub fn OpenFlags::is_write_only(self : OpenFlags) -> Bool {
   (self.0 & 0b11) == _O_WRONLY
 }
