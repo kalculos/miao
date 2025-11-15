@@ -1,11 +1,20 @@
 ///| Tests for HTTP request parser
 
+///| Helper to write UTF-8 string to buffer
+fn write_utf8_string_parser(buffer : &@buffer.Buffer, s : String) -> Unit {
+  let len = s.length()
+  let arr : FixedArray[Byte] = FixedArray::make(len, 0)
+  for i = 0; i < len; i = i + 1 {
+    arr[i] = s[i].land(0xFF).to_byte()
+  }
+  buffer.write(arr, 0, len) |> ignore
+}
+
 ///| Test parsing a simple GET request
 async test "parse_request parses simple GET request" {
   let request_str = "GET /index.html HTTP/1.1\r\nHost: example.com\r\nUser-Agent: TestClient/1.0\r\n\r\n"
   let buffer = @buffer.HeapByteBuf::new(1024)
-  buffer.write(request_str.to_bytes().to_fixedarray(), 0, request_str.length())
-    |> ignore
+  write_utf8_string_parser(buffer as &@buffer.Buffer, request_str)
   let request = try {
     parse_request(buffer as &@buffer.Buffer)
   } catch {
@@ -28,8 +37,7 @@ async test "parse_request parses POST request with body" {
   let request_str = "POST /api/data HTTP/1.1\r\nHost: api.example.com\r\nContent-Type: application/x-www-form-urlencoded\r\nContent-Length: " +
     body_content.length().to_string() + "\r\n\r\n" + body_content
   let buffer = @buffer.HeapByteBuf::new(1024)
-  buffer.write(request_str.to_bytes().to_fixedarray(), 0, request_str.length())
-    |> ignore
+  write_utf8_string_parser(buffer as &@buffer.Buffer, request_str)
   let request = try {
     parse_request(buffer as &@buffer.Buffer)
   } catch {
@@ -49,8 +57,7 @@ async test "parse_request parses POST request with body" {
 async test "parse_request handles multiple headers" {
   let request_str = "GET /test HTTP/1.1\r\nHost: example.com\r\nAccept: text/html\r\nAccept-Encoding: gzip, deflate\r\nConnection: keep-alive\r\n\r\n"
   let buffer = @buffer.HeapByteBuf::new(1024)
-  buffer.write(request_str.to_bytes().to_fixedarray(), 0, request_str.length())
-    |> ignore
+  write_utf8_string_parser(buffer as &@buffer.Buffer, request_str)
   let request = try {
     parse_request(buffer as &@buffer.Buffer)
   } catch {
@@ -71,8 +78,7 @@ async test "parse_request handles multiple headers" {
 async test "parse_request handles query parameters in URI" {
   let request_str = "GET /search?q=moonbit&lang=en HTTP/1.1\r\nHost: search.example.com\r\n\r\n"
   let buffer = @buffer.HeapByteBuf::new(1024)
-  buffer.write(request_str.to_bytes().to_fixedarray(), 0, request_str.length())
-    |> ignore
+  write_utf8_string_parser(buffer as &@buffer.Buffer, request_str)
   let request = try {
     parse_request(buffer as &@buffer.Buffer)
   } catch {
@@ -88,8 +94,7 @@ async test "parse_request handles query parameters in URI" {
 async test "parse_request parses PUT request" {
   let request_str = "PUT /resource/123 HTTP/1.1\r\nHost: api.example.com\r\nContent-Length: 0\r\n\r\n"
   let buffer = @buffer.HeapByteBuf::new(1024)
-  buffer.write(request_str.to_bytes().to_fixedarray(), 0, request_str.length())
-    |> ignore
+  write_utf8_string_parser(buffer as &@buffer.Buffer, request_str)
   let request = try {
     parse_request(buffer as &@buffer.Buffer)
   } catch {
@@ -106,8 +111,7 @@ async test "parse_request parses PUT request" {
 async test "parse_request parses DELETE request" {
   let request_str = "DELETE /resource/456 HTTP/1.1\r\nHost: api.example.com\r\n\r\n"
   let buffer = @buffer.HeapByteBuf::new(1024)
-  buffer.write(request_str.to_bytes().to_fixedarray(), 0, request_str.length())
-    |> ignore
+  write_utf8_string_parser(buffer as &@buffer.Buffer, request_str)
   let request = try {
     parse_request(buffer as &@buffer.Buffer)
   } catch {

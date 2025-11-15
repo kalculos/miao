@@ -1,5 +1,5 @@
 ///| HTTP/1.1 Methods
-pub enum HttpMethod {
+pub(all) enum HttpMethod {
   GET
   POST
   PUT
@@ -43,7 +43,7 @@ pub fn HttpMethod::from_string(s : String) -> HttpMethod raise {
 }
 
 ///| HTTP Version
-pub enum HttpVersion {
+pub(all) enum HttpVersion {
   HTTP_1_0
   HTTP_1_1
 } derive(Eq, Show)
@@ -190,6 +190,11 @@ pub fn HttpRequest::method(self : HttpRequest) -> HttpMethod {
   self.http_method
 }
 
+///| Set body for request
+pub fn HttpRequest::set_body(self : HttpRequest, body : Bytes) -> Unit {
+  self.body = body
+}
+
 ///| HTTP Response
 pub struct HttpResponse {
   version : HttpVersion
@@ -201,4 +206,9 @@ pub struct HttpResponse {
 ///| Create new HttpResponse
 pub fn HttpResponse::new(version : HttpVersion, status : HttpStatus) -> HttpResponse {
   { version, status, headers: HttpHeaders::new(), body: b"" }
+}
+
+///| Set body for response
+pub fn HttpResponse::set_body(self : HttpResponse, body : Bytes) -> Unit {
+  self.body = body
 }

@@ -1,11 +1,20 @@
 ///| Tests for HTTP response parser and serializer
 
+///| Helper to write UTF-8 string to buffer
+fn write_utf8_string_serializer(buffer : &@buffer.Buffer, s : String) -> Unit {
+  let len = s.length()
+  let arr : FixedArray[Byte] = FixedArray::make(len, 0)
+  for i = 0; i < len; i = i + 1 {
+    arr[i] = s[i].land(0xFF).to_byte()
+  }
+  buffer.write(arr, 0, len) |> ignore
+}
+
 ///| Test parsing a simple 200 OK response
 async test "parse_response parses 200 OK response" {
   let response_str = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: 13\r\n\r\nHello, World!"
   let buffer = @buffer.HeapByteBuf::new(1024)
-  buffer.write(response_str.to_bytes().to_fixedarray(), 0, response_str.length())
-    |> ignore
+  write_utf8_string_serializer(buffer as &@buffer.Buffer, response_str)
   let response = try {
     parse_response(buffer as &@buffer.Buffer)
   } catch {
@@ -25,8 +34,7 @@ async test "parse_response parses 200 OK response" {
 async test "parse_response parses 404 Not Found response" {
   let response_str = "HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\n\r\n"
   let buffer = @buffer.HeapByteBuf::new(1024)
-  buffer.write(response_str.to_bytes().to_fixedarray(), 0, response_str.length())
-    |> ignore
+  write_utf8_string_serializer(buffer as &@buffer.Buffer, response_str)
   let response = try {
     parse_response(buffer as &@buffer.Buffer)
   } catch {
@@ -70,7 +78,7 @@ async test "serialize_request serializes POST request with body" {
   request.headers.add("Content-Type", "application/json")
   let body = "{\"name\":\"test\"}"
   request.headers.add("Content-Length", body.length().to_string())
-  request.body = body.to_bytes()
+  request.set_body(body.to_bytes())
   let buffer = @buffer.HeapByteBuf::new(1024)
   serialize_request(request, buffer as &@buffer.Buffer)
   let result = buffer.to_bytes().to_string()
@@ -91,7 +99,7 @@ async test "serialize_response serializes 200 OK response" {
   response.headers.add("Content-Type", "text/plain")
   let body = "Success"
   response.headers.add("Content-Length", body.length().to_string())
-  response.body = body.to_bytes()
+  response.set_body(body.to_bytes())
   let buffer = @buffer.HeapByteBuf::new(1024)
   serialize_response(response, buffer as &@buffer.Buffer)
   let result = buffer.to_bytes().to_string()
@@ -114,7 +122,7 @@ async test "request round-trip serialize and parse" {
   original.headers.add("Content-Type", "text/plain")
   let body = "test data"
   original.headers.add("Content-Length", body.length().to_string())
-  original.body = body.to_bytes()
+  original.set_body(body.to_bytes())
   
   // Serialize
   let buffer = @buffer.HeapByteBuf::new(1024)
@@ -140,7 +148,7 @@ async test "response round-trip serialize and parse" {
   original.headers.add("Content-Type", "application/json")
   let body = "{\"status\":\"ok\"}"
   original.headers.add("Content-Length", body.length().to_string())
-  original.body = body.to_bytes()
+  original.set_body(body.to_bytes())
   
   // Serialize
   let buffer = @buffer.HeapByteBuf::new(1024)

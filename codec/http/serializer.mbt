@@ -123,8 +123,13 @@ pub async fn serialize_response(
 
 ///| Write string to buffer
 fn write_string(buffer : &@buffer.Buffer, s : String) -> Unit {
-  let bytes = String::to_bytes(s)
-  write_bytes(buffer, bytes)
+  // Convert string to UTF-8 bytes
+  let len = s.length()
+  let arr : FixedArray[Byte] = FixedArray::make(len, 0)
+  for i = 0; i < len; i = i + 1 {
+    arr[i] = s[i].land(0xFF).to_byte()
+  }
+  buffer.write(arr, 0, len) |> ignore
 }
 
 ///| Write bytes to buffer
