@@ -5,7 +5,8 @@
     "iceBear67/mnbt": "0.3.3",
     "tonyfettes/uv": "0.12.8",
     "moonbitlang/x": "0.4.34",
-    "iceBear67/time": "0.1.2"
+    "iceBear67/time": "0.1.2",
+    "moonbitlang/async": "0.13.2"
   },
   "readme": "README.mbt.md",
   "repository": "",
