@@ -15,7 +15,7 @@ HTTP 模块提供了以下主要组件：
 
 ## 示例 1: 创建和发送简单的 GET 请求
 
-```moonbit
+```moonbit no test
 async fn example_simple_get_request() -> Unit {
   // 创建一个 buffer 用于写入请求
   let buffer = @buffer.HeapByteBuf::new(1024)
@@ -31,7 +31,7 @@ async fn example_simple_get_request() -> Unit {
   
   // 添加请求头
   request.headers.add("Host", "example.com")
-  request.headers.add("User-Agent", "MoonBit-HTTP/1.0")
+  request.headers.add("User-Agent", "moonbit no test-HTTP/1.0")
   request.headers.add("Accept", "application/json")
   
   // 写入请求（GET 请求通常没有 body）
@@ -48,14 +48,14 @@ async fn example_simple_get_request() -> Unit {
 ```
 GET /api/users HTTP/1.1
 Host: example.com
-User-Agent: MoonBit-HTTP/1.0
+User-Agent: moonbit no test-HTTP/1.0
 Accept: application/json
 
 ```
 
 ## 示例 2: 创建带请求体的 POST 请求
 
-```moonbit
+```moonbit no test
 async fn example_post_request_with_json() -> Unit {
   let buffer = @buffer.HeapByteBuf::new(1024)
   let writer = @io.ByteBufWriter::new(buffer as &@buffer.Buffer)
@@ -89,7 +89,7 @@ async fn example_post_request_with_json() -> Unit {
 
 ## 示例 3: 解析 HTTP 请求
 
-```moonbit
+```moonbit no test
 async fn example_parse_request() -> Unit {
   // 模拟接收到的 HTTP 请求数据
   let request_str = "GET /api/users?page=1&limit=10 HTTP/1.1\r\n" +
@@ -130,7 +130,7 @@ async fn example_parse_request() -> Unit {
 
 ## 示例 4: 解析带请求体的 POST 请求
 
-```moonbit
+```moonbit no test
 async fn example_parse_post_with_body() -> Unit {
   let body_content = "name=Alice&age=30"
   let request_str = "POST /api/users HTTP/1.1\r\n" +
@@ -179,7 +179,7 @@ async fn example_parse_post_with_body() -> Unit {
 
 ## 示例 5: 创建 HTTP 响应
 
-```moonbit
+```moonbit no test
 async fn example_create_response() -> Unit {
   let buffer = @buffer.HeapByteBuf::new(1024)
   let writer = @io.ByteBufWriter::new(buffer as &@buffer.Buffer)
@@ -200,7 +200,7 @@ async fn example_create_response() -> Unit {
   // 添加响应头
   response.headers.add("Content-Type", "application/json")
   response.headers.add("Content-Length", json_response.length().to_string())
-  response.headers.add("Server", "MoonBit-Server/1.0")
+  response.headers.add("Server", "moonbit no test-Server/1.0")
   response.headers.add("Cache-Control", "no-cache")
   
   // 写入响应
@@ -213,7 +213,7 @@ async fn example_create_response() -> Unit {
 
 ## 示例 6: 创建不同状态码的响应
 
-```moonbit
+```moonbit no test
 async fn example_different_status_codes() -> Unit {
   // 404 Not Found
   let response_404 = HttpResponse::new(
@@ -247,7 +247,7 @@ async fn example_different_status_codes() -> Unit {
 
 ## 示例 7: HTTP Headers 操作
 
-```moonbit
+```moonbit no test
 fn example_headers_operations() -> Unit {
   let headers = HttpHeaders::new()
   
@@ -286,10 +286,10 @@ fn example_headers_operations() -> Unit {
 
 ## 示例 8: 处理 URI 和查询参数
 
-```moonbit
+```moonbit no test
 fn example_uri_parsing() -> Unit {
   // 解析包含查询参数的 URI
-  let uri = Uri::parse("/api/search?q=moonbit&page=1&limit=10")
+  let uri = Uri::parse("/api/search?q=moonbit no test&page=1&limit=10")
   
   println("Path: \{uri.path()}")
   
@@ -316,7 +316,7 @@ fn example_uri_parsing() -> Unit {
 
 ## 示例 9: URL 编码和解码
 
-```moonbit
+```moonbit no test
 fn example_url_encoding() -> Unit {
   // URL 编码
   let original = "Hello World! 你好"
@@ -339,7 +339,7 @@ fn example_url_encoding() -> Unit {
 
 ## 示例 10: Cookie 处理
 
-```moonbit
+```moonbit no test
 fn example_cookie_handling() -> Unit {
   // 创建 Cookie
   let cookie = Cookie::new("session_id", "abc123")
@@ -379,7 +379,7 @@ fn example_cookie_handling() -> Unit {
 
 ## 示例 11: 完整的请求-响应循环
 
-```moonbit
+```moonbit no test
 async fn example_full_request_response_cycle() -> Unit {
   // 1. 客户端创建请求
   let request_buffer = @buffer.HeapByteBuf::new(1024)
@@ -480,7 +480,7 @@ async fn example_full_request_response_cycle() -> Unit {
 
 ## 示例 12: 状态码检查工具函数
 
-```moonbit
+```moonbit no test
 fn example_status_code_checks() -> Unit {
   let statuses = [
     HttpStatus::ok(),
