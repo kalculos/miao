@@ -11,7 +11,7 @@ pub(open) trait Reader {
   async read_all(Self) -> &@buffer.Buffer = _
   async read_buffer(Self, len : Int) -> &@buffer.Buffer = _
   /// Read (buf.len - off) bytes at most to the buffer.
-  async read_buffer_to(Self, buf : &@buffer.Buffer) -> Int = _
+  async read_buffer_to(Self, buf : &@buffer.ByteSlice) -> Int = _
   /// Check if there are available bytes. When any bytes available, it returns a positive value. Otherwise, zero or negative is returned.
   /// It does not guarantee the return value equals to the number of bytes you can read.
   async available(Self) -> Int = _
@@ -28,7 +28,7 @@ pub(open) trait Writer {
   /// It returns the bytes actually written. 
   async write_buffer(
     Self,
-    buf : &@buffer.Buffer, // a sliced buffer can be used to control if reader index should inc. Or also supports skipN
+    buf : &@buffer.ByteSlice, // a sliced buffer can be used to control if reader index should inc. Or also supports skipN
   ) -> Int = _
   async close(Self) -> Unit
   ///| This also indicates the state of closer
