@@ -1,6 +1,7 @@
 ///| Tests for HTTP request parser
 
-///| Test parsing a simple GET request
+///|
+/// Test parsing a simple GET request
 async test "parse_request parses simple GET request" {
   let request_str = "GET /index.html HTTP/1.1\r\nHost: example.com\r\nUser-Agent: TestClient/1.0\r\n\r\n"
   let buffer = @buffer.HeapByteBuf::new(1024)
@@ -8,9 +9,7 @@ async test "parse_request parses simple GET request" {
   buffer.write(bytes.to_fixedarray(), 0, bytes.length()) |> ignore
   let reader = @io.ByteBufReader::new(buffer as &@buffer.Buffer)
   let http_reader = HttpReader::new(reader as &@io.Reader)
-  let request = try {
-    http_reader.read_request()
-  } catch {
+  let request = http_reader.read_request() catch {
     e => {
       inspect(e, content="Should not fail")
       HttpRequest::new(HttpMethod::GET, "/", HttpVersion::HTTP_1_1)
@@ -24,19 +23,20 @@ async test "parse_request parses simple GET request" {
   inspect(request.content_reader().is_empty(), content="true")
 }
 
-///| Test parsing a POST request with body
+///|
+/// Test parsing a POST request with body
 async test "parse_request parses POST request with body" {
   let body_content = "name=value&data=test"
   let request_str = "POST /api/data HTTP/1.1\r\nHost: api.example.com\r\nContent-Type: application/x-www-form-urlencoded\r\nContent-Length: " +
-    body_content.length().to_string() + "\r\n\r\n" + body_content
+    body_content.length().to_string() +
+    "\r\n\r\n" +
+    body_content
   let buffer = @buffer.HeapByteBuf::new(1024)
   let bytes = @encoding/utf8.encode(request_str)
   buffer.write(bytes.to_fixedarray(), 0, bytes.length()) |> ignore
   let reader = @io.ByteBufReader::new(buffer as &@buffer.Buffer)
   let http_reader = HttpReader::new(reader as &@io.Reader)
-  let request = try {
-    http_reader.read_request()
-  } catch {
+  let request = http_reader.read_request() catch {
     e => {
       inspect(e, content="Should not fail")
       HttpRequest::new(HttpMethod::POST, "/", HttpVersion::HTTP_1_1)
@@ -44,15 +44,16 @@ async test "parse_request parses POST request with body" {
   }
   inspect(request.method(), content="POST")
   inspect(request.uri, content="/api/data")
-  inspect(request.headers.get("Content-Type"), content="Some(\"application/x-www-form-urlencoded\")")
-  
+  inspect(
+    request.headers.get("Content-Type"),
+    content="Some(\"application/x-www-form-urlencoded\")",
+  )
+
   // Read body using content reader
   match request.content_reader() {
     Some(content_reader) => {
       inspect(content_reader.content_length(), content="20")
-      let body = try {
-        content_reader.read_all()
-      } catch {
+      let body = content_reader.read_all() catch {
         e => {
           inspect(e, content="Should not fail reading body")
           b""
@@ -64,7 +65,8 @@ async test "parse_request parses POST request with body" {
   }
 }
 
-///| Test parsing request with multiple headers
+///|
+/// Test parsing request with multiple headers
 async test "parse_request handles multiple headers" {
   let request_str = "GET /test HTTP/1.1\r\nHost: example.com\r\nAccept: text/html\r\nAccept-Encoding: gzip, deflate\r\nConnection: keep-alive\r\n\r\n"
   let buffer = @buffer.HeapByteBuf::new(1024)
@@ -72,9 +74,7 @@ async test "parse_request handles multiple headers" {
   buffer.write(bytes.to_fixedarray(), 0, bytes.length()) |> ignore
   let reader = @io.ByteBufReader::new(buffer as &@buffer.Buffer)
   let http_reader = HttpReader::new(reader as &@io.Reader)
-  let request = try {
-    http_reader.read_request()
-  } catch {
+  let request = http_reader.read_request() catch {
     e => {
       inspect(e, content="Should not fail")
       HttpRequest::new(HttpMethod::GET, "/", HttpVersion::HTTP_1_1)
@@ -88,7 +88,8 @@ async test "parse_request handles multiple headers" {
   )
 }
 
-///| Test parsing request with URI containing query parameters
+///|
+/// Test parsing request with URI containing query parameters
 async test "parse_request handles query parameters in URI" {
   let request_str = "GET /search?q=moonbit&lang=en HTTP/1.1\r\nHost: search.example.com\r\n\r\n"
   let buffer = @buffer.HeapByteBuf::new(1024)
@@ -96,9 +97,7 @@ async test "parse_request handles query parameters in URI" {
   buffer.write(bytes.to_fixedarray(), 0, bytes.length()) |> ignore
   let reader = @io.ByteBufReader::new(buffer as &@buffer.Buffer)
   let http_reader = HttpReader::new(reader as &@io.Reader)
-  let request = try {
-    http_reader.read_request()
-  } catch {
+  let request = http_reader.read_request() catch {
     e => {
       inspect(e, content="Should not fail")
       HttpRequest::new(HttpMethod::GET, "/", HttpVersion::HTTP_1_1)
@@ -107,7 +106,8 @@ async test "parse_request handles query parameters in URI" {
   inspect(request.uri, content="/search?q=moonbit&lang=en")
 }
 
-///| Test parsing PUT request
+///|
+/// Test parsing PUT request
 async test "parse_request parses PUT request" {
   let request_str = "PUT /resource/123 HTTP/1.1\r\nHost: api.example.com\r\nContent-Length: 0\r\n\r\n"
   let buffer = @buffer.HeapByteBuf::new(1024)
@@ -115,9 +115,7 @@ async test "parse_request parses PUT request" {
   buffer.write(bytes.to_fixedarray(), 0, bytes.length()) |> ignore
   let reader = @io.ByteBufReader::new(buffer as &@buffer.Buffer)
   let http_reader = HttpReader::new(reader as &@io.Reader)
-  let request = try {
-    http_reader.read_request()
-  } catch {
+  let request = http_reader.read_request() catch {
     e => {
       inspect(e, content="Should not fail")
       HttpRequest::new(HttpMethod::PUT, "/", HttpVersion::HTTP_1_1)
@@ -127,7 +125,8 @@ async test "parse_request parses PUT request" {
   inspect(request.uri, content="/resource/123")
 }
 
-///| Test parsing DELETE request
+///|
+/// Test parsing DELETE request
 async test "parse_request parses DELETE request" {
   let request_str = "DELETE /resource/456 HTTP/1.1\r\nHost: api.example.com\r\n\r\n"
   let buffer = @buffer.HeapByteBuf::new(1024)
@@ -135,9 +134,7 @@ async test "parse_request parses DELETE request" {
   buffer.write(bytes.to_fixedarray(), 0, bytes.length()) |> ignore
   let reader = @io.ByteBufReader::new(buffer as &@buffer.Buffer)
   let http_reader = HttpReader::new(reader as &@io.Reader)
-  let request = try {
-    http_reader.read_request()
-  } catch {
+  let request = http_reader.read_request() catch {
     e => {
       inspect(e, content="Should not fail")
       HttpRequest::new(HttpMethod::DELETE, "/", HttpVersion::HTTP_1_1)

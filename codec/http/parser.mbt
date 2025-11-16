@@ -108,12 +108,8 @@ async fn HttpReader::read_headers(self : HttpReader) -> HttpHeaders {
     let colon_pos = line.find(":")
     match colon_pos {
       Some(pos) => {
-        let name = line[0:pos]
-          .trim(chars=" \t\r\n")
-          .to_string()
-        let value = line[pos + 1:]
-          .trim(chars=" \t\r\n")
-          .to_string()
+        let name = line[0:pos].trim(chars=" \t\r\n").to_string()
+        let value = line[pos + 1:].trim(chars=" \t\r\n").to_string()
         headers.add(name, value)
       }
       None => raise fail("Invalid header line: " + line)

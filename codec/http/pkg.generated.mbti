@@ -7,10 +7,58 @@ import(
 )
 
 // Values
+fn build_query_string(Map[String, Array[String]]) -> String
+
+fn parse_cookie_header(String) -> Map[String, String]
+
+fn parse_set_cookie(String) -> Cookie?
+
+fn url_decode(String) -> String
+
+fn url_encode(String) -> String
 
 // Errors
 
 // Types and methods
+pub struct Cookie {
+  name : String
+  value : String
+  domain : String?
+  path : String?
+  expires : String?
+  max_age : Int?
+  secure : Bool
+  http_only : Bool
+  same_site : SameSite?
+}
+fn Cookie::new(String, String) -> Self
+fn Cookie::to_set_cookie_string(Self) -> String
+fn Cookie::with_domain(Self, String) -> Self
+fn Cookie::with_expires(Self, String) -> Self
+fn Cookie::with_http_only(Self, Bool) -> Self
+fn Cookie::with_max_age(Self, Int) -> Self
+fn Cookie::with_path(Self, String) -> Self
+fn Cookie::with_same_site(Self, SameSite) -> Self
+fn Cookie::with_secure(Self, Bool) -> Self
+
+pub struct HttpChunkedReader {
+  reader : &@io.Reader
+  mut current_chunk_remaining : Int
+  mut finished : Bool
+  mut trailer_headers : HttpHeaders?
+}
+fn HttpChunkedReader::is_finished(Self) -> Bool
+fn HttpChunkedReader::new(&@io.Reader) -> Self
+async fn HttpChunkedReader::read_all(Self) -> Bytes
+fn HttpChunkedReader::trailer_headers(Self) -> HttpHeaders?
+
+pub struct HttpChunkedWriter {
+  writer : &@io.Writer
+}
+fn HttpChunkedWriter::new(&@io.Writer) -> Self
+async fn HttpChunkedWriter::write_chunk(Self, Bytes) -> Unit
+async fn HttpChunkedWriter::write_final_chunk(Self, HttpHeaders?) -> Unit
+
 pub struct HttpContentReader {
   reader : &@io.Reader
   content_length : Int
@@ -107,6 +155,27 @@ fn HttpWriter::new(&@io.Writer) -> Self
 async fn HttpWriter::write_request(Self, HttpRequest, &@buffer.Buffer) -> Unit
 async fn HttpWriter::write_response(Self, HttpResponse, &@buffer.Buffer) -> Unit
 impl @io.Writer for HttpWriter
+
+pub enum SameSite {
+  Strict
+  Lax
+  None
+}
+impl Eq for SameSite
+impl Show for SameSite
+
+pub struct Uri {
+  raw : String
+  path : String
+  query : Map[String, Array[String]]
+  fragment : String?
+}
+fn Uri::fragment(Self) -> String?
+fn Uri::get_query(Self, String) -> String?
+fn Uri::get_query_all(Self, String) -> Array[String]
+fn Uri::parse(String) -> Self
+fn Uri::path(Self) -> String
+fn Uri::to_string(Self) -> String
 
 // Type aliases
 
