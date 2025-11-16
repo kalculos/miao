@@ -27,7 +27,7 @@ pub async fn HttpReader::read_request(self : HttpReader) -> HttpRequest {
     .get("Content-Length")
     .map(length_str => {
       let length = @strconv.parse_int(length_str)
-      guard length > 0 else {
+      guard length >= 0 else {
         raise fail("Invalid HTTP Content-Length: \{length}")
       }
       HttpContentReader::new(self.reader, length)
@@ -50,7 +50,7 @@ pub async fn HttpReader::read_response(self : HttpReader) -> HttpResponse {
     .get("Content-Length")
     .map(length_str => {
       let length = @strconv.parse_int(length_str)
-      guard length > 0 else {
+      guard length >= 0 else {
         raise fail("Invalid HTTP Content-Length: \{length}")
       }
       HttpContentReader::new(self.reader, length)

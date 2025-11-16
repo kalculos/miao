@@ -1,5 +1,5 @@
-///| Tests for HTTP codec types
-
+///|
+/// Tests for HTTP codec types
 test "HttpMethod::to_string converts correctly" {
   inspect(HttpMethod::GET.to_string(), content="GET")
   inspect(HttpMethod::POST.to_string(), content="POST")
@@ -7,31 +7,39 @@ test "HttpMethod::to_string converts correctly" {
   inspect(HttpMethod::DELETE.to_string(), content="DELETE")
 }
 
+///|
 test "HttpMethod::from_string parses correctly" {
   inspect(
-    try { HttpMethod::from_string("GET") } catch { _ => HttpMethod::TRACE },
+    HttpMethod::from_string("GET") catch {
+      _ => HttpMethod::TRACE
+    },
     content="GET",
   )
   inspect(
-    try { HttpMethod::from_string("POST") } catch { _ => HttpMethod::TRACE },
+    HttpMethod::from_string("POST") catch {
+      _ => HttpMethod::TRACE
+    },
     content="POST",
   )
 }
 
+///|
 test "HttpVersion::to_string converts correctly" {
   inspect(HttpVersion::HTTP_1_0.to_string(), content="HTTP/1.0")
   inspect(HttpVersion::HTTP_1_1.to_string(), content="HTTP/1.1")
 }
 
+///|
 test "HttpVersion::from_string parses correctly" {
   inspect(
-    try { HttpVersion::from_string("HTTP/1.1") } catch {
+    HttpVersion::from_string("HTTP/1.1") catch {
       _ => HttpVersion::HTTP_1_0
     },
     content="HTTP_1_1",
   )
 }
 
+///|
 test "HttpStatus common status codes" {
   let ok = HttpStatus::ok()
   inspect(ok.code, content="200")
@@ -41,6 +49,7 @@ test "HttpStatus common status codes" {
   inspect(not_found.reason, content="Not Found")
 }
 
+///|
 test "HttpHeaders add and get" {
   let headers = HttpHeaders::new()
   headers.add("Content-Type", "text/html")
@@ -50,6 +59,7 @@ test "HttpHeaders add and get" {
   inspect(headers.get("Missing"), content="None")
 }
 
+///|
 test "HttpHeaders get_all returns all matching headers" {
   let headers = HttpHeaders::new()
   headers.add("Set-Cookie", "a=1")
@@ -61,6 +71,7 @@ test "HttpHeaders get_all returns all matching headers" {
   inspect(cookies[1], content="b=2")
 }
 
+///|
 test "HttpHeaders remove removes all matching headers" {
   let headers = HttpHeaders::new()
   headers.add("X-Custom", "value1")
@@ -72,6 +83,7 @@ test "HttpHeaders remove removes all matching headers" {
   inspect(headers.get("X-Custom"), content="None")
 }
 
+///|
 test "HttpRequest::new creates request with empty headers" {
   let request = HttpRequest::new(HttpMethod::GET, "/", HttpVersion::HTTP_1_1)
   inspect(request.method(), content="GET")
@@ -80,6 +92,7 @@ test "HttpRequest::new creates request with empty headers" {
   inspect(request.headers.length(), content="0")
 }
 
+///|
 test "HttpResponse::new creates response with empty headers" {
   let response = HttpResponse::new(HttpVersion::HTTP_1_1, HttpStatus::ok())
   inspect(response.version, content="HTTP_1_1")
