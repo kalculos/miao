@@ -178,7 +178,7 @@ impl @fs.FileSystem for LibuvFileSystem with delete(self, path) {
         handle.cancel()
       }
     })) {
-    Ok(()) => Ok(())
+    Ok(_) => Ok(())
     Err(@rt.CoroutineError::Cancelled) => raise @rt.CoroutineError::Cancelled
     Err(@rt.CoroutineError::ExecutionError(err)) =>
       Err(uv_error_to_file_error(err, "Failed to delete file"))
@@ -232,7 +232,7 @@ impl @fs.FileSystem for LibuvFileSystem with rename(self, src, dst, copy_attr~) 
         handle.cancel()
       }
     })) {
-    Ok(()) => Ok(())
+    Ok(_) => Ok(())
     Err(@rt.CoroutineError::Cancelled) => raise @rt.CoroutineError::Cancelled
     Err(@rt.CoroutineError::ExecutionError(err)) =>
       Err(uv_error_to_file_error(err, "Failed to rename file"))

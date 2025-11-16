@@ -81,7 +81,7 @@ async fn LibuvFile::new(
   path~ : @fs.Path,
   flag~ : @fs.OpenFlags,
   mode~ : @fs.AccessFlags,
-) -> Result[@fs.FileChannel, @fs.FileError] {
+) -> Result[&@fs.FileChannel, @fs.FileError] {
   let uv = rt.uv
   let path_bytes = @encoding/utf8.encode(path.to_unix_path())
   let fd = match
@@ -115,13 +115,14 @@ async fn LibuvFile::new(
     }
   }
   let attr = match
-    (try? gather_fattr(rt, fd) {
+    (try? gather_fattr(rt, fd)) {
     Ok(a) => a
     Err(@rt.CoroutineError::Cancelled) => raise @rt.CoroutineError::Cancelled
     Err(@rt.CoroutineError::ExecutionError(err)) => {
       let err_str = err.to_string()
       return Err(@fs.FileError::IoError(msg="Failed to get file attributes: \{err_str}"))
     }
+    Err(_) => return Err(@fs.FileError::IoError(msg="Unknown error getting file attributes"))
   }
   Ok(
     LibuvFile::{
@@ -130,7 +131,7 @@ async fn LibuvFile::new(
       access: flag,
       info: @fs.FileInfo::{ attribute: attr, path },
       uv: rt.uv,
-    } as @fs.FileChannel,
+    },
   )
 }
 
