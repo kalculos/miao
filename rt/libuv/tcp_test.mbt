@@ -6,20 +6,12 @@
 /// Test TCP server bind and close
 async test "TCP server can bind to address" {
   // Bind to localhost on a high port - should succeed
-  let result = @net.listen_tcp("127.0.0.1:19876")
+  let socket = @net.listen_tcp("127.0.0.1:19876").unwrap()
   
-  match result {
-    Ok(socket) => {
-      // Successfully bound - this is expected
-      inspect(socket.is_closed(), content="false")
-      @net.Socket::close(socket)
-      inspect(true, content="true")
-    }
-    Err(err) => {
-      // Binding should not fail - if it does, fail the test
-      inspect(false, content="true")
-    }
-  }
+  // Successfully bound - this is expected
+  inspect(socket.is_closed(), content="false")
+  @net.Socket::close(socket)
+  inspect(true, content="true")
 }
 
 ///|
@@ -68,71 +60,57 @@ async test "TCP server and client can communicate" {
   let rt = LibuvRuntime::default()
   
   // Start a server task
-  let server_task = rt.new_task(fn(_) {
+  let server_task = rt.new_task(fn(_) raise {
     // Server: Listen on a port
-    let server_result = @net.listen_tcp("127.0.0.1:19877") catch { _ => return }
-    match server_result {
-      Ok(server) => {
-        // Accept one connection with a timeout
-        let timeout = @time.Duration::of_seconds(5L)
-        let client_result = server.accept(timeout) catch { _ => return }
-        
-        match client_result {
-          Ok(client) => {
-            // Read data from client
-            let buffer : FixedArray[Byte] = FixedArray::make(100, 0)
-            let bytes_read = client.read(buffer, 0, 100) catch { _ => 0 }
-            
-            // Echo back to client
-            if bytes_read > 0 {
-              client.write(buffer, 0, bytes_read) |> ignore
-            }
-            
-            @io.Channel::close(client) catch { _ => () }
-          }
-          Err(_) => ()
-        }
-        
-        @net.Socket::close(server) catch { _ => () }
-      }
-      Err(_) => ()
+    let server = @net.listen_tcp("127.0.0.1:19877").unwrap()
+    
+    // Accept one connection with a timeout
+    let timeout = @time.Duration::of_seconds(5L)
+    let client = server.accept(timeout).unwrap()
+    
+    // Read data from client
+    let buffer : FixedArray[Byte] = FixedArray::make(100, 0)
+    let bytes_read = client.read(buffer, 0, 100)
+    
+    // Echo back to client
+    if bytes_read > 0 {
+      client.write(buffer, 0, bytes_read) |> ignore
     }
+    
+    @io.Channel::close(client)
+    @net.Socket::close(server)
   })
   
   // Start a client task
-  let client_task = rt.new_task(fn(_) {
+  let client_task = rt.new_task(fn(_) raise {
     // Give server time to start
     let rt2 = LibuvRuntime::default()
-    rt2.sleep(100) catch { _ => () }
+    rt2.sleep(100)
     
     // Client: Connect to the server
-    let client_result = @net.dial_tcp("127.0.0.1:19877") catch { _ => return }
-    match client_result {
-      Ok(conn) => {
-        // Send data
-        let send_data : FixedArray[Byte] = [b'H', b'i']
-        conn.write(send_data, 0, 2) |> ignore
-        
-        // Read echo response
-        let recv_buffer : FixedArray[Byte] = FixedArray::make(100, 0)
-        let bytes_read = conn.read(recv_buffer, 0, 100) catch { _ => 0 }
-        
-        // Verify we got data back
-        inspect(bytes_read > 0, content="true")
-        
-        @io.Channel::close(conn) catch { _ => () }
-      }
-      Err(_) => ()
-    }
+    let conn = @net.dial_tcp("127.0.0.1:19877").unwrap()
+    
+    // Send data
+    let send_data : FixedArray[Byte] = [b'H', b'i']
+    conn.write(send_data, 0, 2) |> ignore
+    
+    // Read echo response
+    let recv_buffer : FixedArray[Byte] = FixedArray::make(100, 0)
+    let bytes_read = conn.read(recv_buffer, 0, 100)
+    
+    // Verify we got data back
+    inspect(bytes_read > 0, content="true")
+    
+    @io.Channel::close(conn)
   })
   
   // Start both tasks
-  server_task.start() catch { _ => () }
-  client_task.start() catch { _ => () }
+  server_task.start()
+  client_task.start()
   
   // Wait for both to complete
-  server_task.join() catch { _ => () }
-  client_task.join() catch { _ => () }
+  server_task.join()
+  client_task.join()
   
   // If we got here, the test passed
   inspect(true, content="true")
