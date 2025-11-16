@@ -17,7 +17,9 @@ pub fn HttpChunkedReader::new(reader : &@io.Reader) -> HttpChunkedReader {
 
 ///|
 /// Read all remaining content from chunked encoding
-pub async fn HttpChunkedReader::read_all(self : HttpChunkedReader) -> &@buffer.Buffer {
+pub async fn HttpChunkedReader::read_all(
+  self : HttpChunkedReader,
+) -> &@buffer.Buffer {
   let result = @buffer.HeapByteBuf::new(4096)
   while not(self.finished) {
     let chunk = self.read_chunk()
@@ -28,7 +30,9 @@ pub async fn HttpChunkedReader::read_all(self : HttpChunkedReader) -> &@buffer.B
 
 ///|
 /// Read the next chunk
-async fn HttpChunkedReader::read_chunk(self : HttpChunkedReader) -> &@buffer.Buffer {
+async fn HttpChunkedReader::read_chunk(
+  self : HttpChunkedReader,
+) -> &@buffer.Buffer {
   if self.finished {
     return @buffer.HeapByteBuf::new(0)
   }
@@ -74,7 +78,8 @@ async fn HttpChunkedReader::read_from_current_chunk(
     return @buffer.HeapByteBuf::new(0)
   }
   let buffer = self.reader.read_buffer(to_read)
-  self.current_chunk_remaining = self.current_chunk_remaining - buffer.readable_bytes()
+  self.current_chunk_remaining = self.current_chunk_remaining -
+    buffer.readable_bytes()
   buffer
 }
 
@@ -93,12 +98,16 @@ async fn HttpChunkedReader::read_line(self : HttpChunkedReader) -> String {
 
     // Check for \r\n
     if prev_byte == b'\r' && byte == b'\n' {
-      // Remove the \r we added - get current bytes and remove last character
-      let current_bytes = line_bytes.to_bytes()
-      if current_bytes.length() > 0 {
-        return @encoding/utf8.decode(
-          current_bytes[0:current_bytes.length() - 1],
-        )
+      // Remove the \r we added - skip back one byte
+      if line_bytes.readable_bytes() > 0 {
+        // We need to remove the last written byte
+        // Since we can't go back, we'll reconstruct without the last byte
+        let temp = line_bytes.to_bytes()
+        if temp.length() > 0 {
+          line_bytes.clear()
+          let arr = temp.to_fixedarray()
+          line_bytes.write(arr, 0, temp.length() - 1) |> ignore
+        }
       }
       break
     }
@@ -214,18 +223,18 @@ pub fn HttpChunkedWriter::new(writer : &@io.Writer) -> HttpChunkedWriter {
 /// Write a chunk of data
 pub async fn HttpChunkedWriter::write_chunk(
   self : HttpChunkedWriter,
-  data : Bytes,
+  data : &@buffer.Buffer,
 ) -> Unit {
-  if data.length() == 0 {
+  if data.readable_bytes() == 0 {
     return
   }
 
   // Write chunk size in hex
-  self.write_string(data.length().to_hex_string())
+  self.write_string(data.readable_bytes().to_hex_string())
   self.write_string("\r\n")
 
   // Write chunk data
-  self.write_bytes(data)
+  self.write_buffer(data)
   self.write_string("\r\n")
 }
 
@@ -262,42 +271,17 @@ async fn HttpChunkedWriter::write_string(
   s : String,
 ) -> Unit {
   let bytes = @encoding/utf8.encode(s)
-  self.write_bytes(bytes)
+  let buffer = @buffer.HeapByteBuf::wrapped_bytes(bytes)
+  self.write_buffer(buffer)
 }
 
 ///|
-/// Write bytes to the writer
-async fn HttpChunkedWriter::write_bytes(
+/// Write buffer to the writer
+async fn HttpChunkedWriter::write_buffer(
   self : HttpChunkedWriter,
-  bytes : Bytes,
+  buffer : &@buffer.Buffer,
 ) -> Unit {
-  let len = bytes.length()
-  if len == 0 {
-    return
-  }
-  // Use buffer's wrapped_bytes to access underlying array efficiently
-  let buf = @buffer.HeapByteBuf::wrapped_bytes(bytes)
-  match buf.array() {
-    Some(arr) => {
-      let mut total_written = 0
-      while total_written < len {
-        let written = self.writer.write(arr, total_written, len - total_written)
-        total_written = total_written + written
-      }
-    }
-    None => {
-      // Fallback: copy to array first
-      let arr : FixedArray[Byte] = FixedArray::make(len, 0)
-      for i = 0; i < len; i = i + 1 {
-        arr[i] = bytes[i]
-      }
-      let mut total_written = 0
-      while total_written < len {
-        let written = self.writer.write(arr, total_written, len - total_written)
-        total_written = total_written + written
-      }
-    }
-  }
+  self.writer.write_buffer(buffer) |> ignore
 }
 
 ///|

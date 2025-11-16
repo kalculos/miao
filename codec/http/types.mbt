@@ -1,4 +1,5 @@
-///| HTTP/1.1 Methods
+///|
+/// HTTP/1.1 Methods
 pub(all) enum HttpMethod {
   GET
   POST
@@ -11,7 +12,8 @@ pub(all) enum HttpMethod {
   TRACE
 } derive(Eq, Show)
 
-///| Convert HttpMethod to String
+///|
+/// Convert HttpMethod to String
 pub fn HttpMethod::to_string(self : HttpMethod) -> String {
   match self {
     GET => "GET"
@@ -26,7 +28,8 @@ pub fn HttpMethod::to_string(self : HttpMethod) -> String {
   }
 }
 
-///| Parse HttpMethod from String
+///|
+/// Parse HttpMethod from String
 pub fn HttpMethod::from_string(s : String) -> HttpMethod raise {
   match s {
     "GET" => GET
@@ -42,13 +45,15 @@ pub fn HttpMethod::from_string(s : String) -> HttpMethod raise {
   }
 }
 
-///| HTTP Version
+///|
+/// HTTP Version
 pub(all) enum HttpVersion {
   HTTP_1_0
   HTTP_1_1
 } derive(Eq, Show)
 
-///| Convert HttpVersion to String
+///|
+/// Convert HttpVersion to String
 pub fn HttpVersion::to_string(self : HttpVersion) -> String {
   match self {
     HTTP_1_0 => "HTTP/1.0"
@@ -56,7 +61,8 @@ pub fn HttpVersion::to_string(self : HttpVersion) -> String {
   }
 }
 
-///| Parse HttpVersion from String
+///|
+/// Parse HttpVersion from String
 pub fn HttpVersion::from_string(s : String) -> HttpVersion raise {
   match s {
     "HTTP/1.0" => HTTP_1_0
@@ -65,175 +71,218 @@ pub fn HttpVersion::from_string(s : String) -> HttpVersion raise {
   }
 }
 
-///| HTTP Status Code
+///|
+/// HTTP Status Code
 pub struct HttpStatus {
   code : Int
   reason : String
 } derive(Eq, Show)
 
-///| Common HTTP Status Codes - 1xx Informational
+///|
+/// Common HTTP Status Codes - 1xx Informational
 pub fn HttpStatus::continue_() -> HttpStatus {
   { code: 100, reason: "Continue" }
 }
 
+///|
 pub fn HttpStatus::switching_protocols() -> HttpStatus {
   { code: 101, reason: "Switching Protocols" }
 }
 
-///| Common HTTP Status Codes - 2xx Success
+///|
+/// Common HTTP Status Codes - 2xx Success
 pub fn HttpStatus::ok() -> HttpStatus {
   { code: 200, reason: "OK" }
 }
 
+///|
 pub fn HttpStatus::created() -> HttpStatus {
   { code: 201, reason: "Created" }
 }
 
+///|
 pub fn HttpStatus::accepted() -> HttpStatus {
   { code: 202, reason: "Accepted" }
 }
 
+///|
 pub fn HttpStatus::no_content() -> HttpStatus {
   { code: 204, reason: "No Content" }
 }
 
-///| Common HTTP Status Codes - 3xx Redirection
+///|
+/// Common HTTP Status Codes - 3xx Redirection
 pub fn HttpStatus::moved_permanently() -> HttpStatus {
   { code: 301, reason: "Moved Permanently" }
 }
 
+///|
 pub fn HttpStatus::found() -> HttpStatus {
   { code: 302, reason: "Found" }
 }
 
+///|
 pub fn HttpStatus::see_other() -> HttpStatus {
   { code: 303, reason: "See Other" }
 }
 
+///|
 pub fn HttpStatus::not_modified() -> HttpStatus {
   { code: 304, reason: "Not Modified" }
 }
 
+///|
 pub fn HttpStatus::temporary_redirect() -> HttpStatus {
   { code: 307, reason: "Temporary Redirect" }
 }
 
+///|
 pub fn HttpStatus::permanent_redirect() -> HttpStatus {
   { code: 308, reason: "Permanent Redirect" }
 }
 
-///| Common HTTP Status Codes - 4xx Client Error
+///|
+/// Common HTTP Status Codes - 4xx Client Error
 pub fn HttpStatus::bad_request() -> HttpStatus {
   { code: 400, reason: "Bad Request" }
 }
 
+///|
 pub fn HttpStatus::unauthorized() -> HttpStatus {
   { code: 401, reason: "Unauthorized" }
 }
 
+///|
 pub fn HttpStatus::payment_required() -> HttpStatus {
   { code: 402, reason: "Payment Required" }
 }
 
+///|
 pub fn HttpStatus::forbidden() -> HttpStatus {
   { code: 403, reason: "Forbidden" }
 }
 
+///|
 pub fn HttpStatus::not_found() -> HttpStatus {
   { code: 404, reason: "Not Found" }
 }
 
+///|
 pub fn HttpStatus::method_not_allowed() -> HttpStatus {
   { code: 405, reason: "Method Not Allowed" }
 }
 
+///|
 pub fn HttpStatus::conflict() -> HttpStatus {
   { code: 409, reason: "Conflict" }
 }
 
+///|
 pub fn HttpStatus::gone() -> HttpStatus {
   { code: 410, reason: "Gone" }
 }
 
+///|
 pub fn HttpStatus::unprocessable_entity() -> HttpStatus {
   { code: 422, reason: "Unprocessable Entity" }
 }
 
+///|
 pub fn HttpStatus::too_many_requests() -> HttpStatus {
   { code: 429, reason: "Too Many Requests" }
 }
 
-///| Common HTTP Status Codes - 5xx Server Error
+///|
+/// Common HTTP Status Codes - 5xx Server Error
 pub fn HttpStatus::internal_server_error() -> HttpStatus {
   { code: 500, reason: "Internal Server Error" }
 }
 
+///|
 pub fn HttpStatus::not_implemented() -> HttpStatus {
   { code: 501, reason: "Not Implemented" }
 }
 
+///|
 pub fn HttpStatus::bad_gateway() -> HttpStatus {
   { code: 502, reason: "Bad Gateway" }
 }
 
+///|
 pub fn HttpStatus::service_unavailable() -> HttpStatus {
   { code: 503, reason: "Service Unavailable" }
 }
 
+///|
 pub fn HttpStatus::gateway_timeout() -> HttpStatus {
   { code: 504, reason: "Gateway Timeout" }
 }
 
+///|
 pub fn HttpStatus::new(code : Int, reason : String) -> HttpStatus {
   { code, reason }
 }
 
-///| Check if status is informational (1xx)
+///|
+/// Check if status is informational (1xx)
 pub fn HttpStatus::is_informational(self : HttpStatus) -> Bool {
   self.code >= 100 && self.code < 200
 }
 
-///| Check if status is success (2xx)
+///|
+/// Check if status is success (2xx)
 pub fn HttpStatus::is_success(self : HttpStatus) -> Bool {
   self.code >= 200 && self.code < 300
 }
 
-///| Check if status is redirection (3xx)
+///|
+/// Check if status is redirection (3xx)
 pub fn HttpStatus::is_redirection(self : HttpStatus) -> Bool {
   self.code >= 300 && self.code < 400
 }
 
-///| Check if status is client error (4xx)
+///|
+/// Check if status is client error (4xx)
 pub fn HttpStatus::is_client_error(self : HttpStatus) -> Bool {
   self.code >= 400 && self.code < 500
 }
 
-///| Check if status is server error (5xx)
+///|
+/// Check if status is server error (5xx)
 pub fn HttpStatus::is_server_error(self : HttpStatus) -> Bool {
   self.code >= 500 && self.code < 600
 }
 
-///| Check if status is any error (4xx or 5xx)
+///|
+/// Check if status is any error (4xx or 5xx)
 pub fn HttpStatus::is_error(self : HttpStatus) -> Bool {
   self.code >= 400
 }
 
-///| HTTP Headers
+///|
+/// HTTP Headers
 pub struct HttpHeaders {
   headers : Array[(String, String)]
 }
 
-///| Create new HttpHeaders
+///|
+/// Create new HttpHeaders
 pub fn HttpHeaders::new() -> HttpHeaders {
   { headers: Array::new() }
 }
 
-///| Add a header
-pub fn HttpHeaders::add(self : HttpHeaders, name : String, value : String) -> Unit {
+///|
+/// Add a header
+pub fn HttpHeaders::add(
+  self : HttpHeaders,
+  name : String,
+  value : String,
+) -> Unit {
   self.headers.push((name, value))
 }
 
-///| Get a header value by name (case-insensitive)
+///|
+/// Get a header value by name (case-insensitive)
 pub fn HttpHeaders::get(self : HttpHeaders, name : String) -> String? {
   let lower_name = name.to_lower()
   for i = 0; i < self.headers.length(); i = i + 1 {
@@ -245,7 +294,8 @@ pub fn HttpHeaders::get(self : HttpHeaders, name : String) -> String? {
   None
 }
 
-///| Get all header values by name (case-insensitive)
+///|
+/// Get all header values by name (case-insensitive)
 pub fn HttpHeaders::get_all(self : HttpHeaders, name : String) -> Array[String] {
   let lower_name = name.to_lower()
   let result = Array::new()
@@ -258,7 +308,8 @@ pub fn HttpHeaders::get_all(self : HttpHeaders, name : String) -> Array[String] 
   result
 }
 
-///| Remove all headers with the given name (case-insensitive)
+///|
+/// Remove all headers with the given name (case-insensitive)
 pub fn HttpHeaders::remove(self : HttpHeaders, name : String) -> Unit {
   let lower_name = name.to_lower()
   let mut i = 0
@@ -272,96 +323,96 @@ pub fn HttpHeaders::remove(self : HttpHeaders, name : String) -> Unit {
   }
 }
 
-///| Get the number of headers
+///|
+/// Get the number of headers
 pub fn HttpHeaders::length(self : HttpHeaders) -> Int {
   self.headers.length()
 }
 
-///| Set a header (replaces existing values with same name)
-pub fn HttpHeaders::set(self : HttpHeaders, name : String, value : String) -> Unit {
+///|
+/// Set a header (replaces existing values with same name)
+pub fn HttpHeaders::set(
+  self : HttpHeaders,
+  name : String,
+  value : String,
+) -> Unit {
   self.remove(name)
   self.add(name, value)
 }
 
-///| Check if a header exists (case-insensitive)
+///|
+/// Check if a header exists (case-insensitive)
 pub fn HttpHeaders::contains(self : HttpHeaders, name : String) -> Bool {
   not(self.get(name).is_empty())
 }
 
-///| HTTP Content Reader for lazy body reading
+///|
+/// HTTP Content Reader for lazy body reading
 pub struct HttpContentReader {
   reader : &@io.Reader
   content_length : Int
   mut bytes_read : Int
 }
 
-///| Create a new HttpContentReader
-pub fn HttpContentReader::new(reader : &@io.Reader, content_length : Int) -> HttpContentReader {
+///|
+/// Create a new HttpContentReader
+pub fn HttpContentReader::new(
+  reader : &@io.Reader,
+  content_length : Int,
+) -> HttpContentReader {
   { reader, content_length, bytes_read: 0 }
 }
 
-///| Read all remaining content
-pub async fn HttpContentReader::read_all(self : HttpContentReader) -> Bytes raise {
+///|
+/// Read all remaining content
+pub async fn HttpContentReader::read_all(
+  self : HttpContentReader,
+) -> &@buffer.Buffer {
   let remaining = self.content_length - self.bytes_read
   if remaining <= 0 {
-    return b""
+    return @buffer.HeapByteBuf::new(0)
   }
-  
-  let arr : FixedArray[Byte] = FixedArray::make(remaining, 0)
-  let mut total_read = 0
-  
-  while total_read < remaining {
-    let read = self.reader.read(arr, total_read, remaining - total_read)
-    if read == 0 {
-      raise fail("Unexpected EOF: expected " + remaining.to_string() + " bytes, got " + total_read.to_string())
-    }
-    total_read = total_read + read
-  }
-  
-  self.bytes_read = self.bytes_read + total_read
-  Bytes::from_array(arr)
+  let buffer = self.reader.read_buffer(remaining)
+  self.bytes_read = self.bytes_read + buffer.readable_bytes()
+  buffer
 }
 
-///| Read up to n bytes from the content
-pub async fn HttpContentReader::read(self : HttpContentReader, n : Int) -> Bytes raise {
+///|
+/// Read up to n bytes from the content
+pub async fn HttpContentReader::read(
+  self : HttpContentReader,
+  n : Int,
+) -> &@buffer.Buffer {
   let remaining = self.content_length - self.bytes_read
   let to_read = if n < remaining { n } else { remaining }
-  
   if to_read <= 0 {
-    return b""
+    return @buffer.HeapByteBuf::new(0)
   }
-  
-  let arr : FixedArray[Byte] = FixedArray::make(to_read, 0)
-  let mut total_read = 0
-  
-  while total_read < to_read {
-    let read = self.reader.read(arr, total_read, to_read - total_read)
-    if read == 0 {
-      break
-    }
-    total_read = total_read + read
-  }
-  
-  self.bytes_read = self.bytes_read + total_read
-  Bytes::from_array(arr)
+  let buffer = self.reader.read_buffer(to_read)
+  self.bytes_read = self.bytes_read + buffer.readable_bytes()
+  buffer
 }
 
-///| Get the total content length
+///|
+/// Get the total content length
 pub fn HttpContentReader::content_length(self : HttpContentReader) -> Int {
   self.content_length
 }
 
-///| Get the number of bytes already read
+///|
+/// Get the number of bytes already read
 pub fn HttpContentReader::bytes_read(self : HttpContentReader) -> Int {
   self.bytes_read
 }
 
-///| Check if there's more content to read
+///|
+/// Check if there's more content to read
 pub fn HttpContentReader::has_more(self : HttpContentReader) -> Bool {
   self.bytes_read < self.content_length
 }
 
-///| HTTP Request
+///|
+/// HTTP Request
 pub struct HttpRequest {
   http_method : HttpMethod
   uri : String
@@ -370,26 +421,36 @@ pub struct HttpRequest {
   content_reader : HttpContentReader?
 }
 
-///| Create new HttpRequest
+///|
+/// Create new HttpRequest
 pub fn HttpRequest::new(
   http_method : HttpMethod,
   uri : String,
-  version : HttpVersion
+  version : HttpVersion,
 ) -> HttpRequest {
-  { http_method, uri, version, headers: HttpHeaders::new(), content_reader: None }
+  {
+    http_method,
+    uri,
+    version,
+    headers: HttpHeaders::new(),
+    content_reader: None,
+  }
 }
 
-///| Get method from request
+///|
+/// Get method from request
 pub fn HttpRequest::method(self : HttpRequest) -> HttpMethod {
   self.http_method
 }
 
-///| Get the content reader if available
+///|
+/// Get the content reader if available
 pub fn HttpRequest::content_reader(self : HttpRequest) -> HttpContentReader? {
   self.content_reader
 }
 
-///| HTTP Response
+///|
+/// HTTP Response
 pub struct HttpResponse {
   version : HttpVersion
   status : HttpStatus
@@ -397,7 +458,11 @@ pub struct HttpResponse {
   content_reader : HttpContentReader?
 }
 
-///| Create new HttpResponse
-pub fn HttpResponse::new(version : HttpVersion, status : HttpStatus) -> HttpResponse {
+///|
+/// Create new HttpResponse
+pub fn HttpResponse::new(
+  version : HttpVersion,
+  status : HttpStatus,
+) -> HttpResponse {
   { version, status, headers: HttpHeaders::new(), content_reader: None }
 }

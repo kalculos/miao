@@ -297,8 +297,8 @@ async test "round-trip write and read response" {
   )
   match parsed_response.content_reader {
     Some(content_reader) => {
-      let body = content_reader.read_all()
-      inspect(@encoding/utf8.decode(body), content="{\"ok\":true}")
+      let body  = content_reader.read_all().to_bytes()
+      inspect(@encoding/utf8.decode(body[:]), content="{\"ok\":true}")
     }
     None => inspect(false, content="Should have content reader")
   }

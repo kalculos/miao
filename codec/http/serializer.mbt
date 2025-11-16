@@ -86,18 +86,12 @@ async fn HttpWriter::write_string(self : HttpWriter, s : String) -> Unit {
 }
 
 ///|
-/// Write bytes to the writer
-async fn HttpWriter::write_bytes(self : HttpWriter, bytes : Bytes) -> Unit {
-  let len = bytes.length()
-  let arr : FixedArray[Byte] = FixedArray::make(len, 0)
-  for i = 0; i < len; i = i + 1 {
-    arr[i] = bytes[i]
-  }
-  let mut total_written = 0
-  while total_written < len {
-    let written = self.writer.write(arr, total_written, len - total_written)
-    total_written = total_written + written
-  }
+/// Write buffer to the writer
+async fn HttpWriter::write_buffer(
+  self : HttpWriter,
+  buffer : &@buffer.Buffer,
+) -> Unit {
+  self.writer.write_buffer(buffer) |> ignore
 }
 
 ///|

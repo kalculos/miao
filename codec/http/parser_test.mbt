@@ -53,13 +53,16 @@ async test "parse_request parses POST request with body" {
   match request.content_reader() {
     Some(content_reader) => {
       inspect(content_reader.content_length(), content="20")
-      let body = content_reader.read_all() catch {
+      let body  = content_reader.read_all() catch {
         e => {
           inspect(e, content="Should not fail reading body")
-          b""
+          ...
         }
       }
-      inspect(@encoding/utf8.decode(body), content="name=value&data=test")
+      inspect(
+        @encoding/utf8.decode(body.to_bytes()),
+        content="name=value&data=test",
+      )
     }
     None => inspect(false, content="Should have content reader")
   }
