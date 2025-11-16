@@ -31,8 +31,8 @@ async test "TCP dial to unreachable address fails gracefully" {
   
   match result {
     Ok(_) => {
-      // Unlikely to succeed unless something is running there
-      inspect(false, content="false")
+      // Should not succeed - assert nothing is running there
+      assert_false(true, msg="Expected connection to fail, but it succeeded")
     }
     Err(_) => {
       // Expected to fail with connection refused
@@ -50,7 +50,7 @@ async test "TCP bind validates address format" {
   match result {
     Ok(_) => {
       // Should not succeed with invalid address
-      inspect(false, content="false")
+      assert_false(true, msg="Expected invalid address to fail binding")
     }
     Err(err) => {
       // Should get InvalidAddress error
