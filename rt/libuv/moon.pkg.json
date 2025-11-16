@@ -15,5 +15,8 @@
     "iceBear67/time",
     "iceBear67/miao/process"
   ],
+  "test-import": [
+    "moonbitlang/async"
+  ],
   "native-stub": ["coroutine.c"]
 }
