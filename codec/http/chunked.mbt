@@ -17,26 +17,20 @@ pub fn HttpChunkedReader::new(reader : &@io.Reader) -> HttpChunkedReader {
 
 ///|
 /// Read all remaining content from chunked encoding
-pub async fn HttpChunkedReader::read_all(self : HttpChunkedReader) -> Bytes {
-  let result = Array::new()
+pub async fn HttpChunkedReader::read_all(self : HttpChunkedReader) -> &@buffer.Buffer {
+  let result = @buffer.HeapByteBuf::new(4096)
   while not(self.finished) {
     let chunk = self.read_chunk()
-    for i = 0; i < chunk.length(); i = i + 1 {
-      result.push(chunk[i])
-    }
+    chunk.transfer_to(result)
   }
-  let arr : FixedArray[Byte] = FixedArray::make(result.length(), 0)
-  for i = 0; i < result.length(); i = i + 1 {
-    arr[i] = result[i]
-  }
-  Bytes::from_array(arr)
+  result
 }
 
 ///|
 /// Read the next chunk
-async fn HttpChunkedReader::read_chunk(self : HttpChunkedReader) -> Bytes {
+async fn HttpChunkedReader::read_chunk(self : HttpChunkedReader) -> &@buffer.Buffer {
   if self.finished {
-    return b""
+    return @buffer.HeapByteBuf::new(0)
   }
 
   // If we have remaining bytes in current chunk, read them
@@ -53,7 +47,7 @@ async fn HttpChunkedReader::read_chunk(self : HttpChunkedReader) -> Bytes {
     // Last chunk, read trailer headers
     self.finished = true
     self.trailer_headers = Some(self.read_trailer_headers())
-    return b""
+    return @buffer.HeapByteBuf::new(0)
   }
 
   // Read the chunk data
@@ -70,32 +64,24 @@ async fn HttpChunkedReader::read_chunk(self : HttpChunkedReader) -> Bytes {
 async fn HttpChunkedReader::read_from_current_chunk(
   self : HttpChunkedReader,
   n : Int,
-) -> Bytes {
+) -> &@buffer.Buffer {
   let to_read = if n < self.current_chunk_remaining {
     n
   } else {
     self.current_chunk_remaining
   }
   if to_read <= 0 {
-    return b""
+    return @buffer.HeapByteBuf::new(0)
   }
-  let arr : FixedArray[Byte] = FixedArray::make(to_read, 0)
-  let mut total_read = 0
-  while total_read < to_read {
-    let read = self.reader.read(arr, total_read, to_read - total_read)
-    if read == 0 {
-      raise fail("Unexpected EOF in chunked encoding")
-    }
-    total_read = total_read + read
-  }
-  self.current_chunk_remaining = self.current_chunk_remaining - total_read
-  Bytes::from_array(arr)
+  let buffer = self.reader.read_buffer(to_read)
+  self.current_chunk_remaining = self.current_chunk_remaining - buffer.readable_bytes()
+  buffer
 }
 
 ///|
 /// Read a line from the reader (until \r\n or \n)
 async fn HttpChunkedReader::read_line(self : HttpChunkedReader) -> String {
-  let line_bytes = Array::new()
+  let line_bytes = @buffer.HeapByteBuf::new(128)
   let mut prev_byte : Byte = 0
   let buffer : FixedArray[Byte] = FixedArray::make(1, 0)
   while true {
@@ -107,9 +93,12 @@ async fn HttpChunkedReader::read_line(self : HttpChunkedReader) -> String {
 
     // Check for \r\n
     if prev_byte == b'\r' && byte == b'\n' {
-      // Remove the \r we added
-      if line_bytes.length() > 0 {
-        line_bytes.pop() |> ignore
+      // Remove the \r we added - get current bytes and remove last character
+      let current_bytes = line_bytes.to_bytes()
+      if current_bytes.length() > 0 {
+        return @encoding/utf8.decode(
+          current_bytes[0:current_bytes.length() - 1],
+        )
       }
       break
     }
@@ -117,16 +106,12 @@ async fn HttpChunkedReader::read_line(self : HttpChunkedReader) -> String {
     if byte == b'\n' {
       break
     }
-    line_bytes.push(byte)
+    line_bytes.write_byte(byte)
     prev_byte = byte
   }
 
   // Convert bytes to string using UTF-8 decoding
-  let arr : FixedArray[Byte] = FixedArray::make(line_bytes.length(), 0)
-  for i = 0; i < line_bytes.length(); i = i + 1 {
-    arr[i] = line_bytes[i]
-  }
-  @encoding/utf8.decode(Bytes::from_array(arr))
+  @encoding/utf8.decode(line_bytes.to_bytes())
 }
 
 ///|
@@ -287,14 +272,31 @@ async fn HttpChunkedWriter::write_bytes(
   bytes : Bytes,
 ) -> Unit {
   let len = bytes.length()
-  let arr : FixedArray[Byte] = FixedArray::make(len, 0)
-  for i = 0; i < len; i = i + 1 {
-    arr[i] = bytes[i]
+  if len == 0 {
+    return
   }
-  let mut total_written = 0
-  while total_written < len {
-    let written = self.writer.write(arr, total_written, len - total_written)
-    total_written = total_written + written
+  // Use buffer's wrapped_bytes to access underlying array efficiently
+  let buf = @buffer.HeapByteBuf::wrapped_bytes(bytes)
+  match buf.array() {
+    Some(arr) => {
+      let mut total_written = 0
+      while total_written < len {
+        let written = self.writer.write(arr, total_written, len - total_written)
+        total_written = total_written + written
+      }
+    }
+    None => {
+      // Fallback: copy to array first
+      let arr : FixedArray[Byte] = FixedArray::make(len, 0)
+      for i = 0; i < len; i = i + 1 {
+        arr[i] = bytes[i]
+      }
+      let mut total_written = 0
+      while total_written < len {
+        let written = self.writer.write(arr, total_written, len - total_written)
+        total_written = total_written + written
+      }
+    }
   }
 }
 
