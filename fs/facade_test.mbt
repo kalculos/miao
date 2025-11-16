@@ -6,10 +6,7 @@ async test "facade open" {
   let fs = MemFileSystem::new()
   set_default_fs(fs)
   let p = path("/test.txt", using_fs=fs)
-  let chan = match open(p, OpenFlags::write_only(create=true), permission=0) {
-    Ok(c) => c
-    Err(_) => return
-  }
+  let chan = open(p, OpenFlags::write_only(create=true), permission=0).unwrap()
   let data : FixedArray[Byte] = [1, 2, 3]
   chan.write(data, 0, 3) |> ignore
   @io.Channel::close(chan)
@@ -22,17 +19,11 @@ async test "facade size" {
   let fs = MemFileSystem::new()
   set_default_fs(fs)
   let p = path("/test.txt", using_fs=fs)
-  let chan = match open(p, OpenFlags::write_only(create=true), permission=0) {
-    Ok(c) => c
-    Err(_) => return
-  }
+  let chan = open(p, OpenFlags::write_only(create=true), permission=0).unwrap()
   let data : FixedArray[Byte] = [1, 2, 3, 4, 5]
   chan.write(data, 0, 5) |> ignore
   @io.Channel::close(chan)
-  let s = match size(p) {
-    Ok(sz) => sz
-    Err(_) => return
-  }
+  let s = size(p).unwrap()
   inspect(s, content="5")
 }
 
@@ -42,15 +33,9 @@ async test "facade attr" {
   let fs = MemFileSystem::new()
   set_default_fs(fs)
   let p = path("/test.txt", using_fs=fs)
-  let chan = match open(p, OpenFlags::write_only(create=true), permission=0) {
-    Ok(c) => c
-    Err(_) => return
-  }
+  let chan = open(p, OpenFlags::write_only(create=true), permission=0).unwrap()
   @io.Channel::close(chan)
-  let a = match attr(p) {
-    Ok(attr) => attr
-    Err(_) => return
-  }
+  let a = attr(p).unwrap()
   inspect(a.kind, content="RegularFile")
   inspect(a.size, content="0")
 }
@@ -62,19 +47,10 @@ async test "facade list_dir" {
   set_default_fs(fs)
   let f1 = path("/dir/file1.txt", using_fs=fs)
   let f2 = path("/dir/file2.txt", using_fs=fs)
-  match open(f1, OpenFlags::write_only(create=true), permission=0) {
-    Ok(c) => @io.Channel::close(c)
-    Err(_) => return
-  }
-  match open(f2, OpenFlags::write_only(create=true), permission=0) {
-    Ok(c) => @io.Channel::close(c)
-    Err(_) => return
-  }
+  @io.Channel::close(open(f1, OpenFlags::write_only(create=true), permission=0).unwrap())
+  @io.Channel::close(open(f2, OpenFlags::write_only(create=true), permission=0).unwrap())
   let dir = path("/dir", using_fs=fs)
-  let entries = match list_dir(dir) {
-    Ok(e) => e
-    Err(_) => return
-  }
+  let entries = list_dir(dir).unwrap()
   inspect(entries.length(), content="2")
 }
 
@@ -85,10 +61,7 @@ async test "facade exists" {
   set_default_fs(fs)
   let p = path("/test.txt", using_fs=fs)
   inspect(exists(p), content="false")
-  match open(p, OpenFlags::write_only(create=true), permission=0) {
-    Ok(c) => @io.Channel::close(c)
-    Err(_) => return
-  }
+  @io.Channel::close(open(p, OpenFlags::write_only(create=true), permission=0).unwrap())
   inspect(exists(p), content="true")
 }
 
@@ -98,15 +71,9 @@ async test "facade delete" {
   let fs = MemFileSystem::new()
   set_default_fs(fs)
   let p = path("/test.txt", using_fs=fs)
-  match open(p, OpenFlags::write_only(create=true), permission=0) {
-    Ok(c) => @io.Channel::close(c)
-    Err(_) => return
-  }
+  @io.Channel::close(open(p, OpenFlags::write_only(create=true), permission=0).unwrap())
   inspect(exists(p), content="true")
-  match delete(p) {
-    Ok(_) => ()
-    Err(_) => return
-  }
+  delete(p).unwrap()
   inspect(exists(p), content="false")
 }
 
@@ -116,14 +83,8 @@ async test "facade delete_if_exist exists" {
   let fs = MemFileSystem::new()
   set_default_fs(fs)
   let p = path("/test.txt", using_fs=fs)
-  match open(p, OpenFlags::write_only(create=true), permission=0) {
-    Ok(c) => @io.Channel::close(c)
-    Err(_) => return
-  }
-  match delete_if_exist(p) {
-    Ok(_) => ()
-    Err(_) => return
-  }
+  @io.Channel::close(open(p, OpenFlags::write_only(create=true), permission=0).unwrap())
+  delete_if_exist(p).unwrap()
   inspect(exists(p), content="false")
 }
 
@@ -133,10 +94,7 @@ async test "facade delete_if_exist not exists" {
   let fs = MemFileSystem::new()
   set_default_fs(fs)
   let p = path("/test.txt", using_fs=fs)
-  match delete_if_exist(p) {
-    Ok(_) => ()
-    Err(_) => return
-  }
+  delete_if_exist(p).unwrap()
   inspect(exists(p), content="false")
 }
 

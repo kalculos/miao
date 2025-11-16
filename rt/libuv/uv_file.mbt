@@ -105,10 +105,8 @@ async fn LibuvFile::new(
         Err(@fs.FileError::PermissionDenied(msg=err_str))
       } else if err_str.contains("EEXIST") {
         Err(@fs.FileError::AlreadyExists(msg=err_str))
-      } else if err_str.contains("ENOTDIR") {
-        Err(@fs.FileError::NotADirectory(msg=err_str))
-      } else if err_str.contains("EISDIR") {
-        Err(@fs.FileError::IsADirectory(msg=err_str))
+      } else if err_str.contains("ENOTDIR") || err_str.contains("EISDIR") {
+        Err(@fs.FileError::UnexpectedKind(msg=err_str))
       } else {
         Err(@fs.FileError::IoError(msg="Failed to open file: \{err_str}"))
       }

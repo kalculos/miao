@@ -18,10 +18,7 @@ async test "MemFileSystem create and write" {
   inspect(written, content="5")
 
   // Read back
-  let rchan = match fs.open_file(p, OpenFlags::read_only(), mode=AccessFlags::new()) {
-    Ok(c) => c
-    Err(_) => return
-  }
+  let rchan = fs.open_file(p, OpenFlags::read_only(), mode=AccessFlags::new()).unwrap()
   let buf : FixedArray[Byte] = FixedArray::make(10, 0)
   let read_count = rchan.read(buf, 0, 10)
   inspect(read_count, content="5")
@@ -61,10 +58,7 @@ async test "MemFileSystem truncate flag" {
   @io.Channel::close(chan2)
 
   // Read back
-  let rchan = match fs.open_file(p, OpenFlags::read_only(), mode=AccessFlags::new()) {
-    Ok(c) => c
-    Err(_) => return
-  }
+  let rchan = fs.open_file(p, OpenFlags::read_only(), mode=AccessFlags::new()).unwrap()
   let buf : FixedArray[Byte] = FixedArray::make(10, 0)
   let read_count = rchan.read(buf, 0, 10)
   inspect(read_count, content="2")
@@ -104,10 +98,7 @@ async test "MemFileSystem append flag" {
   @io.Channel::close(chan2)
 
   // Read back
-  let rchan = match fs.open_file(p, OpenFlags::read_only(), mode=AccessFlags::new()) {
-    Ok(c) => c
-    Err(_) => return
-  }
+  let rchan = fs.open_file(p, OpenFlags::read_only(), mode=AccessFlags::new()).unwrap()
   let buf : FixedArray[Byte] = FixedArray::make(10, 0)
   let read_count = rchan.read(buf, 0, 10)
   inspect(read_count, content="5")
@@ -203,10 +194,7 @@ async test "MemFileSystem write to read-only fails" {
   @io.Channel::close(chan1)
 
   // Open read-only
-  let chan2 = match fs.open_file(p, OpenFlags::read_only(), mode=AccessFlags::new()) {
-    Ok(c) => c
-    Err(_) => return
-  }
+  let chan2 = fs.open_file(p, OpenFlags::read_only(), mode=AccessFlags::new()).unwrap()
   let data : FixedArray[Byte] = [1, 2, 3]
   try {
     chan2.write(data, 0, 3) |> ignore
@@ -261,10 +249,7 @@ async test "MemFileSystem list directory" {
     Err(_) => return
   }
   let dir = path("/dir", using_fs=fs)
-  let entries = match fs.list_directory(dir) {
-    Ok(e) => e
-    Err(_) => return
-  }
+  let entries = fs.list_directory(dir).unwrap()
   inspect(entries.length(), content="2")
 }
 
@@ -278,10 +263,7 @@ async test "MemFileSystem delete file" {
     Err(_) => return
   }
   inspect(fs.exists(p), content="true")
-  match fs.delete(p) {
-    Ok(_) => ()
-    Err(_) => return
-  }
+  fs.delete(p).unwrap()
   inspect(fs.exists(p), content="false")
 }
 
@@ -319,10 +301,7 @@ async test "MemFileSystem rename file" {
   let data : FixedArray[Byte] = [1, 2, 3]
   chan.write(data, 0, 3) |> ignore
   @io.Channel::close(chan)
-  match fs.rename(src, dst, copy_attr=false) {
-    Ok(_) => ()
-    Err(_) => return
-  }
+  fs.rename(src, dst, copy_attr=false).unwrap()
   inspect(fs.exists(src), content="false")
   inspect(fs.exists(dst), content="true")
 }
@@ -388,10 +367,7 @@ async test "MemFileSystem file attributes" {
   let data : FixedArray[Byte] = [1, 2, 3, 4, 5]
   chan.write(data, 0, 5) |> ignore
   @io.Channel::close(chan)
-  let attr = match fs.attr(p) {
-    Ok(a) => a
-    Err(_) => return
-  }
+  let attr = fs.attr(p).unwrap()
   inspect(attr.kind, content="RegularFile")
   inspect(attr.size, content="5")
 }
@@ -435,10 +411,7 @@ async test "MemFileSystem read past EOF" {
   let data : FixedArray[Byte] = [1, 2, 3]
   chan.write(data, 0, 3) |> ignore
   @io.Channel::close(chan)
-  let rchan = match fs.open_file(p, OpenFlags::read_only(), mode=AccessFlags::new()) {
-    Ok(c) => c
-    Err(_) => return
-  }
+  let rchan = fs.open_file(p, OpenFlags::read_only(), mode=AccessFlags::new()).unwrap()
   let buf : FixedArray[Byte] = FixedArray::make(10, 0)
   rchan.read(buf, 0, 3) |> ignore // Read all data
   let read_count = rchan.read(buf, 0, 10) // Try to read more

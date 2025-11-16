@@ -21,10 +21,7 @@ async test "MemFileSystem basic file operations" {
   inspect(written, content="5")
 
   // Read back
-  let rchan = match fs.open_file(p, OpenFlags::read_only(), mode=AccessFlags::new()) {
-    Ok(c) => c
-    Err(_) => return
-  }
+  let rchan = fs.open_file(p, OpenFlags::read_only(), mode=AccessFlags::new()).unwrap()
   let buf : FixedArray[Byte] = FixedArray::make(10, 0)
   let read = rchan.read(buf, 0, 10)
   inspect(read, content="5")
@@ -36,10 +33,7 @@ async test "MemFileSystem basic file operations" {
   inspect(exists, content="true")
 
   // Get attributes
-  let attr = match fs.attr(p) {
-    Ok(a) => a
-    Err(_) => return
-  }
+  let attr = fs.attr(p).unwrap()
   inspect(attr.kind, content="RegularFile")
   inspect(attr.size, content="5")
 }
@@ -62,17 +56,11 @@ async test "MemFileSystem directory operations" {
 
   // List directory
   let dir = path("/dir1/dir2", using_fs=fs)
-  let entries = match fs.list_directory(dir) {
-    Ok(e) => e
-    Err(_) => return
-  }
+  let entries = fs.list_directory(dir).unwrap()
   inspect(entries.length(), content="1")
 
   // Delete file
-  match fs.delete(p) {
-    Ok(_) => ()
-    Err(_) => return
-  }
+  fs.delete(p).unwrap()
   let exists = fs.exists(p)
   inspect(exists, content="false")
 }
@@ -97,20 +85,14 @@ async test "MemFileSystem rename" {
   chan.write(data, 0, 3) |> ignore
 
   // Rename
-  match fs.rename(src, dst, copy_attr=false) {
-    Ok(_) => ()
-    Err(_) => return
-  }
+  fs.rename(src, dst, copy_attr=false).unwrap()
 
   // Check old doesn't exist, new does
   inspect(fs.exists(src), content="false")
   inspect(fs.exists(dst), content="true")
 
   // Read renamed file
-  let rchan = match fs.open_file(dst, OpenFlags::read_only(), mode=AccessFlags::new()) {
-    Ok(c) => c
-    Err(_) => return
-  }
+  let rchan = fs.open_file(dst, OpenFlags::read_only(), mode=AccessFlags::new()).unwrap()
   let buf : FixedArray[Byte] = FixedArray::make(5, 0)
   let read = rchan.read(buf, 0, 5)
   inspect(read, content="3")

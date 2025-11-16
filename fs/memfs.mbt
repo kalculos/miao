@@ -307,7 +307,7 @@ pub impl FileSystem for MemFileSystem with list_directory(self, path) {
       node.children.each(fn(k, _) { res.push(path.resolve(k)) })
       Ok(res)
     }
-    Some(_) => Err(FileError::NotADirectory(msg="not a directory"))
+    Some(_) => Err(FileError::UnexpectedKind(msg="not a directory"))
     None => Err(FileError::NotFound(msg="path not found"))
   }
 }
@@ -337,7 +337,7 @@ pub impl FileSystem for MemFileSystem with delete(self, path) {
     Some(node_ref) => {
       let node = node_ref.val
       if node.kind == FileKind::Directory && node.children.length() > 0 {
-        return Err(FileError::IsADirectory(msg="directory not empty"))
+        return Err(FileError::UnexpectedKind(msg="directory not empty"))
       }
       parent_node.children.remove(name) |> ignore
       Ok(())

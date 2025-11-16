@@ -18,10 +18,8 @@ fn uv_error_to_file_error(err : Error, default_msg : String) -> @fs.FileError {
     @fs.FileError::PermissionDenied(msg=err_str)
   } else if err_str.contains("EEXIST") {
     @fs.FileError::AlreadyExists(msg=err_str)
-  } else if err_str.contains("ENOTDIR") {
-    @fs.FileError::NotADirectory(msg=err_str)
-  } else if err_str.contains("EISDIR") {
-    @fs.FileError::IsADirectory(msg=err_str)
+  } else if err_str.contains("ENOTDIR") || err_str.contains("EISDIR") {
+    @fs.FileError::UnexpectedKind(msg=err_str)
   } else {
     @fs.FileError::IoError(msg="\{default_msg}: \{err_str}")
   }
