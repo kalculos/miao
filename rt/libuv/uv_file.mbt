@@ -84,53 +84,61 @@ async fn LibuvFile::new(
 ) -> Result[&@fs.FileChannel, @fs.FileError] {
   let uv = rt.uv
   let path_bytes = @encoding/utf8.encode(path.to_unix_path())
-  let fd = match
-    (try? uvrt_op_suspend((resolve, reject, _) => {
-      let handle = uv.fs_open(
-        path_bytes,
-        flag.to_uv_flags(),
-        to_uv_access(mode) |> access_flag_inner,
-        file => resolve(file),
-        err => reject(err),
-      )
-      () => handle.cancel()
-    })) {
-    Ok(file) => file
-    Err(@rt.CoroutineError::Cancelled) => raise @rt.CoroutineError::Cancelled
-    Err(@rt.CoroutineError::ExecutionError(err)) => {
-      let err_str = err.to_string()
-      return if err_str.contains("ENOENT") {
-        Err(@fs.FileError::NotFound(msg=err_str))
-      } else if err_str.contains("EACCES") || err_str.contains("EPERM") {
-        Err(@fs.FileError::PermissionDenied(msg=err_str))
-      } else if err_str.contains("EEXIST") {
-        Err(@fs.FileError::AlreadyExists(msg=err_str))
-      } else if err_str.contains("ENOTDIR") || err_str.contains("EISDIR") {
-        Err(@fs.FileError::UnexpectedKind(msg=err_str))
-      } else {
-        Err(@fs.FileError::IoError(msg="Failed to open file: \{err_str}"))
+  let fd = uvrt_op_suspend((resolve, reject, _) => {
+    let handle = uv.fs_open(
+      path_bytes,
+      flag.to_uv_flags(),
+      to_uv_access(mode) |> access_flag_inner,
+      file => resolve(file),
+      err => reject(err),
+    )
+    () => handle.cancel()
+  }) catch {
+    zerr =>
+      match zerr {
+        Cancelled => raise @rt.CoroutineError::Cancelled
+        ExecutionError(err) => {
+          let err_str = err.to_string()
+          return if err_str.contains("ENOENT") {
+            Err(@fs.FileError::NotFound(msg=err_str))
+          } else if err_str.contains("EACCES") || err_str.contains("EPERM") {
+            Err(@fs.FileError::PermissionDenied(msg=err_str))
+          } else if err_str.contains("EEXIST") {
+            Err(@fs.FileError::AlreadyExists(msg=err_str))
+          } else if err_str.contains("ENOTDIR") || err_str.contains("EISDIR") {
+            Err(@fs.FileError::UnexpectedKind(msg=err_str))
+          } else {
+            Err(@fs.FileError::IoError(msg="Failed to open file: \{err_str}"))
+          }
+        }
       }
-    }
   }
-  let attr = match
-    (try? gather_fattr(rt, fd)) {
-    Ok(a) => a
-    Err(@rt.CoroutineError::Cancelled) => raise @rt.CoroutineError::Cancelled
-    Err(@rt.CoroutineError::ExecutionError(err)) => {
-      let err_str = err.to_string()
-      return Err(@fs.FileError::IoError(msg="Failed to get file attributes: \{err_str}"))
-    }
-    Err(_) => return Err(@fs.FileError::IoError(msg="Unknown error getting file attributes"))
+  let attr = gather_fattr(rt, fd) catch {
+    e =>
+      match e {
+        @rt.CoroutineError::Cancelled => raise @rt.CoroutineError::Cancelled
+        @rt.CoroutineError::ExecutionError(err) => {
+          let err_str = err.to_string()
+          return Err(
+            @fs.FileError::IoError(
+              msg="Failed to get file attributes: \{err_str}",
+            ),
+          )
+        }
+        other =>
+          return Err(
+            @fs.FileError::IoError(msg="Unknown error getting file attributes \{other}"),
+          )
+      }
   }
-  Ok(
-    LibuvFile::{
-      fd,
-      closed: false,
-      access: flag,
-      info: @fs.FileInfo::{ attribute: attr, path },
-      uv: rt.uv,
-    },
-  )
+
+  Ok(LibuvFile::{
+    fd,
+    closed: false,
+    access: flag,
+    info: @fs.FileInfo::{ attribute: attr, path },
+    uv: rt.uv,
+  })
 }
 
 ///|
