@@ -53,7 +53,10 @@ pub(open) trait FileSystem {
     follow_links? : Bool,
   ) -> Result[&FileChannel, FileError]
   ///| Get attributes of the file. Returns error if the file not exists
-  async attr(Self, Path, follow_links? : Bool) -> Result[FileAttribute, FileError]
+  async attr(Self, Path, follow_links? : Bool) -> Result[
+    FileAttribute,
+    FileError,
+  ]
   ///| List the content of the file. Returns error if the file is not a directory
   async list_directory(Self, Path) -> Result[ArrayView[Path], FileError]
   ///| Check if we can access the file. Return false if the file is inaccessible or not exist
@@ -64,7 +67,10 @@ pub(open) trait FileSystem {
   ///| Resolves a symbol link. Returns error if the path is not a symbol link
   async read_symbol_link(Self, Path) -> Result[Path, FileError]
   ///| Move a file to another path. Returns error if the operation is failed.
-  async rename(Self, src : Path, dst : Path, copy_attr~ : Bool) -> Result[Unit, FileError]
+  async rename(Self, src : Path, dst : Path, copy_attr~ : Bool) -> Result[
+    Unit,
+    FileError,
+  ]
   ///| Returns a path with all symbolic links and path redirections resolved.
   async real_path(Self, path : Path) -> Result[Path, FileError]
   ///| The current working directory.

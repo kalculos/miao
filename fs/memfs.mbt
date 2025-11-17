@@ -263,7 +263,9 @@ pub impl FileSystem for MemFileSystem with open_file(
     Some(node_ref) => {
       // File exists
       if create && flag.is_exclusive() {
-        return Err(FileError::AlreadyExists(msg="file already exists (exclusive flag)"))
+        return Err(
+          FileError::AlreadyExists(msg="file already exists (exclusive flag)"),
+        )
       }
       let node = node_ref.val
       // Truncate if flag is set

@@ -5,11 +5,8 @@ async test "MemFileSystem basic file operations" {
 
   // Create and write to a file
   let p = path("/test.txt", using_fs=fs)
-  let chan = match fs.open_file(
-    p,
-    OpenFlags::write_only(create=true),
-    mode=AccessFlags::new(),
-  ) {
+  let chan = match
+    fs.open_file(p, OpenFlags::write_only(create=true), mode=AccessFlags::new()) {
     Ok(c) => c
     Err(e) => {
       inspect(e, content="")
@@ -21,7 +18,9 @@ async test "MemFileSystem basic file operations" {
   inspect(written, content="5")
 
   // Read back
-  let rchan = fs.open_file(p, OpenFlags::read_only(), mode=AccessFlags::new()).unwrap()
+  let rchan = fs
+    .open_file(p, OpenFlags::read_only(), mode=AccessFlags::new())
+    .unwrap()
   let buf : FixedArray[Byte] = FixedArray::make(10, 0)
   let read = rchan.read(buf, 0, 10)
   inspect(read, content="5")
@@ -45,11 +44,8 @@ async test "MemFileSystem directory operations" {
 
   // Create a nested file
   let p = path("/dir1/dir2/file.txt", using_fs=fs)
-  let _chan = match fs.open_file(
-    p,
-    OpenFlags::write_only(create=true),
-    mode=AccessFlags::new(),
-  ) {
+  let _chan = match
+    fs.open_file(p, OpenFlags::write_only(create=true), mode=AccessFlags::new()) {
     Ok(c) => c
     Err(_) => return
   }
@@ -73,11 +69,12 @@ async test "MemFileSystem rename" {
   let dst = path("/new.txt", using_fs=fs)
 
   // Create source file
-  let chan = match fs.open_file(
-    src,
-    OpenFlags::write_only(create=true),
-    mode=AccessFlags::new(),
-  ) {
+  let chan = match
+    fs.open_file(
+      src,
+      OpenFlags::write_only(create=true),
+      mode=AccessFlags::new(),
+    ) {
     Ok(c) => c
     Err(_) => return
   }
@@ -92,7 +89,9 @@ async test "MemFileSystem rename" {
   inspect(fs.exists(dst), content="true")
 
   // Read renamed file
-  let rchan = fs.open_file(dst, OpenFlags::read_only(), mode=AccessFlags::new()).unwrap()
+  let rchan = fs
+    .open_file(dst, OpenFlags::read_only(), mode=AccessFlags::new())
+    .unwrap()
   let buf : FixedArray[Byte] = FixedArray::make(5, 0)
   let read = rchan.read(buf, 0, 5)
   inspect(read, content="3")

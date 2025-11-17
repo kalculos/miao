@@ -47,8 +47,12 @@ async test "facade list_dir" {
   set_default_fs(fs)
   let f1 = path("/dir/file1.txt", using_fs=fs)
   let f2 = path("/dir/file2.txt", using_fs=fs)
-  @io.Channel::close(open(f1, OpenFlags::write_only(create=true), permission=0).unwrap())
-  @io.Channel::close(open(f2, OpenFlags::write_only(create=true), permission=0).unwrap())
+  @io.Channel::close(
+    open(f1, OpenFlags::write_only(create=true), permission=0).unwrap(),
+  )
+  @io.Channel::close(
+    open(f2, OpenFlags::write_only(create=true), permission=0).unwrap(),
+  )
   let dir = path("/dir", using_fs=fs)
   let entries = list_dir(dir).unwrap()
   inspect(entries.length(), content="2")
@@ -61,7 +65,9 @@ async test "facade exists" {
   set_default_fs(fs)
   let p = path("/test.txt", using_fs=fs)
   inspect(exists(p), content="false")
-  @io.Channel::close(open(p, OpenFlags::write_only(create=true), permission=0).unwrap())
+  @io.Channel::close(
+    open(p, OpenFlags::write_only(create=true), permission=0).unwrap(),
+  )
   inspect(exists(p), content="true")
 }
 
@@ -71,7 +77,9 @@ async test "facade delete" {
   let fs = MemFileSystem::new()
   set_default_fs(fs)
   let p = path("/test.txt", using_fs=fs)
-  @io.Channel::close(open(p, OpenFlags::write_only(create=true), permission=0).unwrap())
+  @io.Channel::close(
+    open(p, OpenFlags::write_only(create=true), permission=0).unwrap(),
+  )
   inspect(exists(p), content="true")
   delete(p).unwrap()
   inspect(exists(p), content="false")
@@ -83,7 +91,9 @@ async test "facade delete_if_exist exists" {
   let fs = MemFileSystem::new()
   set_default_fs(fs)
   let p = path("/test.txt", using_fs=fs)
-  @io.Channel::close(open(p, OpenFlags::write_only(create=true), permission=0).unwrap())
+  @io.Channel::close(
+    open(p, OpenFlags::write_only(create=true), permission=0).unwrap(),
+  )
   delete_if_exist(p).unwrap()
   inspect(exists(p), content="false")
 }

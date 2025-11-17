@@ -127,11 +127,12 @@ async fn LibuvFile::new(
         }
         other =>
           return Err(
-            @fs.FileError::IoError(msg="Unknown error getting file attributes \{other}"),
+            @fs.FileError::IoError(
+              msg="Unknown error getting file attributes \{other}",
+            ),
           )
       }
   }
-
   Ok(LibuvFile::{
     fd,
     closed: false,
