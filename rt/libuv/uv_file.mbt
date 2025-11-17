@@ -81,7 +81,7 @@ async fn LibuvFile::new(
   path~ : @fs.Path,
   flag~ : @fs.OpenFlags,
   mode~ : @fs.AccessFlags,
-) -> LibuvFile {
+) -> Result[&@fs.FileChannel, @fs.FileError] {
   let uv = rt.uv
   let path_bytes = @encoding/utf8.encode(path.to_unix_path())
   let fd = uvrt_op_suspend((resolve, reject, _) => {
@@ -93,14 +93,53 @@ async fn LibuvFile::new(
       err => reject(err),
     )
     () => handle.cancel()
-  })
-  LibuvFile::{
+  }) catch {
+    zerr =>
+      match zerr {
+        Cancelled => raise @rt.CoroutineError::Cancelled
+        ExecutionError(err) => {
+          let err_str = err.to_string()
+          return if err_str.contains("ENOENT") {
+            Err(@fs.FileError::NotFound(msg=err_str))
+          } else if err_str.contains("EACCES") || err_str.contains("EPERM") {
+            Err(@fs.FileError::PermissionDenied(msg=err_str))
+          } else if err_str.contains("EEXIST") {
+            Err(@fs.FileError::AlreadyExists(msg=err_str))
+          } else if err_str.contains("ENOTDIR") || err_str.contains("EISDIR") {
+            Err(@fs.FileError::UnexpectedKind(msg=err_str))
+          } else {
+            Err(@fs.FileError::IoError(msg="Failed to open file: \{err_str}"))
+          }
+        }
+      }
+  }
+  let attr = gather_fattr(rt, fd) catch {
+    e =>
+      match e {
+        @rt.CoroutineError::Cancelled => raise @rt.CoroutineError::Cancelled
+        @rt.CoroutineError::ExecutionError(err) => {
+          let err_str = err.to_string()
+          return Err(
+            @fs.FileError::IoError(
+              msg="Failed to get file attributes: \{err_str}",
+            ),
+          )
+        }
+        other =>
+          return Err(
+            @fs.FileError::IoError(
+              msg="Unknown error getting file attributes \{other}",
+            ),
+          )
+      }
+  }
+  Ok(LibuvFile::{
     fd,
     closed: false,
     access: flag,
-    info: @fs.FileInfo::{ attribute: gather_fattr(rt, fd), path },
+    info: @fs.FileInfo::{ attribute: attr, path },
     uv: rt.uv,
-  }
+  })
 }
 
 ///|

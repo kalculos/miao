@@ -263,14 +263,16 @@ pub impl FileSystem for MemFileSystem with open_file(
     Some(node_ref) => {
       // File exists
       if create && flag.is_exclusive() {
-        raise fail("file already exists (exclusive flag)")
+        return Err(
+          FileError::AlreadyExists(msg="file already exists (exclusive flag)"),
+        )
       }
       let node = node_ref.val
       // Truncate if flag is set
       if flag.is_truncate() {
         node.content.clear()
       }
-      memfilechannel_new(node_ref, flag, p)
+      Ok(memfilechannel_new(node_ref, flag, p) as &FileChannel)
     }
     None =>
       if create {
@@ -280,12 +282,12 @@ pub impl FileSystem for MemFileSystem with open_file(
         match self.find_ref(parent, create_dirs=true) {
           Some(parent_ref) => {
             parent_ref.val.children.set(file.name, file_ref)
-            memfilechannel_new(file_ref, flag, p)
+            Ok(memfilechannel_new(file_ref, flag, p) as &FileChannel)
           }
-          None => raise fail("parent not found")
+          None => Err(FileError::NotFound(msg="parent not found"))
         }
       } else {
-        raise fail("file not found")
+        Err(FileError::NotFound(msg="file not found"))
       }
   }
 }
@@ -294,8 +296,8 @@ pub impl FileSystem for MemFileSystem with open_file(
 pub impl FileSystem for MemFileSystem with attr(self, path, follow_links?) {
   ignore(follow_links)
   match self.find(path, create_dirs=false) {
-    Some(node) => build_attr(node)
-    None => raise fail("file not found")
+    Some(node) => Ok(build_attr(node))
+    None => Err(FileError::NotFound(msg="file not found"))
   }
 }
 
@@ -305,9 +307,10 @@ pub impl FileSystem for MemFileSystem with list_directory(self, path) {
     Some(node) if node.kind == FileKind::Directory => {
       let res : Array[Path] = []
       node.children.each(fn(k, _) { res.push(path.resolve(k)) })
-      res
+      Ok(res)
     }
-    _ => raise fail("not a directory")
+    Some(_) => Err(FileError::UnexpectedKind(msg="not a directory"))
+    None => Err(FileError::NotFound(msg="path not found"))
   }
 }
 
@@ -325,22 +328,23 @@ pub impl FileSystem for MemFileSystem with delete(self, path) {
   let p = path
   let parent = match p.parent() {
     Some(v) => v
-    None => raise fail("cannot delete root")
+    None => return Err(FileError::PermissionDenied(msg="cannot delete root"))
   }
   let parent_node = match self.find(parent, create_dirs=false) {
     Some(v) => v
-    None => raise fail("no parent")
+    None => return Err(FileError::NotFound(msg="no parent"))
   }
   let name = p.components[p.components.length() - 1].to_string()
   match parent_node.children.get(name) {
     Some(node_ref) => {
       let node = node_ref.val
       if node.kind == FileKind::Directory && node.children.length() > 0 {
-        raise fail("directory not empty")
+        return Err(FileError::UnexpectedKind(msg="directory not empty"))
       }
       parent_node.children.remove(name) |> ignore
+      Ok(())
     }
-    None => raise fail("not found")
+    None => Err(FileError::NotFound(msg="not found"))
   }
 }
 
@@ -352,8 +356,9 @@ pub impl FileSystem for MemFileSystem with exists(self, path) {
 ///|
 pub impl FileSystem for MemFileSystem with read_symbol_link(self, path) {
   match self.find(path, create_dirs=false) {
-    Some(node) if node.kind == FileKind::Link => node.target.unwrap()
-    _ => raise fail("not a symlink")
+    Some(node) if node.kind == FileKind::Link => Ok(node.target.unwrap())
+    Some(_) => Err(FileError::InvalidPath(msg="not a symlink"))
+    None => Err(FileError::NotFound(msg="path not found"))
   }
 }
 
@@ -364,20 +369,20 @@ pub impl FileSystem for MemFileSystem with rename(self, src, dst, copy_attr~) {
   let d = dst
   let sparent = match s.parent() {
     Some(v) => v
-    None => raise fail("cannot rename root")
+    None => return Err(FileError::PermissionDenied(msg="cannot rename root"))
   }
   let dparent = match d.parent() {
     Some(v) => v
-    None => raise fail("cannot rename to root")
+    None => return Err(FileError::PermissionDenied(msg="cannot rename to root"))
   }
   let snode_parent = match self.find(sparent, create_dirs=false) {
     Some(v) => v
-    None => raise fail("src parent not found")
+    None => return Err(FileError::NotFound(msg="src parent not found"))
   }
   // Don't auto-create destination parent - it must exist
   let dnode_parent = match self.find(dparent, create_dirs=false) {
     Some(v) => v
-    None => raise fail("dst parent not found")
+    None => return Err(FileError::NotFound(msg="dst parent not found"))
   }
   let name = s.components[s.components.length() - 1].to_string()
   match snode_parent.children.get(name) {
@@ -387,15 +392,16 @@ pub impl FileSystem for MemFileSystem with rename(self, src, dst, copy_attr~) {
         d.components[d.components.length() - 1].to_string(),
         node,
       )
+      Ok(())
     }
-    None => raise fail("src not found")
+    None => Err(FileError::NotFound(msg="src not found"))
   }
 }
 
 ///|
 pub impl FileSystem for MemFileSystem with real_path(self, path) {
   ignore(self)
-  path
+  Ok(path)
 }
 
 ///|

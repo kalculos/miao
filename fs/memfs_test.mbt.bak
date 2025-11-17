@@ -5,8 +5,11 @@
 async test "MemFileSystem create and write" {
   let fs = MemFileSystem::new()
   let p = path("/test.txt", using_fs=fs)
-  let chan = match
-    fs.open_file(p, OpenFlags::write_only(create=true), mode=AccessFlags::new()) {
+  let chan = match fs.open_file(
+    p,
+    OpenFlags::write_only(create=true),
+    mode=AccessFlags::new(),
+  ) {
     Ok(c) => c
     Err(_) => return
   }
@@ -15,9 +18,10 @@ async test "MemFileSystem create and write" {
   inspect(written, content="5")
 
   // Read back
-  let rchan = fs
-    .open_file(p, OpenFlags::read_only(), mode=AccessFlags::new())
-    .unwrap()
+  let rchan = match fs.open_file(p, OpenFlags::read_only(), mode=AccessFlags::new()) {
+    Ok(c) => c
+    Err(_) => return
+  }
   let buf : FixedArray[Byte] = FixedArray::make(10, 0)
   let read_count = rchan.read(buf, 0, 10)
   inspect(read_count, content="5")
@@ -31,8 +35,11 @@ async test "MemFileSystem truncate flag" {
   let p = path("/test.txt", using_fs=fs)
 
   // Write initial data
-  let chan1 = match
-    fs.open_file(p, OpenFlags::write_only(create=true), mode=AccessFlags::new()) {
+  let chan1 = match fs.open_file(
+    p,
+    OpenFlags::write_only(create=true),
+    mode=AccessFlags::new(),
+  ) {
     Ok(c) => c
     Err(_) => return
   }
@@ -41,12 +48,11 @@ async test "MemFileSystem truncate flag" {
   @io.Channel::close(chan1)
 
   // Open with truncate
-  let chan2 = match
-    fs.open_file(
-      p,
-      OpenFlags::write_only(truncate=true),
-      mode=AccessFlags::new(),
-    ) {
+  let chan2 = match fs.open_file(
+    p,
+    OpenFlags::write_only(truncate=true),
+    mode=AccessFlags::new(),
+  ) {
     Ok(c) => c
     Err(_) => return
   }
@@ -55,9 +61,10 @@ async test "MemFileSystem truncate flag" {
   @io.Channel::close(chan2)
 
   // Read back
-  let rchan = fs
-    .open_file(p, OpenFlags::read_only(), mode=AccessFlags::new())
-    .unwrap()
+  let rchan = match fs.open_file(p, OpenFlags::read_only(), mode=AccessFlags::new()) {
+    Ok(c) => c
+    Err(_) => return
+  }
   let buf : FixedArray[Byte] = FixedArray::make(10, 0)
   let read_count = rchan.read(buf, 0, 10)
   inspect(read_count, content="2")
@@ -71,8 +78,11 @@ async test "MemFileSystem append flag" {
   let p = path("/test.txt", using_fs=fs)
 
   // Write initial data
-  let chan1 = match
-    fs.open_file(p, OpenFlags::write_only(create=true), mode=AccessFlags::new()) {
+  let chan1 = match fs.open_file(
+    p,
+    OpenFlags::write_only(create=true),
+    mode=AccessFlags::new(),
+  ) {
     Ok(c) => c
     Err(_) => return
   }
@@ -81,8 +91,11 @@ async test "MemFileSystem append flag" {
   @io.Channel::close(chan1)
 
   // Open with append
-  let chan2 = match
-    fs.open_file(p, OpenFlags::write_only(append=true), mode=AccessFlags::new()) {
+  let chan2 = match fs.open_file(
+    p,
+    OpenFlags::write_only(append=true),
+    mode=AccessFlags::new(),
+  ) {
     Ok(c) => c
     Err(_) => return
   }
@@ -91,9 +104,10 @@ async test "MemFileSystem append flag" {
   @io.Channel::close(chan2)
 
   // Read back
-  let rchan = fs
-    .open_file(p, OpenFlags::read_only(), mode=AccessFlags::new())
-    .unwrap()
+  let rchan = match fs.open_file(p, OpenFlags::read_only(), mode=AccessFlags::new()) {
+    Ok(c) => c
+    Err(_) => return
+  }
   let buf : FixedArray[Byte] = FixedArray::make(10, 0)
   let read_count = rchan.read(buf, 0, 10)
   inspect(read_count, content="5")
@@ -106,15 +120,11 @@ async test "MemFileSystem append flag" {
 async test "MemFileSystem exclusive flag success" {
   let fs = MemFileSystem::new()
   let p = path("/test.txt", using_fs=fs)
-  let chan = match
-    fs.open_file(
-      p,
-      OpenFlags::write_only(create=true, exclusive=true),
-      mode=AccessFlags::new(),
-    ) {
-    Ok(c) => c
-    Err(_) => return
-  }
+  let chan = fs.open_file(
+    p,
+    OpenFlags::write_only(create=true, exclusive=true),
+    mode=AccessFlags::new(),
+  )
   inspect(@io.Channel::is_closed(chan), content="false")
 }
 
@@ -125,22 +135,24 @@ async test "MemFileSystem exclusive flag fail" {
   let p = path("/test.txt", using_fs=fs)
 
   // Create file first
-  let chan1 = match
-    fs.open_file(p, OpenFlags::write_only(create=true), mode=AccessFlags::new()) {
-    Ok(c) => c
-    Err(_) => return
-  }
+  let chan1 = fs.open_file(
+    p,
+    OpenFlags::write_only(create=true),
+    mode=AccessFlags::new(),
+  )
   @io.Channel::close(chan1)
 
-  // Try to create with exclusive - should fail
-  match
-    fs.open_file(
+  // Try to create with exclusive
+  try {
+    let chan2 = fs.open_file(
       p,
       OpenFlags::write_only(create=true, exclusive=true),
       mode=AccessFlags::new(),
-    ) {
-    Ok(_) => inspect("should have failed", content="should not reach here")
-    Err(_) => inspect(true, content="true")
+    )
+    @io.Channel::close(chan2)
+    inspect("should have failed", content="should not reach here")
+  } catch {
+    _ => inspect(true, content="true")
   }
 }
 
@@ -149,11 +161,11 @@ async test "MemFileSystem exclusive flag fail" {
 async test "MemFileSystem read from write-only fails" {
   let fs = MemFileSystem::new()
   let p = path("/test.txt", using_fs=fs)
-  let chan = match
-    fs.open_file(p, OpenFlags::write_only(create=true), mode=AccessFlags::new()) {
-    Ok(c) => c
-    Err(_) => return
-  }
+  let chan = fs.open_file(
+    p,
+    OpenFlags::write_only(create=true),
+    mode=AccessFlags::new(),
+  )
   let buf : FixedArray[Byte] = FixedArray::make(10, 0)
   try {
     chan.read(buf, 0, 10) |> ignore
@@ -170,17 +182,15 @@ async test "MemFileSystem write to read-only fails" {
   let p = path("/test.txt", using_fs=fs)
 
   // Create file first
-  let chan1 = match
-    fs.open_file(p, OpenFlags::write_only(create=true), mode=AccessFlags::new()) {
-    Ok(c) => c
-    Err(_) => return
-  }
+  let chan1 = fs.open_file(
+    p,
+    OpenFlags::write_only(create=true),
+    mode=AccessFlags::new(),
+  )
   @io.Channel::close(chan1)
 
   // Open read-only
-  let chan2 = fs
-    .open_file(p, OpenFlags::read_only(), mode=AccessFlags::new())
-    .unwrap()
+  let chan2 = fs.open_file(p, OpenFlags::read_only(), mode=AccessFlags::new())
   let data : FixedArray[Byte] = [1, 2, 3]
   try {
     chan2.write(data, 0, 3) |> ignore
@@ -195,11 +205,11 @@ async test "MemFileSystem write to read-only fails" {
 async test "MemFileSystem nested directories" {
   let fs = MemFileSystem::new()
   let p = path("/a/b/c/file.txt", using_fs=fs)
-  let chan = match
-    fs.open_file(p, OpenFlags::write_only(create=true), mode=AccessFlags::new()) {
-    Ok(c) => c
-    Err(_) => return
-  }
+  let chan = fs.open_file(
+    p,
+    OpenFlags::write_only(create=true),
+    mode=AccessFlags::new(),
+  )
   let data : FixedArray[Byte] = [1, 2, 3]
   chan.write(data, 0, 3) |> ignore
   @io.Channel::close(chan)
@@ -214,26 +224,22 @@ async test "MemFileSystem list directory" {
   // Create some files
   let f1 = path("/dir/file1.txt", using_fs=fs)
   let f2 = path("/dir/file2.txt", using_fs=fs)
-  match
+  @io.Channel::close(
     fs.open_file(
       f1,
       OpenFlags::write_only(create=true),
       mode=AccessFlags::new(),
-    ) {
-    Ok(c) => @io.Channel::close(c)
-    Err(_) => return
-  }
-  match
+    ),
+  )
+  @io.Channel::close(
     fs.open_file(
       f2,
       OpenFlags::write_only(create=true),
       mode=AccessFlags::new(),
-    ) {
-    Ok(c) => @io.Channel::close(c)
-    Err(_) => return
-  }
+    ),
+  )
   let dir = path("/dir", using_fs=fs)
-  let entries = fs.list_directory(dir).unwrap()
+  let entries = fs.list_directory(dir)
   inspect(entries.length(), content="2")
 }
 
@@ -242,13 +248,11 @@ async test "MemFileSystem list directory" {
 async test "MemFileSystem delete file" {
   let fs = MemFileSystem::new()
   let p = path("/test.txt", using_fs=fs)
-  match
-    fs.open_file(p, OpenFlags::write_only(create=true), mode=AccessFlags::new()) {
-    Ok(c) => @io.Channel::close(c)
-    Err(_) => return
-  }
+  @io.Channel::close(
+    fs.open_file(p, OpenFlags::write_only(create=true), mode=AccessFlags::new()),
+  )
   inspect(fs.exists(p), content="true")
-  fs.delete(p).unwrap()
+  fs.delete(p)
   inspect(fs.exists(p), content="false")
 }
 
@@ -257,15 +261,15 @@ async test "MemFileSystem delete file" {
 async test "MemFileSystem delete non-empty directory fails" {
   let fs = MemFileSystem::new()
   let f = path("/dir/file.txt", using_fs=fs)
-  match
-    fs.open_file(f, OpenFlags::write_only(create=true), mode=AccessFlags::new()) {
-    Ok(c) => @io.Channel::close(c)
-    Err(_) => return
-  }
+  @io.Channel::close(
+    fs.open_file(f, OpenFlags::write_only(create=true), mode=AccessFlags::new()),
+  )
   let dir = path("/dir", using_fs=fs)
-  match fs.delete(dir) {
-    Ok(_) => inspect("should have failed", content="should not reach here")
-    Err(_) => inspect(true, content="true")
+  try {
+    fs.delete(dir)
+    inspect("should have failed", content="should not reach here")
+  } catch {
+    _ => inspect(true, content="true")
   }
 }
 
@@ -275,19 +279,15 @@ async test "MemFileSystem rename file" {
   let fs = MemFileSystem::new()
   let src = path("/old.txt", using_fs=fs)
   let dst = path("/new.txt", using_fs=fs)
-  let chan = match
-    fs.open_file(
-      src,
-      OpenFlags::write_only(create=true),
-      mode=AccessFlags::new(),
-    ) {
-    Ok(c) => c
-    Err(_) => return
-  }
+  let chan = fs.open_file(
+    src,
+    OpenFlags::write_only(create=true),
+    mode=AccessFlags::new(),
+  )
   let data : FixedArray[Byte] = [1, 2, 3]
   chan.write(data, 0, 3) |> ignore
   @io.Channel::close(chan)
-  fs.rename(src, dst, copy_attr=false).unwrap()
+  fs.rename(src, dst, copy_attr=false)
   inspect(fs.exists(src), content="false")
   inspect(fs.exists(dst), content="true")
 }
@@ -298,18 +298,18 @@ async test "MemFileSystem rename fails without dst parent" {
   let fs = MemFileSystem::new()
   let src = path("/old.txt", using_fs=fs)
   let dst = path("/nonexistent/new.txt", using_fs=fs)
-  match
+  @io.Channel::close(
     fs.open_file(
       src,
       OpenFlags::write_only(create=true),
       mode=AccessFlags::new(),
-    ) {
-    Ok(c) => @io.Channel::close(c)
-    Err(_) => return
-  }
-  match fs.rename(src, dst, copy_attr=false) {
-    Ok(_) => inspect("should have failed", content="should not reach here")
-    Err(_) => inspect(true, content="true")
+    ),
+  )
+  try {
+    fs.rename(src, dst, copy_attr=false)
+    inspect("should have failed", content="should not reach here")
+  } catch {
+    _ => inspect(true, content="true")
   }
 }
 
@@ -318,9 +318,11 @@ async test "MemFileSystem rename fails without dst parent" {
 async test "MemFileSystem open non-existent fails" {
   let fs = MemFileSystem::new()
   let p = path("/nonexistent.txt", using_fs=fs)
-  match fs.open_file(p, OpenFlags::read_only(), mode=AccessFlags::new()) {
-    Ok(_) => inspect("should have failed", content="should not reach here")
-    Err(_) => inspect(true, content="true")
+  try {
+    fs.open_file(p, OpenFlags::read_only(), mode=AccessFlags::new()) |> ignore
+    inspect("should have failed", content="should not reach here")
+  } catch {
+    _ => inspect(true, content="true")
   }
 }
 
@@ -330,11 +332,9 @@ async test "MemFileSystem can_access" {
   let fs = MemFileSystem::new()
   let p = path("/test.txt", using_fs=fs)
   inspect(fs.can_access(p, AccessFlags::new()), content="false")
-  match
-    fs.open_file(p, OpenFlags::write_only(create=true), mode=AccessFlags::new()) {
-    Ok(c) => @io.Channel::close(c)
-    Err(_) => return
-  }
+  @io.Channel::close(
+    fs.open_file(p, OpenFlags::write_only(create=true), mode=AccessFlags::new()),
+  )
   inspect(fs.can_access(p, AccessFlags::new()), content="true")
 }
 
@@ -343,15 +343,15 @@ async test "MemFileSystem can_access" {
 async test "MemFileSystem file attributes" {
   let fs = MemFileSystem::new()
   let p = path("/test.txt", using_fs=fs)
-  let chan = match
-    fs.open_file(p, OpenFlags::write_only(create=true), mode=AccessFlags::new()) {
-    Ok(c) => c
-    Err(_) => return
-  }
+  let chan = fs.open_file(
+    p,
+    OpenFlags::write_only(create=true),
+    mode=AccessFlags::new(),
+  )
   let data : FixedArray[Byte] = [1, 2, 3, 4, 5]
   chan.write(data, 0, 5) |> ignore
   @io.Channel::close(chan)
-  let attr = fs.attr(p).unwrap()
+  let attr = fs.attr(p)
   inspect(attr.kind, content="RegularFile")
   inspect(attr.size, content="5")
 }
@@ -361,11 +361,11 @@ async test "MemFileSystem file attributes" {
 async test "MemFileSystem FileInfo updates" {
   let fs = MemFileSystem::new()
   let p = path("/test.txt", using_fs=fs)
-  let chan = match
-    fs.open_file(p, OpenFlags::write_only(create=true), mode=AccessFlags::new()) {
-    Ok(c) => c
-    Err(_) => return
-  }
+  let chan = fs.open_file(
+    p,
+    OpenFlags::write_only(create=true),
+    mode=AccessFlags::new(),
+  )
   let info1 = chan.info()
   inspect(info1.attribute.size, content="0")
   let data : FixedArray[Byte] = [1, 2, 3, 4, 5]
@@ -379,17 +379,15 @@ async test "MemFileSystem FileInfo updates" {
 async test "MemFileSystem read past EOF" {
   let fs = MemFileSystem::new()
   let p = path("/test.txt", using_fs=fs)
-  let chan = match
-    fs.open_file(p, OpenFlags::write_only(create=true), mode=AccessFlags::new()) {
-    Ok(c) => c
-    Err(_) => return
-  }
+  let chan = fs.open_file(
+    p,
+    OpenFlags::write_only(create=true),
+    mode=AccessFlags::new(),
+  )
   let data : FixedArray[Byte] = [1, 2, 3]
   chan.write(data, 0, 3) |> ignore
   @io.Channel::close(chan)
-  let rchan = fs
-    .open_file(p, OpenFlags::read_only(), mode=AccessFlags::new())
-    .unwrap()
+  let rchan = fs.open_file(p, OpenFlags::read_only(), mode=AccessFlags::new())
   let buf : FixedArray[Byte] = FixedArray::make(10, 0)
   rchan.read(buf, 0, 3) |> ignore // Read all data
   let read_count = rchan.read(buf, 0, 10) // Try to read more
@@ -401,11 +399,11 @@ async test "MemFileSystem read past EOF" {
 async test "MemFileSystem closed channel returns 0" {
   let fs = MemFileSystem::new()
   let p = path("/test.txt", using_fs=fs)
-  let chan = match
-    fs.open_file(p, OpenFlags::write_only(create=true), mode=AccessFlags::new()) {
-    Ok(c) => c
-    Err(_) => return
-  }
+  let chan = fs.open_file(
+    p,
+    OpenFlags::write_only(create=true),
+    mode=AccessFlags::new(),
+  )
   @io.Channel::close(chan)
   let data : FixedArray[Byte] = [1, 2, 3]
   let written = chan.write(data, 0, 3)
