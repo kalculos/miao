@@ -1,0 +1,352 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "iceBear67/miao/codec/http"
+
+import(
+  "iceBear67/miao/buffer"
+  "iceBear67/miao/io"
+)
+
+// Values
+let _ACCEPT : String
+
+let _ACCEPT_CHARSET : String
+
+let _ACCEPT_ENCODING : String
+
+let _ACCEPT_LANGUAGE : String
+
+let _ACCESS_CONTROL_ALLOW_CREDENTIALS : String
+
+let _ACCESS_CONTROL_ALLOW_HEADERS : String
+
+let _ACCESS_CONTROL_ALLOW_METHODS : String
+
+let _ACCESS_CONTROL_ALLOW_ORIGIN : String
+
+let _ACCESS_CONTROL_EXPOSE_HEADERS : String
+
+let _ACCESS_CONTROL_MAX_AGE : String
+
+let _ACCESS_CONTROL_REQUEST_HEADERS : String
+
+let _ACCESS_CONTROL_REQUEST_METHOD : String
+
+let _AGE : String
+
+let _ALLOW : String
+
+let _AUTHORIZATION : String
+
+let _CACHE_CONTROL : String
+
+let _CONNECTION : String
+
+let _CONTENT_DISPOSITION : String
+
+let _CONTENT_ENCODING : String
+
+let _CONTENT_LANGUAGE : String
+
+let _CONTENT_LENGTH : String
+
+let _CONTENT_LOCATION : String
+
+let _CONTENT_RANGE : String
+
+let _CONTENT_TYPE : String
+
+let _COOKIE : String
+
+let _DATE : String
+
+let _ETAG : String
+
+let _EXPECT : String
+
+let _EXPIRES : String
+
+let _FROM : String
+
+let _HOST : String
+
+let _IF_MATCH : String
+
+let _IF_MODIFIED_SINCE : String
+
+let _IF_NONE_MATCH : String
+
+let _IF_RANGE : String
+
+let _IF_UNMODIFIED_SINCE : String
+
+let _LAST_MODIFIED : String
+
+let _LINK : String
+
+let _LOCATION : String
+
+let _MAX_FORWARDS : String
+
+let _MIME_APPLICATION_FORM_URLENCODED : String
+
+let _MIME_APPLICATION_JSON : String
+
+let _MIME_APPLICATION_OCTET_STREAM : String
+
+let _MIME_APPLICATION_XML : String
+
+let _MIME_IMAGE_GIF : String
+
+let _MIME_IMAGE_JPEG : String
+
+let _MIME_IMAGE_PNG : String
+
+let _MIME_IMAGE_SVG : String
+
+let _MIME_MULTIPART_FORM_DATA : String
+
+let _MIME_TEXT_CSS : String
+
+let _MIME_TEXT_HTML : String
+
+let _MIME_TEXT_JAVASCRIPT : String
+
+let _MIME_TEXT_PLAIN : String
+
+let _ORIGIN : String
+
+let _PRAGMA : String
+
+let _PROXY_AUTHENTICATE : String
+
+let _PROXY_AUTHORIZATION : String
+
+let _RANGE : String
+
+let _REFERER : String
+
+let _RETRY_AFTER : String
+
+let _SERVER : String
+
+let _SET_COOKIE : String
+
+let _TE : String
+
+let _TRAILER : String
+
+let _TRANSFER_ENCODING : String
+
+let _UPGRADE : String
+
+let _USER_AGENT : String
+
+let _VARY : String
+
+let _VIA : String
+
+let _WARNING : String
+
+let _WWW_AUTHENTICATE : String
+
+fn build_query_string(Map[String, Array[String]]) -> String
+
+fn parse_cookie_header(String) -> Map[String, String]
+
+fn parse_set_cookie(String) -> Cookie?
+
+fn url_decode(String) -> String
+
+fn url_encode(String) -> String
+
+// Errors
+
+// Types and methods
+pub struct Cookie {
+  name : String
+  value : String
+  domain : String?
+  path : String?
+  expires : String?
+  max_age : Int?
+  secure : Bool
+  http_only : Bool
+  same_site : SameSite?
+}
+fn Cookie::new(String, String) -> Self
+fn Cookie::to_set_cookie_string(Self) -> String
+fn Cookie::with_domain(Self, String) -> Self
+fn Cookie::with_expires(Self, String) -> Self
+fn Cookie::with_http_only(Self, Bool) -> Self
+fn Cookie::with_max_age(Self, Int) -> Self
+fn Cookie::with_path(Self, String) -> Self
+fn Cookie::with_same_site(Self, SameSite) -> Self
+fn Cookie::with_secure(Self, Bool) -> Self
+
+pub struct HttpChunkedReader {
+  reader : &@io.Reader
+  mut current_chunk_remaining : Int
+  mut finished : Bool
+  mut trailer_headers : HttpHeaders?
+}
+fn HttpChunkedReader::is_finished(Self) -> Bool
+fn HttpChunkedReader::new(&@io.Reader) -> Self
+async fn HttpChunkedReader::read_all(Self) -> &@buffer.Buffer
+fn HttpChunkedReader::trailer_headers(Self) -> HttpHeaders?
+
+pub struct HttpChunkedWriter {
+  writer : &@io.Writer
+}
+fn HttpChunkedWriter::new(&@io.Writer) -> Self
+async fn HttpChunkedWriter::write_chunk(Self, &@buffer.Buffer) -> Unit
+async fn HttpChunkedWriter::write_final_chunk(Self, HttpHeaders?) -> Unit
+
+pub struct HttpContentReader {
+  reader : &@io.Reader
+  content_length : Int
+  mut bytes_read : Int
+}
+fn HttpContentReader::bytes_read(Self) -> Int
+fn HttpContentReader::content_length(Self) -> Int
+fn HttpContentReader::has_more(Self) -> Bool
+fn HttpContentReader::new(&@io.Reader, Int) -> Self
+async fn HttpContentReader::read(Self, Int) -> &@buffer.Buffer
+async fn HttpContentReader::read_all(Self) -> &@buffer.Buffer
+
+pub struct HttpHeaders {
+  headers : Array[(String, String)]
+}
+fn HttpHeaders::add(Self, String, String) -> Unit
+fn HttpHeaders::contains(Self, String) -> Bool
+fn HttpHeaders::get(Self, String) -> String?
+fn HttpHeaders::get_all(Self, String) -> Array[String]
+fn HttpHeaders::length(Self) -> Int
+fn HttpHeaders::new() -> Self
+fn HttpHeaders::remove(Self, String) -> Unit
+fn HttpHeaders::set(Self, String, String) -> Unit
+
+pub(all) enum HttpMethod {
+  GET
+  POST
+  PUT
+  DELETE
+  HEAD
+  OPTIONS
+  PATCH
+  CONNECT
+  TRACE
+}
+fn HttpMethod::from_string(String) -> Self raise
+fn HttpMethod::to_string(Self) -> String
+impl Eq for HttpMethod
+impl Show for HttpMethod
+
+pub struct HttpReader {
+  reader : &@io.Reader
+}
+fn HttpReader::new(&@io.Reader) -> Self
+async fn HttpReader::read_request(Self) -> HttpRequest
+async fn HttpReader::read_response(Self) -> HttpResponse
+
+pub struct HttpRequest {
+  http_method : HttpMethod
+  uri : String
+  version : HttpVersion
+  headers : HttpHeaders
+  content_reader : HttpContentReader?
+}
+fn HttpRequest::content_reader(Self) -> HttpContentReader?
+fn HttpRequest::method(Self) -> HttpMethod
+fn HttpRequest::new(HttpMethod, String, HttpVersion) -> Self
+
+pub struct HttpResponse {
+  version : HttpVersion
+  status : HttpStatus
+  headers : HttpHeaders
+  content_reader : HttpContentReader?
+}
+fn HttpResponse::new(HttpVersion, HttpStatus) -> Self
+
+pub struct HttpStatus {
+  code : Int
+  reason : String
+}
+fn HttpStatus::accepted() -> Self
+fn HttpStatus::bad_gateway() -> Self
+fn HttpStatus::bad_request() -> Self
+fn HttpStatus::conflict() -> Self
+fn HttpStatus::continue_() -> Self
+fn HttpStatus::created() -> Self
+fn HttpStatus::forbidden() -> Self
+fn HttpStatus::found() -> Self
+fn HttpStatus::gateway_timeout() -> Self
+fn HttpStatus::gone() -> Self
+fn HttpStatus::internal_server_error() -> Self
+fn HttpStatus::is_client_error(Self) -> Bool
+fn HttpStatus::is_error(Self) -> Bool
+fn HttpStatus::is_informational(Self) -> Bool
+fn HttpStatus::is_redirection(Self) -> Bool
+fn HttpStatus::is_server_error(Self) -> Bool
+fn HttpStatus::is_success(Self) -> Bool
+fn HttpStatus::method_not_allowed() -> Self
+fn HttpStatus::moved_permanently() -> Self
+fn HttpStatus::new(Int, String) -> Self
+fn HttpStatus::no_content() -> Self
+fn HttpStatus::not_found() -> Self
+fn HttpStatus::not_implemented() -> Self
+fn HttpStatus::not_modified() -> Self
+fn HttpStatus::ok() -> Self
+fn HttpStatus::payment_required() -> Self
+fn HttpStatus::permanent_redirect() -> Self
+fn HttpStatus::see_other() -> Self
+fn HttpStatus::service_unavailable() -> Self
+fn HttpStatus::switching_protocols() -> Self
+fn HttpStatus::temporary_redirect() -> Self
+fn HttpStatus::too_many_requests() -> Self
+fn HttpStatus::unauthorized() -> Self
+fn HttpStatus::unprocessable_entity() -> Self
+impl Eq for HttpStatus
+impl Show for HttpStatus
+
+pub(all) enum HttpVersion {
+  HTTP_1_0
+  HTTP_1_1
+}
+fn HttpVersion::from_string(String) -> Self raise
+fn HttpVersion::to_string(Self) -> String
+impl Eq for HttpVersion
+impl Show for HttpVersion
+
+pub struct HttpWriter {
+  writer : &@io.Writer
+}
+fn HttpWriter::new(&@io.Writer) -> Self
+async fn HttpWriter::write_request(Self, HttpRequest, &@buffer.Buffer) -> Unit
+async fn HttpWriter::write_response(Self, HttpResponse, &@buffer.Buffer) -> Unit
+impl @io.Writer for HttpWriter
+
+pub enum SameSite {
+  Strict
+  Lax
+  None
+}
+impl Eq for SameSite
+impl Show for SameSite
+
+pub struct Uri {
+  raw : String
+  path : String
+  query : Map[String, Array[String]]
+  fragment : String?
+}
+fn Uri::fragment(Self) -> String?
+fn Uri::get_query(Self, String) -> String?
+fn Uri::get_query_all(Self, String) -> Array[String]
+fn Uri::parse(String) -> Self
+fn Uri::path(Self) -> String
+fn Uri::to_string(Self) -> String
+
+// Type aliases
+
+// Traits
+
