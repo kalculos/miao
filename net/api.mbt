@@ -21,9 +21,7 @@ pub async fn dial_tcp(
   address : String,
   opt? : TcpOption = _TCP_OPT_EMPTY,
 ) -> Result[&TcpConnection, NetworkError] {
-  _network.val
-  .dial("tcp", address, opt.0)
-  .map(it => it.unsafe_connection_assert())
+  _network.val.dial("tcp", address, opt.0).map(it => type_assert(Ref::new(it)).val)
 }
 
 ///|
@@ -33,7 +31,7 @@ pub async fn dial_udp(
 ) -> Result[&DatagramConnection, NetworkError] {
   _network.val
   .dial("udp", address, opt.0)
-  .map(it => it.unsafe_connection_assert())
+  .map(it => type_assert(Ref::new(it)).val)
 }
 
 ///|
@@ -41,7 +39,9 @@ pub async fn listen_tcp(
   address : String,
   opt? : TcpOption = _TCP_OPT_EMPTY,
 ) -> Result[&TcpSocket, NetworkError] {
-  _network.val.bind("tcp", address, opt.0).map(it => it.unsafe_socket_assert())
+  _network.val
+  .bind("tcp", address, opt.0)
+  .map(it => type_assert(Ref::new(it)).val)
 }
 
 ///|
@@ -49,11 +49,10 @@ pub async fn listen_udp(
   address : String,
   opt? : UdpOption = _UDP_OPT_EMPTY,
 ) -> Result[&DatagramSocket, NetworkError] {
-  _network.val.bind("udp", address, opt.0).map(it => it.unsafe_socket_assert())
+  _network.val
+  .bind("udp", address, opt.0)
+  .map(it => type_assert(Ref::new(it)).val)
 }
 
 ///|
-fn[T] &Socket::unsafe_socket_assert(self : &Socket) -> T = "%identity"
-
-///|
-fn[T] &Connection::unsafe_connection_assert(self : &Connection) -> T = "%identity"
+fn[T, E] type_assert(t : Ref[T]) -> Ref[E] = "%identity"

@@ -198,3 +198,4 @@ impl @net.Socket for UvDatagramSocket with close(self) {
 impl @net.Socket for UvDatagramSocket with is_closed(self) {
   self.closed
 }
+

@@ -15,6 +15,10 @@ fn current_coroutine() -> UvTask?
 
 fn read_stream(&@rt.Runtime, @uv.Stream, buffer_size? : Int) -> &@io.Reader raise
 
+fn with_runtime(async () -> Unit noraise) -> Unit raise
+
+fn with_test(async () -> Unit) -> Unit raise
+
 // Errors
 
 // Types and methods
@@ -35,7 +39,6 @@ type LibuvFileSystem
 type LibuvRuntime
 fn LibuvRuntime::default() -> Self raise
 fn LibuvRuntime::new(@uv.Loop) -> Self
-fn LibuvRuntime::run(async () -> Unit noraise) -> Unit raise
 impl @rt.Runtime for LibuvRuntime
 
 type StreamWriter

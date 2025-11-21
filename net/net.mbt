@@ -39,6 +39,7 @@ pub(open) trait Socket {
     NetworkError,
   ]
   async close(Self) -> Unit
+  // a workaround: We cannot cast types even with assertions.
   is_closed(Self) -> Bool
 }
 
