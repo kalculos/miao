@@ -29,17 +29,53 @@ pub impl @rt.Runtime for LibuvRuntime with new_task(self, task) {
 ///|
 pub fn LibuvRuntime::new_uv_task(
   self : LibuvRuntime,
-  task : async (&@rt.Task) -> Unit,
-) -> UvTask {
+  exec : async (&@rt.Task) -> Unit,
+) -> UvTask raise {
   self.task_counter += 1
-  return UvTask::{
+  let task = UvTask::{
     id: self.task_counter,
     cancel_handle: () => (),
     exit_handler: _ => (),
     state: New,
     rt: self,
-    task,
+    handle: Ref::new(None)
   }
+  let handle = @uv.Async::new(self.uv, _async => ___run_async(() => {
+    task.state = Running
+    // prevent memory leak
+    push_coroutine(task)
+    defer (fn() {
+      pop_coroutine() |> ignore
+      task.cancel_handle = () => ()
+    })()
+    try (exec)(task) catch {
+      e =>
+        match e {
+          @rt.CoroutineError::Cancelled => {
+            task.state = Cancelled
+            task._cleanup_exit(ExitType::Cancelled)
+          }
+          _ => {
+            task.state = Cancelled
+            task._cleanup_exit(ExitType::UnhandledError)
+          }
+        }
+    } noraise {
+      _ => {
+        task.state = Completed
+        task._cleanup_exit(ExitType::Done)
+      }
+    }
+  }))
+  task.handle.val = Some(handle)
+  task.cancel_handle = () => ___suspend((
+    res,
+    _, // no need to store context ..
+  ) => {
+    handle.close(() => res(()))
+    task.handle.val = None // prevent memory leak
+  })
+  return task
 }
 
 ///|
@@ -76,8 +112,8 @@ struct UvTask {
   mut cancel_handle : async () -> Unit
   mut exit_handler : (ExitType) -> Unit
   mut state : @rt.TaskState
-  task : async (&@rt.Task) -> Unit
   rt : LibuvRuntime
+  handle : Ref[@uv.Async?]
 }
 
 ///|
@@ -128,38 +164,8 @@ pub impl @rt.Task for UvTask with state(self) {
 
 ///|
 pub impl @rt.Task for UvTask with start(self) {
-  let handle = @uv.Async::new(self.rt.uv, _async => ___run_async(() => {
-    self.state = Running
-    // prevent memory leak
-    push_coroutine(self)
-    defer (fn() {
-      pop_coroutine() |> ignore
-      self.cancel_handle = () => ()
-    })()
-    try (self.task)(self) catch {
-      e =>
-        match e {
-          @rt.CoroutineError::Cancelled => {
-            self.state = Cancelled
-            self._cleanup_exit(ExitType::Cancelled)
-          }
-          _ => {
-            self.state = Cancelled
-            self._cleanup_exit(ExitType::UnhandledError)
-          }
-        }
-    } noraise {
-      _ => {
-        self.state = Completed
-        self._cleanup_exit(ExitType::Done)
-      }
-    }
-  }))
-  handle.send()
-  self.cancel_handle = () => ___suspend((
-    res,
-    _, // no need to store context ..
-  ) => handle.close(() => res(())))
+  guard self.handle.val is Some(asy)
+  asy.send()
 }
 
 ///|
