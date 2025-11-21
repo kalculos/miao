@@ -92,10 +92,19 @@ fn UvTask::on_exit(
   }
   let og = self.exit_handler
   let mut cancel = false
-  self.exit_handler = type_ => {
-    defer og(type_)
-    if !cancel && type_ == _type {
-      handler()
+  if _type == Any {
+    self.exit_handler = type_ => {
+      defer og(type_)
+      if !cancel {
+        handler()
+      }
+    }
+  } else {
+    self.exit_handler = type_ => {
+      defer og(type_)
+      if !cancel && type_ == _type {
+        handler()
+      }
     }
   }
   () => cancel = true
@@ -146,6 +155,7 @@ pub impl @rt.Task for UvTask with start(self) {
       }
     }
   }))
+  handle.send()
   self.cancel_handle = () => ___suspend((
     res,
     _, // no need to store context ..

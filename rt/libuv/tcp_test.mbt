@@ -12,7 +12,7 @@ test "TCP server can bind to address" {
     // Successfully bound - this is expected
     inspect(socket.is_closed(), content="false")
     @net.Socket::close(socket)
-    inspect(true, content="true")
+    ()
   })
 }
 
@@ -31,7 +31,7 @@ test "TCP dial to unreachable address fails gracefully" {
       }
       Err(_) => {
         // Expected to fail with connection refused
-        inspect(true, content="true")
+        ()
       }
     }
   })
@@ -52,8 +52,8 @@ test "TCP bind validates address format" {
       Err(err) => {
         // Should get InvalidAddress error
         match err {
-          @net.NetworkError::InvalidAddress(_) => inspect(true, content="true")
-          _ => inspect(false, content="false")
+          @net.NetworkError::InvalidAddress(_) => ()
+          _ => ()
         }
       }
     }
@@ -120,6 +120,6 @@ test "TCP server and client can communicate" {
     client_task.join()
     
     // If we got here, the test passed
-    inspect(true, content="true")
+    ()
   })
 }

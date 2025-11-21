@@ -10,7 +10,7 @@ test "UDP socket can bind to address" {
     let socket = @net.listen_udp("127.0.0.1:19877").unwrap()
     inspect(socket.is_closed(), content="false")
     @net.Socket::close(socket)
-    inspect(true, content="true")
+    ()
   })
 }
 
@@ -27,11 +27,7 @@ test "UDP dial creates datagram connection" {
     // Check local and remote addresses
     let local = conn.local_addr()
     let remote = conn.remote_addr()
-    match (local, remote) {
-      (@net.SockAddr::Inet(_), @net.SockAddr::Inet(_)) =>
-        inspect(true, content="true")
-      _ => inspect(false, content="false")
-    }
+    inspect(local)
 
     // Close the connection (actually the underlying socket)
     @io.Channel::close(conn)
@@ -44,11 +40,11 @@ test "UDP bind validates address format" {
   @libuv.with_test(() => {
     let result = @net.listen_udp("not-an-address")
     match result {
-      Ok(_) => inspect(false, content="false")
+      Ok(_) => ()
       Err(err) =>
         match err {
-          @net.NetworkError::InvalidAddress(_) => inspect(true, content="true")
-          _ => inspect(false, content="false")
+          @net.NetworkError::InvalidAddress(_) => ()
+          _ => ()
         }
     }
   })
@@ -127,6 +123,6 @@ test "UDP server and client can communicate" {
     client_task.join()
 
     // If we got here, the test passed
-    inspect(true, content="true")
+    ()
   })
 }
