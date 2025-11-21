@@ -20,6 +20,10 @@ impl @net.Connection for UvTcpConnection with flush(_) {
 
 }
 
+impl @net.Connection for UvTcpConnection with unsafe_tcp_conn(self) {
+  self as &@net.TcpConnection
+}
+
 ///|
 impl @io.Writer for UvTcpConnection with write(self, arr, off, len) {
   uvrt_op_suspend((resolve, reject, _) => {
@@ -187,4 +191,8 @@ impl @net.Socket for UvTcpSocket with close(self) {
 ///|
 impl @net.Socket for UvTcpSocket with is_closed(self) {
   self.uv.to_handle().is_closing()
+}
+
+impl @net.Socket for UvTcpSocket with unsafe_tcp_socket(self) {
+  self as &@net.TcpSocket
 }

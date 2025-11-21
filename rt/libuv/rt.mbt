@@ -23,6 +23,14 @@ pub fn LibuvRuntime::default() -> LibuvRuntime raise {
 
 ///|
 pub impl @rt.Runtime for LibuvRuntime with new_task(self, task) {
+  self.new_uv_task(task)
+}
+
+///|
+pub fn LibuvRuntime::new_uv_task(
+  self : LibuvRuntime,
+  task : async (&@rt.Task) -> Unit,
+) -> UvTask {
   self.task_counter += 1
   return UvTask::{
     id: self.task_counter,
