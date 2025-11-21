@@ -40,19 +40,7 @@ pub(open) trait Socket {
   ]
   async close(Self) -> Unit
   // a workaround: We cannot cast types even with assertions.
-  unsafe_tcp_socket(Self) -> &TcpSocket = _
-  unsafe_udp_socket(Self) -> &DatagramSocket = _
   is_closed(Self) -> Bool
-}
-
-///|
-impl Socket with unsafe_tcp_socket(self) {
-  abort("Unsupported operation called on socket.")
-}
-
-///|
-impl Socket with unsafe_udp_socket(self) {
-  abort("Unsupported operation called on socket.")
 }
 
 ///|

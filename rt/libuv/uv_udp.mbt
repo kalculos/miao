@@ -27,11 +27,6 @@ impl @net.Connection for UvDatagram with flush(self) {
 }
 
 ///|
-impl @net.Connection for UvDatagram with unsafe_udp_conn(self) {
-  self as &@net.DatagramConnection
-}
-
-///|
 impl @io.Writer for UvDatagram with write(_self, _arr, _off, _len) {
   abort("UDP datagrams do not support write operation")
 }
@@ -204,7 +199,3 @@ impl @net.Socket for UvDatagramSocket with is_closed(self) {
   self.closed
 }
 
-///|
-impl @net.Socket for UvDatagramSocket with unsafe_udp_socket(self) {
-  self as &@net.DatagramSocket
-}
