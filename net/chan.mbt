@@ -5,4 +5,6 @@ pub(open) trait Connection: @io.Channel {
   remote_addr(Self) -> SockAddr
   // Flushes all the data to destination
   async flush(Self) -> Unit
+  unsafe_tcp_connection(Self) -> &TcpConnection
+  unsafe_udp_connection(Self) -> &DatagramConnection
 }

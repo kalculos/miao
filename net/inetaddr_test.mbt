@@ -293,7 +293,7 @@ test "IPv6 multicast address" {
 test "InetAddr enum pattern matching InetAddr::IPv4" {
   let addr = InetAddr::from_ipv4("1.2.3.4")
   match addr {
-    InetAddr::IPv4(_) => inspect(true, content="true")
+    InetAddr::IPv4(_) => ()
     InetAddr::IPv6(..) => inspect(false, content="true")
   }
 }
@@ -303,6 +303,6 @@ test "InetAddr enum pattern matching InetAddr::IPv6" {
   let addr = InetAddr::from_ipv6("::1")
   match addr {
     InetAddr::IPv4(_) => inspect(false, content="true")
-    InetAddr::IPv6(..) => inspect(true, content="true")
+    InetAddr::IPv6(..) => ()
   }
 }

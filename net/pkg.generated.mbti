@@ -84,9 +84,9 @@ fn UdpOption::new(broadcast? : Bool) -> Self
 pub(open) trait Connection : @io.Channel {
   local_addr(Self) -> SockAddr
   remote_addr(Self) -> SockAddr
-  unsafe_tcp_conn(Self) -> &TcpConnection = _
-  unsafe_udp_conn(Self) -> &DatagramConnection = _
   async flush(Self) -> Unit
+  unsafe_tcp_connection(Self) -> &TcpConnection
+  unsafe_udp_connection(Self) -> &DatagramConnection
 }
 
 pub(open) trait DatagramConnection : Connection {
@@ -107,9 +107,9 @@ pub(open) trait Network {
 pub(open) trait Socket {
   async accept(Self, @time.Duration) -> Result[&Connection, NetworkError]
   async close(Self) -> Unit
-  unsafe_tcp_socket(Self) -> &TcpSocket = _
-  unsafe_udp_socket(Self) -> &DatagramSocket = _
   is_closed(Self) -> Bool
+  unsafe_tcp_socket(Self) -> &TcpSocket
+  unsafe_udp_socket(Self) -> &DatagramSocket
 }
 
 pub(open) trait TcpConnection : Connection {

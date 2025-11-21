@@ -39,6 +39,7 @@ type LibuvFileSystem
 type LibuvRuntime
 fn LibuvRuntime::default() -> Self raise
 fn LibuvRuntime::new(@uv.Loop) -> Self
+fn LibuvRuntime::new_uv_task(Self, async (&@rt.Task) -> Unit) -> UvTask raise
 impl @rt.Runtime for LibuvRuntime
 
 type StreamWriter

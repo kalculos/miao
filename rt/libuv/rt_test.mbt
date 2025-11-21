@@ -9,11 +9,11 @@ test "LibuvRuntime::default creates runtime" {
     let rt = LibuvRuntime::default()
     // Runtime should be created successfully
     // Just verify we can create tasks with it
-    let task = rt.new_task(fn(_) {})
-    let task2 = rt.new_task(fn(_) {})
+    let task = rt.new_task(fn(_) {  })
+    let task2 = rt.new_task(fn(_) {  })
     assert_true(task.id() != task2.id())
-    inspect(task.state())
-    inspect(task2.state())
+    inspect(task.state(), content="New")
+    inspect(task2.state(), content="New")
   })
 }
 
@@ -37,7 +37,7 @@ test "LibuvRuntime::new_task creates task" {
     let task = rt.new_task(fn(_) {
       // Empty task
     })
-    
+
     // Task should be created in New state
     inspect(task.state(), content="New")
     inspect(task.id() > 0, content="true")
@@ -53,10 +53,9 @@ test "Task can be started and joined" {
       let rt2 = LibuvRuntime::default()
       rt2.sleep(10)
     })
-    
     task.start()
     task.join()
-    
+
     // After join, task should be completed
     inspect(task.state(), content="Completed")
   })

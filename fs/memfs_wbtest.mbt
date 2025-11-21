@@ -4,7 +4,7 @@ async test "MemFileSystem basic file operations" {
   set_default_fs(fs)
 
   // Create and write to a file
-  let p = path("/test.txt", using_fs=fs)
+  let p = path_fs("/test.txt", using_fs=fs)
   let chan = fs.open_file(
     p,
     OpenFlags::write_only(create=true),
@@ -38,7 +38,7 @@ async test "MemFileSystem directory operations" {
   set_default_fs(fs)
 
   // Create a nested file
-  let p = path("/dir1/dir2/file.txt", using_fs=fs)
+  let p = path_fs("/dir1/dir2/file.txt", using_fs=fs)
   let _chan = fs.open_file(
     p,
     OpenFlags::write_only(create=true),
@@ -46,7 +46,7 @@ async test "MemFileSystem directory operations" {
   )
 
   // List directory
-  let dir = path("/dir1/dir2", using_fs=fs)
+  let dir = path_fs("/dir1/dir2", using_fs=fs)
   let entries = fs.list_directory(dir)
   inspect(entries.length(), content="1")
 
@@ -60,8 +60,8 @@ async test "MemFileSystem directory operations" {
 async test "MemFileSystem rename" {
   let fs = MemFileSystem::new()
   set_default_fs(fs)
-  let src = path("/old.txt", using_fs=fs)
-  let dst = path("/new.txt", using_fs=fs)
+  let src = path_fs("/old.txt", using_fs=fs)
+  let dst = path_fs("/new.txt", using_fs=fs)
 
   // Create source file
   let chan = fs.open_file(

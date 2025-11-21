@@ -158,8 +158,8 @@ impl @fs.FileSystem for LibuvFileSystem with read_symbol_link(self, path) {
   uvrt_op_suspend((resolve, reject, _) => {
     let handle = uv.fs_readlink(
       @encoding/utf8.encode(path.to_unix_path()),
-      bytes => @fs.path(
-          (try? @encoding/utf8.decode(bytes)).unwrap(), // assertion
+      bytes => @fs.path_fs(
+          @encoding/utf8.decode_lossy(bytes), // assertion
           using_fs=self,
         )
         |> resolve,
@@ -195,7 +195,7 @@ impl @fs.FileSystem for LibuvFileSystem with rename(self, src, dst, copy_attr~) 
 impl @fs.FileSystem for LibuvFileSystem with cwd(self) {
   try {
     let cwd = @uv.cwd()
-    @fs.path(@encoding/utf8.decode(cwd), using_fs=self)
+    @fs.path_fs(@encoding/utf8.decode(cwd), using_fs=self)
   } catch {
     _ => panic()
   }
@@ -204,7 +204,7 @@ impl @fs.FileSystem for LibuvFileSystem with cwd(self) {
 ///|
 impl @fs.FileSystem for LibuvFileSystem with system_roots(self) {
   // todo: windows support
-  [@fs.path("", using_fs=self)]
+  [@fs.path_fs("", using_fs=self)]
 }
 
 ///|
@@ -214,7 +214,7 @@ impl @fs.FileSystem for LibuvFileSystem with real_path(self, path) {
     let handle = uv.fs_realpath(
       @encoding/utf8.encode(path.to_unix_path()),
       bytes => resolve(
-        @fs.path((try? @encoding/utf8.decode(bytes)).unwrap(), using_fs=self),
+        @fs.path_fs(@encoding/utf8.decode_lossy(bytes), using_fs=self),
       ),
       err => reject(err),
     )

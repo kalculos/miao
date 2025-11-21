@@ -76,7 +76,8 @@ async fn[T] uvrt_suspend(
   }
 }
 
-extern "C" fn uvrt_sleep(sec: Int) -> Int = "moonbit_uvrt_sleep"
+///|
+extern "C" fn uvrt_sleep(sec : Int) -> Int = "moonbit_uvrt_sleep"
 
 ///|
 extern "C" fn __has_coroutine() -> Bool = "moonbit_uvrt_has_coroutine"

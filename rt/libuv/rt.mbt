@@ -38,7 +38,7 @@ pub fn LibuvRuntime::new_uv_task(
     exit_handler: _ => (),
     state: New,
     rt: self,
-    handle: Ref::new(None)
+    handle: Ref::new(None),
   }
   let handle = @uv.Async::new(self.uv, _async => ___run_async(() => {
     task.state = Running
@@ -48,7 +48,7 @@ pub fn LibuvRuntime::new_uv_task(
       pop_coroutine() |> ignore
       task.cancel_handle = () => ()
     })()
-    try (exec)(task) catch {
+    try exec(task) catch {
       e =>
         match e {
           @rt.CoroutineError::Cancelled => {
@@ -68,12 +68,11 @@ pub fn LibuvRuntime::new_uv_task(
     }
   }))
   task.handle.val = Some(handle)
-  task.cancel_handle = () => ___suspend((
-    res,
-    _, // no need to store context ..
-  ) => {
+  task.cancel_handle = () => ___suspend((res, _) => { // no need to store context ..
     handle.close(() => res(()))
-    task.handle.val = None // prevent memory leak
+    task // prevent memory leak
+    .handle.val
+    = None
   })
   return task
 }
@@ -87,7 +86,7 @@ pub impl @rt.Runtime for LibuvRuntime with unsafe_suspend(_, f) {
 pub impl @rt.Runtime for LibuvRuntime with sleep(self, time_millis) {
   let timer = @uv.Timer::new(self.uv)
   uvrt_suspend((resolve, reject, _) => {
-    timer.start(timeout=time_millis, repeat=0, t => t.close(() => resolve(()))) catch {
+    timer.start(timeout=time_millis, repeat=0, _ => resolve(())) catch {
       err => reject(err)
     }
     () => {
@@ -170,9 +169,12 @@ pub impl @rt.Task for UvTask with start(self) {
 
 ///|
 pub impl @rt.Task for UvTask with join(self) {
+  if self.state == New {
+    self.start()
+  }
   match self.state {
     Cancelled | Completed => ()
-    Cancelling | Suspend | Running =>
+    Cancelling | Suspend | Running | New =>
       uvrt_suspend((resolve, reject, _) => {
         let cancelToken = self.on_exit(ExitType::Any, () => resolve(()))
         () => {
@@ -180,11 +182,6 @@ pub impl @rt.Task for UvTask with join(self) {
           reject(@rt.CoroutineError::Cancelled)
         }
       })
-    New => {
-      // enqueue the task and wait for it
-      self.start()
-      self.join()
-    }
   }
 }
 
