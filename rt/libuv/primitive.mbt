@@ -40,8 +40,12 @@ async fn[T] uvrt_suspend(
   }
   guard task.state == Running else {
     if task.state != Cancelling {
-      @debug.printerr("uvrt: Expect task state Running | Cancelling but got \{task.state}.")
-      @debug.printerr("uvrt: This is possibly a runtime bug! Interrupting as cancelled...")
+      @debug.printerr(
+        "uvrt: Expect task state Running | Cancelling but got \{task.state}.",
+      )
+      @debug.printerr(
+        "uvrt: This is possibly a runtime bug! Interrupting as cancelled...",
+      )
     }
     raise @rt.CoroutineError::Cancelled
   }

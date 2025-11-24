@@ -54,7 +54,11 @@ test "LibuvFileSystem can read file" {
 
     // Read data back
     let read_file = match
-      @fs.open(temp_path, @fs.OpenFlags::read_only(), permission=@fs.AccessFlags::new(write=true)) {
+      @fs.open(
+        temp_path,
+        @fs.OpenFlags::read_only(),
+        permission=@fs.AccessFlags::new(write=true),
+      ) {
       Ok(f) => f
       Err(e) => raise e
     }

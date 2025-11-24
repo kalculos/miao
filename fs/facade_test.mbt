@@ -6,7 +6,11 @@ async test "facade open" {
   let fs = MemFileSystem::new()
   set_default_fs(fs)
   let p = path("/test.txt", using_fs=fs)
-  let chan = open(p, OpenFlags::write_only(create=true), permission=AccessFlags::new()).unwrap()
+  let chan = open(
+    p,
+    OpenFlags::write_only(create=true),
+    permission=AccessFlags::new(),
+  ).unwrap()
   let data : FixedArray[Byte] = [1, 2, 3]
   chan.write(data, 0, 3) |> ignore
   @io.Channel::close(chan)
@@ -19,7 +23,11 @@ async test "facade size" {
   let fs = MemFileSystem::new()
   set_default_fs(fs)
   let p = path("/test.txt", using_fs=fs)
-  let chan = open(p, OpenFlags::write_only(create=true), permission=AccessFlags::new()).unwrap()
+  let chan = open(
+    p,
+    OpenFlags::write_only(create=true),
+    permission=AccessFlags::new(),
+  ).unwrap()
   let data : FixedArray[Byte] = [1, 2, 3, 4, 5]
   chan.write(data, 0, 5) |> ignore
   @io.Channel::close(chan)
@@ -33,7 +41,11 @@ async test "facade attr" {
   let fs = MemFileSystem::new()
   set_default_fs(fs)
   let p = path("/test.txt", using_fs=fs)
-  let chan = open(p, OpenFlags::write_only(create=true), permission=AccessFlags::new()).unwrap()
+  let chan = open(
+    p,
+    OpenFlags::write_only(create=true),
+    permission=AccessFlags::new(),
+  ).unwrap()
   @io.Channel::close(chan)
   let a = attr(p).unwrap()
   inspect(a.kind, content="RegularFile")

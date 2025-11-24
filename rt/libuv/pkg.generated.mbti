@@ -34,8 +34,6 @@ impl Hash for ExitType
 type LibuvFile
 fn LibuvFile::fd(Self) -> Int
 
-type LibuvFileSystem
-
 type LibuvRuntime
 fn LibuvRuntime::default() -> Self raise
 fn LibuvRuntime::new(@uv.Loop) -> Self

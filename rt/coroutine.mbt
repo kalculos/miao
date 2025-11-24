@@ -2,7 +2,7 @@
 pub(all) suberror CoroutineError {
   Cancelled
   ExecutionError(Error)
-} derive (Show)
+} derive(Show)
 
 ///|
 /// A TaskState indicates the execution state of a corresponding Task.

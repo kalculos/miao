@@ -11,6 +11,7 @@ pub(all) suberror CoroutineError {
   Cancelled
   ExecutionError(Error)
 }
+impl Show for CoroutineError
 
 // Types and methods
 pub struct BasicContext {

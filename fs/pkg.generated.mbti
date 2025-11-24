@@ -17,9 +17,11 @@ async fn exists(Path) -> Bool
 
 async fn list_dir(Path) -> Result[ArrayView[Path], FileError]
 
-async fn open(Path, OpenFlags, permission~ : Int) -> Result[&FileChannel, FileError]
+async fn open(Path, OpenFlags, permission~ : AccessFlags, follow_links? : Bool) -> Result[&FileChannel, FileError]
 
-fn path(String, using_fs? : &FileSystem) -> Path
+fn path(String, using_fs~ : &FileSystem) -> Path
+
+fn path_def(String) -> Path
 
 async fn read_symbolic_link(Path) -> Result[Path, FileError]
 

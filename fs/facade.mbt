@@ -3,9 +3,9 @@ pub async fn open(
   path : Path,
   mode : OpenFlags,
   permission~ : AccessFlags,
-  follow_links? : Bool = true
+  follow_links? : Bool = true,
 ) -> Result[&FileChannel, FileError] {
-  path.fs.open_file(path, mode, mode=permission, follow_links=follow_links)
+  path.fs.open_file(path, mode, mode=permission, follow_links~)
 }
 
 ///|

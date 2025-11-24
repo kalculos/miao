@@ -266,5 +266,5 @@ pub fn Path::relativize_path(self : Path, other : Path) -> Path {
 
 ///|
 pub fn Path::to_unix_path(self : Path) -> String {
-  "/"+self.components.join("/")
+  "/" + self.components.join("/")
 }
