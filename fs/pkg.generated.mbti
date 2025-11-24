@@ -7,27 +7,38 @@ import(
 )
 
 // Values
-async fn attr(Path) -> FileAttribute
+async fn attr(Path) -> Result[FileAttribute, FileError]
 
-async fn delete(Path) -> Unit
+async fn delete(Path) -> Result[Unit, FileError]
 
-async fn delete_if_exist(Path) -> Unit
+async fn delete_if_exist(Path) -> Result[Unit, FileError]
 
 async fn exists(Path) -> Bool
 
-async fn list_dir(Path) -> ArrayView[Path]
+async fn list_dir(Path) -> Result[ArrayView[Path], FileError]
 
-async fn open(Path, OpenFlags, permission~ : Int) -> &FileChannel
+async fn open(Path, OpenFlags, permission~ : Int) -> Result[&FileChannel, FileError]
 
 fn path(String, using_fs? : &FileSystem) -> Path
 
-async fn read_symbolic_link(Path) -> Path?
+async fn read_symbolic_link(Path) -> Result[Path, FileError]
 
 fn set_default_fs(&FileSystem) -> Unit
 
-async fn size(Path) -> UInt64
+async fn size(Path) -> Result[UInt64, FileError]
 
 // Errors
+pub(all) suberror FileError {
+  NotFound(msg~ : String)
+  PermissionDenied(msg~ : String)
+  AlreadyExists(msg~ : String)
+  UnexpectedKind(msg~ : String)
+  InvalidPath(msg~ : String)
+  IoError(msg~ : String)
+}
+impl Eq for FileError
+impl Hash for FileError
+impl Show for FileError
 
 // Types and methods
 pub struct AccessFlags(Int)
@@ -125,15 +136,15 @@ pub(open) trait FileChannel : @io.Channel {
 
 pub(open) trait FileSystem {
   id(Self) -> String
-  async open_file(Self, Path, OpenFlags, mode~ : AccessFlags, follow_links? : Bool) -> &FileChannel
-  async attr(Self, Path, follow_links? : Bool) -> FileAttribute
-  async list_directory(Self, Path) -> ArrayView[Path]
+  async open_file(Self, Path, OpenFlags, mode~ : AccessFlags, follow_links? : Bool) -> Result[&FileChannel, FileError]
+  async attr(Self, Path, follow_links? : Bool) -> Result[FileAttribute, FileError]
+  async list_directory(Self, Path) -> Result[ArrayView[Path], FileError]
   async can_access(Self, Path, AccessFlags) -> Bool
-  async delete(Self, Path) -> Unit
+  async delete(Self, Path) -> Result[Unit, FileError]
   async exists(Self, Path) -> Bool
-  async read_symbol_link(Self, Path) -> Path
-  async rename(Self, Path, Path, copy_attr~ : Bool) -> Unit
-  async real_path(Self, Path) -> Path
+  async read_symbol_link(Self, Path) -> Result[Path, FileError]
+  async rename(Self, Path, Path, copy_attr~ : Bool) -> Result[Unit, FileError]
+  async real_path(Self, Path) -> Result[Path, FileError]
   cwd(Self) -> Path
   system_roots(Self) -> ArrayView[Path]
 }

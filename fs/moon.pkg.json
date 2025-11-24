@@ -8,5 +8,11 @@
   ],
   "test-import": [
     "moonbitlang/async"
-  ]
+  ],
+  "link": {
+    "native": {
+      "gcc-flags": "--std=gnu2x",
+      "cc": "clang"
+    }
+  }
 }

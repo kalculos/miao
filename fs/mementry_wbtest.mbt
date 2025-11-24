@@ -33,7 +33,7 @@ test "memfilesystem new" {
 /// Test find_ref
 test "find_ref root" {
   let fs = MemFileSystem::new()
-  let p = path_fs("/", using_fs=fs)
+  let p = path("/", using_fs=fs)
   match fs.find_ref(p) {
     Some(r) => inspect(r.val.kind, content="Directory")
     None => assert_false(true, msg="ERROR: Root not found!")
@@ -44,7 +44,7 @@ test "find_ref root" {
 /// Test find
 test "find root" {
   let fs = MemFileSystem::new()
-  let p = path_fs("/", using_fs=fs)
+  let p = path("/", using_fs=fs)
   match fs.find(p) {
     Some(entry) => inspect(entry.kind, content="Directory")
     None => assert_false(true, msg="ERROR: Root not found!")

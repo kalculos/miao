@@ -88,7 +88,7 @@ async fn LibuvFile::new(
     let handle = uv.fs_open(
       path_bytes,
       flag.to_uv_flags(),
-      to_uv_access(mode) |> access_flag_inner,
+      to_access_bits(mode),
       file => resolve(file),
       err => reject(err),
     )

@@ -32,16 +32,16 @@ async fn[T] uvrt_suspend(
   f : ((T) -> Unit, (Error) -> Unit, UvTask) -> UvCancellationToken,
 ) -> T raise @rt.CoroutineError {
   guard pop_coroutine() is Some(task) else {
-    println(
-      "WARNING: Job not running in a UvTask calling uvrt_suspend. Haven't you set default_runtime nor use with_runtime in your main fn?",
+    @debug.printerr(
+      "uvrt: WARNING: Job not running in a UvTask calling uvrt_suspend. Haven't you set default_runtime nor use with_runtime in your main fn?",
     )
-    println("Unexpected behaviour is occurred. Program exiting")
+    @debug.printerr("uvrt: Unexpected behaviour is occurred. Program exiting")
     panic()
   }
   guard task.state == Running else {
     if task.state != Cancelling {
-      println("Expect task state Running | Cancelling but got \{task.state}.")
-      println("This is possibly a runtime bug! Interrupting as cancelled...")
+      @debug.printerr("uvrt: Expect task state Running | Cancelling but got \{task.state}.")
+      @debug.printerr("uvrt: This is possibly a runtime bug! Interrupting as cancelled...")
     }
     raise @rt.CoroutineError::Cancelled
   }

@@ -5,8 +5,8 @@
 async test "facade open" {
   let fs = MemFileSystem::new()
   set_default_fs(fs)
-  let p = path_fs("/test.txt", using_fs=fs)
-  let chan = open(p, OpenFlags::write_only(create=true), permission=0)
+  let p = path("/test.txt", using_fs=fs)
+  let chan = open(p, OpenFlags::write_only(create=true), permission=AccessFlags::new()).unwrap()
   let data : FixedArray[Byte] = [1, 2, 3]
   chan.write(data, 0, 3) |> ignore
   @io.Channel::close(chan)
@@ -18,12 +18,12 @@ async test "facade open" {
 async test "facade size" {
   let fs = MemFileSystem::new()
   set_default_fs(fs)
-  let p = path_fs("/test.txt", using_fs=fs)
-  let chan = open(p, OpenFlags::write_only(create=true), permission=0)
+  let p = path("/test.txt", using_fs=fs)
+  let chan = open(p, OpenFlags::write_only(create=true), permission=AccessFlags::new()).unwrap()
   let data : FixedArray[Byte] = [1, 2, 3, 4, 5]
   chan.write(data, 0, 5) |> ignore
   @io.Channel::close(chan)
-  let s = size(p)
+  let s = size(p).unwrap()
   inspect(s, content="5")
 }
 
@@ -32,10 +32,10 @@ async test "facade size" {
 async test "facade attr" {
   let fs = MemFileSystem::new()
   set_default_fs(fs)
-  let p = path_fs("/test.txt", using_fs=fs)
-  let chan = open(p, OpenFlags::write_only(create=true), permission=0)
+  let p = path("/test.txt", using_fs=fs)
+  let chan = open(p, OpenFlags::write_only(create=true), permission=AccessFlags::new()).unwrap()
   @io.Channel::close(chan)
-  let a = attr(p)
+  let a = attr(p).unwrap()
   inspect(a.kind, content="RegularFile")
   inspect(a.size, content="0")
 }
@@ -45,12 +45,16 @@ async test "facade attr" {
 async test "facade list_dir" {
   let fs = MemFileSystem::new()
   set_default_fs(fs)
-  let f1 = path_fs("/dir/file1.txt", using_fs=fs)
-  let f2 = path_fs("/dir/file2.txt", using_fs=fs)
-  @io.Channel::close(open(f1, OpenFlags::write_only(create=true), permission=0))
-  @io.Channel::close(open(f2, OpenFlags::write_only(create=true), permission=0))
-  let dir = path_fs("/dir", using_fs=fs)
-  let entries = list_dir(dir)
+  let f1 = path("/dir/file1.txt", using_fs=fs)
+  let f2 = path("/dir/file2.txt", using_fs=fs)
+  @io.Channel::close(
+    open(f1, OpenFlags::write_only(create=true), permission=AccessFlags::new()).unwrap(),
+  )
+  @io.Channel::close(
+    open(f2, OpenFlags::write_only(create=true), permission=AccessFlags::new()).unwrap(),
+  )
+  let dir = path("/dir", using_fs=fs)
+  let entries = list_dir(dir).unwrap()
   inspect(entries.length(), content="2")
 }
 
@@ -59,9 +63,11 @@ async test "facade list_dir" {
 async test "facade exists" {
   let fs = MemFileSystem::new()
   set_default_fs(fs)
-  let p = path_fs("/test.txt", using_fs=fs)
+  let p = path("/test.txt", using_fs=fs)
   inspect(exists(p), content="false")
-  @io.Channel::close(open(p, OpenFlags::write_only(create=true), permission=0))
+  @io.Channel::close(
+    open(p, OpenFlags::write_only(create=true), permission=AccessFlags::new()).unwrap(),
+  )
   inspect(exists(p), content="true")
 }
 
@@ -70,10 +76,12 @@ async test "facade exists" {
 async test "facade delete" {
   let fs = MemFileSystem::new()
   set_default_fs(fs)
-  let p = path_fs("/test.txt", using_fs=fs)
-  @io.Channel::close(open(p, OpenFlags::write_only(create=true), permission=0))
+  let p = path("/test.txt", using_fs=fs)
+  @io.Channel::close(
+    open(p, OpenFlags::write_only(create=true), permission=AccessFlags::new()).unwrap(),
+  )
   inspect(exists(p), content="true")
-  delete(p)
+  delete(p).unwrap()
   inspect(exists(p), content="false")
 }
 
@@ -82,9 +90,11 @@ async test "facade delete" {
 async test "facade delete_if_exist exists" {
   let fs = MemFileSystem::new()
   set_default_fs(fs)
-  let p = path_fs("/test.txt", using_fs=fs)
-  @io.Channel::close(open(p, OpenFlags::write_only(create=true), permission=0))
-  delete_if_exist(p)
+  let p = path("/test.txt", using_fs=fs)
+  @io.Channel::close(
+    open(p, OpenFlags::write_only(create=true), permission=AccessFlags::new()).unwrap(),
+  )
+  delete_if_exist(p).unwrap()
   inspect(exists(p), content="false")
 }
 
@@ -93,8 +103,8 @@ async test "facade delete_if_exist exists" {
 async test "facade delete_if_exist not exists" {
   let fs = MemFileSystem::new()
   set_default_fs(fs)
-  let p = path_fs("/test.txt", using_fs=fs)
-  delete_if_exist(p) // Should not raise
+  let p = path("/test.txt", using_fs=fs)
+  delete_if_exist(p).unwrap()
   inspect(exists(p), content="false")
 }
 
@@ -103,12 +113,11 @@ async test "facade delete_if_exist not exists" {
 async test "facade read_symbolic_link" {
   let fs = MemFileSystem::new()
   set_default_fs(fs)
-  let p = path_fs("/test.txt", using_fs=fs)
+  let p = path("/test.txt", using_fs=fs)
   // MemFileSystem doesn't support creating symlinks yet
-  // This should return None
-  let link = read_symbolic_link(p)
-  match link {
-    Some(_) => inspect("unexpected", content="should be None")
-    None => ()
+  // This should return an error
+  match read_symbolic_link(p) {
+    Ok(_) => inspect("unexpected", content="should be error")
+    Err(_) => inspect(true, content="true")
   }
 }

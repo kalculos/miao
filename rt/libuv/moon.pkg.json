@@ -15,10 +15,14 @@
     "iceBear67/miao/net",
     "iceBear67/miao/buffer",
     "iceBear67/time",
-    "iceBear67/miao/process"
+    "iceBear67/miao/process",
+    "iceBear67/miao/debug"
   ],
   "native-stub": [
     "coroutine.c",
     "net.c"
+  ],
+  "test-import": [
+    "iceBear67/miao/debug"
   ]
 }

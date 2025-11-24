@@ -53,25 +53,16 @@ pub impl Eq for Path with equal(self, another) {
 ///|
 /// A factory of path. It parses the input in unix path style and produce a Path with default file system.
 /// You may manipulate its behaviour by hijacking runtime. It also resolves absoluteness of the given path.
-pub fn path_fs(
-  str : String,
-  using_fs~ : &FileSystem
-) -> Path { // todo illegal path detection?
+pub fn path(str : String, using_fs~ : &FileSystem) -> Path { // todo illegal path detection?
   //todo windows support?
   let components = str.split("/").filter(fn(s) { s.length() > 0 }).to_array()
   let path = Path::{ fs: using_fs, components, absolute: false }
-  println(1)
-  if true {return path}
-  for root in using_fs.system_roots() {
-    if path.starts_with_path(root) {
-      return { ..path, absolute: true }
-    }
-  }
   path
 }
 
-pub fn path(str: String) -> Path {
-  path_fs(str, using_fs = default_file_system.val.unwrap())
+///|
+pub fn path_def(str : String) -> Path {
+  path(str, using_fs=default_file_system.val.unwrap())
 }
 
 ///|
@@ -132,7 +123,7 @@ pub fn Path::resolve_path(self : Path, another : Path) -> Path {
 ///  have a parent, the empty path.
 pub fn Path::sibling(self : Path, another : String) -> Path {
   guard self.parent() is Some(parent) else {
-    return path_fs(another, using_fs = self.fs)
+    return path(another, using_fs=self.fs)
   }
   parent.resolve(another)
 }
@@ -174,8 +165,14 @@ pub fn Path::to_absolute(self : Path) -> Path {
   if self.absolute {
     self
   } else {
-    let cwd = self.fs.cwd()
-    cwd.resolve_path(self).clean()
+    for path in self.fs.system_roots() {
+      if self.starts_with_path(path) {
+        return { ..self, absolute: true }
+      }
+    } else {
+      let cwd = self.fs.cwd()
+      { ..cwd.resolve_path(self).clean(), absolute: true }
+    }
   }
 }
 
@@ -195,12 +192,12 @@ pub fn Path::starts_with_path(self : Path, prefix : Path) -> Bool {
 
 ///|
 pub fn Path::starts_with(self : Path, prefix : String) -> Bool {
-  self.starts_with_path(path_fs(prefix,using_fs =  self.fs))
+  self.starts_with_path(path(prefix, using_fs=self.fs))
 }
 
 ///|
 pub fn Path::resolve(self : Path, child : String) -> Path {
-  self.resolve_path(path_fs(child, using_fs = self.fs))
+  self.resolve_path(path(child, using_fs=self.fs))
 }
 
 ///|
@@ -210,7 +207,7 @@ pub fn Path::resolve(self : Path, child : String) -> Path {
 /// p.relativize(p .resolve(q)).equals(q)
 /// When symbolic links are supported, then whether the resulting path, when resolved against this path, yields a path that can be used to locate the same file as other is implementation dependent. For example, if this path is "/a/b" and the given path is "/a/x" then the resulting relative path may be "../x". If "b" is a symbolic link then is implementation dependent if "a/b/../x" would locate the same file as "/a/x".
 pub fn Path::relativize(self : Path, other : String) -> Path {
-  self.relativize_path(path_fs(other,using_fs =  self.fs))
+  self.relativize_path(path(other, using_fs=self.fs))
 }
 
 ///|
@@ -269,5 +266,5 @@ pub fn Path::relativize_path(self : Path, other : Path) -> Path {
 
 ///|
 pub fn Path::to_unix_path(self : Path) -> String {
-  self.components.join("/")
+  "/"+self.components.join("/")
 }

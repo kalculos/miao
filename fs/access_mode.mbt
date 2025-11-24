@@ -12,9 +12,9 @@ pub struct AccessFlags(Int)
 
 ///|
 pub fn AccessFlags::new(
-  read? : Bool = false,
-  write? : Bool = false,
-  execute? : Bool = false,
+  read? : Bool = true,
+  write? : Bool = true,
+  execute? : Bool = true,
 ) -> AccessFlags {
   let mut flag = 0
   if read {

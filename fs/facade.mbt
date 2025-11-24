@@ -2,23 +2,24 @@
 pub async fn open(
   path : Path,
   mode : OpenFlags,
-  permission~ : Int,
-) -> &FileChannel {
-  path.fs.open_file(path, mode, mode=permission)
+  permission~ : AccessFlags,
+  follow_links? : Bool = true
+) -> Result[&FileChannel, FileError] {
+  path.fs.open_file(path, mode, mode=permission, follow_links=follow_links)
 }
 
 ///|
-pub async fn size(path : Path) -> UInt64 {
-  path.fs.attr(path).size
+pub async fn size(path : Path) -> Result[UInt64, FileError] {
+  path.fs.attr(path).map(fn(attr) { attr.size })
 }
 
 ///|
-pub async fn attr(path : Path) -> FileAttribute {
+pub async fn attr(path : Path) -> Result[FileAttribute, FileError] {
   path.fs.attr(path)
 }
 
 ///|
-pub async fn list_dir(path : Path) -> ArrayView[Path] {
+pub async fn list_dir(path : Path) -> Result[ArrayView[Path], FileError] {
   path.fs.list_directory(path)
 }
 
@@ -28,18 +29,20 @@ pub async fn exists(path : Path) -> Bool {
 }
 
 ///|
-pub async fn delete(path : Path) -> Unit {
+pub async fn delete(path : Path) -> Result[Unit, FileError] {
   path.fs.delete(path)
 }
 
 ///|
-pub async fn delete_if_exist(path : Path) -> Unit {
+pub async fn delete_if_exist(path : Path) -> Result[Unit, FileError] {
   if exists(path) {
     delete(path)
+  } else {
+    Ok(())
   }
 }
 
 ///|
-pub async fn read_symbolic_link(path : Path) -> Path? {
-  (try? path.fs.read_symbol_link(path)).to_option()
+pub async fn read_symbolic_link(path : Path) -> Result[Path, FileError] {
+  path.fs.read_symbol_link(path)
 }
