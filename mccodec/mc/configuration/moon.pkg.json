@@ -1,9 +1,0 @@
-{
-  "import": [
-    "iceBear67/miao/mccodec/mc",
-    "iceBear67/miao/mccodec/mc/types",
-    "iceBear67/miao/buffer",
-    "moonbitlang/x/uuid",
-    "iceBear67/mnbt/nbt"
-  ]
-}
