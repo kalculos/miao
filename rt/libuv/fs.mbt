@@ -46,7 +46,7 @@ impl @fs.FileSystem for LibuvFileSystem with open_file(
   } else {
     path
   }
-  Ok(LibuvFile::new(rt=self.rt, path=resolved_path, flag~, mode~))
+  LibuvFile::new(rt=self.rt, path=resolved_path, flag~, mode~)
 }
 
 ///|
