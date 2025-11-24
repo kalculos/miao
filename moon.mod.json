@@ -1,6 +1,6 @@
 {
   "name": "iceBear67/miao",
-  "version": "0.1.0",
+  "version": "0.1.0-M2",
   "deps": {
     "iceBear67/mnbt": "0.3.3",
     "tonyfettes/uv": "0.12.8",
