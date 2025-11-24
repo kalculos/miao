@@ -1,8 +1,7 @@
 {
     "import": [
         "iceBear67/miao/buffer",
-        "iceBear67/miao/io",
-        "moonbitlang/x/uuid"
+        "iceBear67/miao/io"
     ],
     "test-import": [
         "moonbitlang/async"

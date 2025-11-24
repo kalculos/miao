@@ -444,6 +444,18 @@ pub fn HttpRequest::method(self : HttpRequest) -> HttpMethod {
 }
 
 ///|
+/// Get URI from request
+pub fn HttpRequest::uri(self : HttpRequest) -> String {
+  self.uri
+}
+
+///|
+/// Get version from request
+pub fn HttpRequest::version(self : HttpRequest) -> HttpVersion {
+  self.version
+}
+
+///|
 /// Get the content reader if available
 pub fn HttpRequest::content_reader(self : HttpRequest) -> HttpContentReader? {
   self.content_reader
@@ -465,4 +477,22 @@ pub fn HttpResponse::new(
   status : HttpStatus,
 ) -> HttpResponse {
   { version, status, headers: HttpHeaders::new(), content_reader: None }
+}
+
+///|
+/// Get version from response
+pub fn HttpResponse::version(self : HttpResponse) -> HttpVersion {
+  self.version
+}
+
+///|
+/// Get status from response
+pub fn HttpResponse::status(self : HttpResponse) -> HttpStatus {
+  self.status
+}
+
+///|
+/// Get the content reader if available
+pub fn HttpResponse::content_reader(self : HttpResponse) -> HttpContentReader? {
+  self.content_reader
 }

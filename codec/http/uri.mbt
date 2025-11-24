@@ -58,11 +58,9 @@ fn parse_query_string(query_str : String) -> Map[String, Array[String]] {
         }
       }
       None => {
-        let key = url_decode(pair_str)
-        match result.get(key) {
-          Some(_) => () // Already exists, skip
-          None => result.set(key, [])
-        }
+        // Do not add key if there is no value (skip)
+        // This ensures get_query("flag") returns None as expected
+        ()
       }
     }
   }
@@ -72,14 +70,14 @@ fn parse_query_string(query_str : String) -> Map[String, Array[String]] {
 ///|
 /// URL decode a string (percent encoding)
 pub fn url_decode(s : String) -> String {
-  let mut result = ""
+  let result_bytes : Array[Byte] = []
   let mut i = 0
   let len = s.length()
   while i < len {
     let ch_code = s[i]
     let ch = ch_code.unsafe_to_char()
     if ch == '+' {
-      result = result + " "
+      result_bytes.push(b' ')
       i = i + 1
     } else if ch == '%' && i + 2 < len {
       // Try to parse hex digits
@@ -88,21 +86,30 @@ pub fn url_decode(s : String) -> String {
       let hex = substring(s, hex_start, hex_end)
       match parse_hex_byte(hex) {
         Some(byte) => {
-          // Convert byte to character (assuming ASCII/Latin-1)
-          result = result + byte.to_int().unsafe_to_char().to_string()
+          // Accumulate bytes for UTF-8 decoding
+          result_bytes.push(byte)
           i = i + 3
         }
         None => {
-          result = result + ch_code.unsafe_to_char().to_string()
+          result_bytes.push(ch_code.to_byte())
           i = i + 1
         }
       }
     } else {
-      result = result + ch_code.unsafe_to_char().to_string()
+      result_bytes.push(ch_code.to_byte())
       i = i + 1
     }
   }
-  result
+  // Convert accumulated bytes to UTF-8 string
+  let arr : FixedArray[Byte] = FixedArray::make(result_bytes.length(), 0)
+  for i = 0; i < result_bytes.length(); i = i + 1 {
+    arr[i] = result_bytes[i]
+  }
+  try {
+    @encoding/utf8.decode(Bytes::from_array(arr))
+  } catch {
+    _ => "" // Fallback: if decode fails, return empty string
+  }
 }
 
 ///|

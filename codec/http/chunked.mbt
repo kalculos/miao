@@ -86,7 +86,7 @@ async fn HttpChunkedReader::read_from_current_chunk(
 ///|
 /// Read a line from the reader (until \r\n or \n)
 async fn HttpChunkedReader::read_line(self : HttpChunkedReader) -> String {
-  let line_bytes = @buffer.HeapByteBuf::new(128)
+  let line_bytes : Array[Byte] = []
   let mut prev_byte : Byte = 0
   let buffer : FixedArray[Byte] = FixedArray::make(1, 0)
   while true {
@@ -98,16 +98,9 @@ async fn HttpChunkedReader::read_line(self : HttpChunkedReader) -> String {
 
     // Check for \r\n
     if prev_byte == b'\r' && byte == b'\n' {
-      // Remove the \r we added - skip back one byte
-      if line_bytes.readable_bytes() > 0 {
-        // We need to remove the last written byte
-        // Since we can't go back, we'll reconstruct without the last byte
-        let temp = line_bytes.to_bytes()
-        if temp.length() > 0 {
-          line_bytes.clear()
-          let arr = temp.to_fixedarray()
-          line_bytes.write(arr, 0, temp.length() - 1) |> ignore
-        }
+      // Remove the \r we added - efficient pop operation on Array
+      if line_bytes.length() > 0 {
+        line_bytes.pop() |> ignore
       }
       break
     }
@@ -115,12 +108,16 @@ async fn HttpChunkedReader::read_line(self : HttpChunkedReader) -> String {
     if byte == b'\n' {
       break
     }
-    line_bytes.write_byte(byte)
+    line_bytes.push(byte)
     prev_byte = byte
   }
 
   // Convert bytes to string using UTF-8 decoding
-  @encoding/utf8.decode(line_bytes.to_bytes())
+  let arr : FixedArray[Byte] = FixedArray::make(line_bytes.length(), 0)
+  for i = 0; i < line_bytes.length(); i = i + 1 {
+    arr[i] = line_bytes[i]
+  }
+  @encoding/utf8.decode(Bytes::from_array(arr))
 }
 
 ///|

@@ -26,7 +26,11 @@ pub async fn HttpReader::read_request(self : HttpReader) -> HttpRequest {
   let content_reader = headers
     .get("Content-Length")
     .map(length_str => {
-      let length = @strconv.parse_int(length_str)
+      let length = try {
+        @strconv.parse_int(length_str)
+      } catch {
+        _ => raise fail("Invalid Content-Length value: '\{length_str}'")
+      }
       guard length >= 0 else {
         raise fail("Invalid HTTP Content-Length: \{length}")
       }
@@ -49,7 +53,11 @@ pub async fn HttpReader::read_response(self : HttpReader) -> HttpResponse {
   let content_reader = headers
     .get("Content-Length")
     .map(length_str => {
-      let length = @strconv.parse_int(length_str)
+      let length = try {
+        @strconv.parse_int(length_str)
+      } catch {
+        _ => raise fail("Invalid Content-Length value: '\{length_str}'")
+      }
       guard length >= 0 else {
         raise fail("Invalid HTTP Content-Length: \{length}")
       }
@@ -80,7 +88,11 @@ fn parse_status_line(line : String) -> (HttpVersion, HttpStatus) raise {
   }
   let version = HttpVersion::from_string(parts[0].to_string())
   let code_str = parts[1].to_string()
-  let code = @strconv.parse_int(code_str)
+  let code = try {
+    @strconv.parse_int(code_str)
+  } catch {
+    _ => raise fail("Invalid status code in status line: '\{line}'")
+  }
   let reason = if parts.length() > 2 {
     // Join remaining parts as reason phrase
     let mut r = parts[2].to_string()
