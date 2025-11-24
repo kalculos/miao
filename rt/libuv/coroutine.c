@@ -47,7 +47,6 @@ void *moonbit_uvrt_pop_coroutine_stack()
     void *coro_ptr = current->coro_ptr;
     current = to_be_freed->prev;
     free(to_be_freed);
-    moonbit_decref(coro_ptr);
     return coro_ptr;
 }
 
