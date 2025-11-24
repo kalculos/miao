@@ -6,7 +6,7 @@ async test "facade open" {
   let fs = MemFileSystem::new()
   set_default_fs(fs)
   let p = path("/test.txt", using_fs=fs)
-  let chan = open(p, OpenFlags::write_only(create=true), permission=0).unwrap()
+  let chan = open(p, OpenFlags::write_only(create=true), permission=AccessFlags::new()).unwrap()
   let data : FixedArray[Byte] = [1, 2, 3]
   chan.write(data, 0, 3) |> ignore
   @io.Channel::close(chan)
@@ -19,7 +19,7 @@ async test "facade size" {
   let fs = MemFileSystem::new()
   set_default_fs(fs)
   let p = path("/test.txt", using_fs=fs)
-  let chan = open(p, OpenFlags::write_only(create=true), permission=0).unwrap()
+  let chan = open(p, OpenFlags::write_only(create=true), permission=AccessFlags::new()).unwrap()
   let data : FixedArray[Byte] = [1, 2, 3, 4, 5]
   chan.write(data, 0, 5) |> ignore
   @io.Channel::close(chan)
@@ -33,7 +33,7 @@ async test "facade attr" {
   let fs = MemFileSystem::new()
   set_default_fs(fs)
   let p = path("/test.txt", using_fs=fs)
-  let chan = open(p, OpenFlags::write_only(create=true), permission=0).unwrap()
+  let chan = open(p, OpenFlags::write_only(create=true), permission=AccessFlags::new()).unwrap()
   @io.Channel::close(chan)
   let a = attr(p).unwrap()
   inspect(a.kind, content="RegularFile")
@@ -48,10 +48,10 @@ async test "facade list_dir" {
   let f1 = path("/dir/file1.txt", using_fs=fs)
   let f2 = path("/dir/file2.txt", using_fs=fs)
   @io.Channel::close(
-    open(f1, OpenFlags::write_only(create=true), permission=0).unwrap(),
+    open(f1, OpenFlags::write_only(create=true), permission=AccessFlags::new()).unwrap(),
   )
   @io.Channel::close(
-    open(f2, OpenFlags::write_only(create=true), permission=0).unwrap(),
+    open(f2, OpenFlags::write_only(create=true), permission=AccessFlags::new()).unwrap(),
   )
   let dir = path("/dir", using_fs=fs)
   let entries = list_dir(dir).unwrap()
@@ -66,7 +66,7 @@ async test "facade exists" {
   let p = path("/test.txt", using_fs=fs)
   inspect(exists(p), content="false")
   @io.Channel::close(
-    open(p, OpenFlags::write_only(create=true), permission=0).unwrap(),
+    open(p, OpenFlags::write_only(create=true), permission=AccessFlags::new()).unwrap(),
   )
   inspect(exists(p), content="true")
 }
@@ -78,7 +78,7 @@ async test "facade delete" {
   set_default_fs(fs)
   let p = path("/test.txt", using_fs=fs)
   @io.Channel::close(
-    open(p, OpenFlags::write_only(create=true), permission=0).unwrap(),
+    open(p, OpenFlags::write_only(create=true), permission=AccessFlags::new()).unwrap(),
   )
   inspect(exists(p), content="true")
   delete(p).unwrap()
@@ -92,7 +92,7 @@ async test "facade delete_if_exist exists" {
   set_default_fs(fs)
   let p = path("/test.txt", using_fs=fs)
   @io.Channel::close(
-    open(p, OpenFlags::write_only(create=true), permission=0).unwrap(),
+    open(p, OpenFlags::write_only(create=true), permission=AccessFlags::new()).unwrap(),
   )
   delete_if_exist(p).unwrap()
   inspect(exists(p), content="false")

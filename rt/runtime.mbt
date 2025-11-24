@@ -10,7 +10,7 @@ pub(open) trait Runtime {
     Self,
     ((ResolvedToken) -> Unit, (Error) -> Unit, &Task) -> CancellationToken,
   ) -> ResolvedToken
-  new_task(Self, task : async (&Task) -> Unit) -> &Task
+  new_task(Self, task : async (&Task) -> Unit) -> &Task raise
   async sleep(Self, time_millis : UInt64) -> Unit
 }
 

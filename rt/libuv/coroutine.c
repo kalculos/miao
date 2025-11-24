@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include "moonbit.h"
+#include <unistd.h>
 
 typedef struct tlstack
 {
@@ -46,6 +47,12 @@ void *moonbit_uvrt_pop_coroutine_stack()
     void *coro_ptr = current->coro_ptr;
     current = to_be_freed->prev;
     free(to_be_freed);
-    moonbit_decref(coro_ptr);
     return coro_ptr;
+}
+
+MOONBIT_FFI_EXPORT
+int moonbit_uvrt_sleep(int sec)
+{
+    sleep(sec);
+    return 0;
 }

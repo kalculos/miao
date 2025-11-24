@@ -21,6 +21,17 @@ impl @net.Connection for UvTcpConnection with flush(_) {
 }
 
 ///|
+impl @net.Connection for UvTcpConnection with unsafe_tcp_connection(self) {
+  self as &@net.TcpConnection
+}
+
+///|
+impl @net.Connection for UvTcpConnection with unsafe_udp_connection(_self) {
+  println("unsupport")
+  abort("unsupport")
+}
+
+///|
 impl @io.Writer for UvTcpConnection with write(self, arr, off, len) {
   uvrt_op_suspend((resolve, reject, _) => {
     let _handle = self.tcp.write(
@@ -187,4 +198,15 @@ impl @net.Socket for UvTcpSocket with close(self) {
 ///|
 impl @net.Socket for UvTcpSocket with is_closed(self) {
   self.uv.to_handle().is_closing()
+}
+
+///|
+impl @net.Socket for UvTcpSocket with unsafe_tcp_socket(self) {
+  self as &@net.TcpSocket
+}
+
+///|
+impl @net.Socket for UvTcpSocket with unsafe_udp_socket(_self) {
+  println("unsupport")
+  abort("unsupport")
 }

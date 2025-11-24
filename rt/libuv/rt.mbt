@@ -23,15 +23,58 @@ pub fn LibuvRuntime::default() -> LibuvRuntime raise {
 
 ///|
 pub impl @rt.Runtime for LibuvRuntime with new_task(self, task) {
+  self.new_uv_task(task)
+}
+
+///|
+pub fn LibuvRuntime::new_uv_task(
+  self : LibuvRuntime,
+  exec : async (&@rt.Task) -> Unit,
+) -> UvTask raise {
   self.task_counter += 1
-  return UvTask::{
+  let task = UvTask::{
     id: self.task_counter,
     cancel_handle: () => (),
     exit_handler: _ => (),
     state: New,
     rt: self,
-    task,
+    handle: Ref::new(None),
   }
+  let handle = @uv.Async::new(self.uv, _async => ___run_async(() => {
+    task.state = Running
+    // prevent memory leak
+    push_coroutine(task)
+    defer (fn() {
+      pop_coroutine() |> ignore
+      task.cancel_handle = () => ()
+    })()
+    try exec(task) catch {
+      e =>
+        match e {
+          @rt.CoroutineError::Cancelled => {
+            task.state = Cancelled
+            task._cleanup_exit(ExitType::Cancelled)
+          }
+          _ => {
+            task.state = Cancelled
+            task._cleanup_exit(ExitType::UnhandledError)
+          }
+        }
+    } noraise {
+      _ => {
+        task.state = Completed
+        task._cleanup_exit(ExitType::Done)
+      }
+    }
+  }))
+  task.handle.val = Some(handle)
+  task.cancel_handle = () => ___suspend((res, _) => { // no need to store context ..
+    handle.close(() => res(()))
+    task // prevent memory leak
+    .handle.val
+    = None
+  })
+  return task
 }
 
 ///|
@@ -43,7 +86,7 @@ pub impl @rt.Runtime for LibuvRuntime with unsafe_suspend(_, f) {
 pub impl @rt.Runtime for LibuvRuntime with sleep(self, time_millis) {
   let timer = @uv.Timer::new(self.uv)
   uvrt_suspend((resolve, reject, _) => {
-    timer.start(timeout=time_millis, repeat=0, t => t.close(() => resolve(()))) catch {
+    timer.start(timeout=time_millis, repeat=0, _ => resolve(())) catch {
       err => reject(err)
     }
     () => {
@@ -68,8 +111,8 @@ struct UvTask {
   mut cancel_handle : async () -> Unit
   mut exit_handler : (ExitType) -> Unit
   mut state : @rt.TaskState
-  task : async (&@rt.Task) -> Unit
   rt : LibuvRuntime
+  handle : Ref[@uv.Async?]
 }
 
 ///|
@@ -84,10 +127,19 @@ fn UvTask::on_exit(
   }
   let og = self.exit_handler
   let mut cancel = false
-  self.exit_handler = type_ => {
-    defer og(type_)
-    if !cancel && type_ == _type {
-      handler()
+  if _type == Any {
+    self.exit_handler = type_ => {
+      defer og(type_)
+      if !cancel {
+        handler()
+      }
+    }
+  } else {
+    self.exit_handler = type_ => {
+      defer og(type_)
+      if !cancel && type_ == _type {
+        handler()
+      }
     }
   }
   () => cancel = true
@@ -111,44 +163,18 @@ pub impl @rt.Task for UvTask with state(self) {
 
 ///|
 pub impl @rt.Task for UvTask with start(self) {
-  let handle = @uv.Async::new(self.rt.uv, _async => ___run_async(() => {
-    self.state = Running
-    // prevent memory leak
-    push_coroutine(self)
-    defer (fn() {
-      pop_coroutine() |> ignore
-      self.cancel_handle = () => ()
-    })()
-    try (self.task)(self) catch {
-      e =>
-        match e {
-          @rt.CoroutineError::Cancelled => {
-            self.state = Cancelled
-            self._cleanup_exit(ExitType::Cancelled)
-          }
-          _ => {
-            self.state = Cancelled
-            self._cleanup_exit(ExitType::UnhandledError)
-          }
-        }
-    } noraise {
-      _ => {
-        self.state = Completed
-        self._cleanup_exit(ExitType::Done)
-      }
-    }
-  }))
-  self.cancel_handle = () => ___suspend((
-    res,
-    _, // no need to store context ..
-  ) => handle.close(() => res(())))
+  guard self.handle.val is Some(asy)
+  asy.send()
 }
 
 ///|
 pub impl @rt.Task for UvTask with join(self) {
+  if self.state == New {
+    self.start()
+  }
   match self.state {
     Cancelled | Completed => ()
-    Cancelling | Suspend | Running =>
+    Cancelling | Suspend | Running | New =>
       uvrt_suspend((resolve, reject, _) => {
         let cancelToken = self.on_exit(ExitType::Any, () => resolve(()))
         () => {
@@ -156,11 +182,6 @@ pub impl @rt.Task for UvTask with join(self) {
           reject(@rt.CoroutineError::Cancelled)
         }
       })
-    New => {
-      // enqueue the task and wait for it
-      self.start()
-      self.join()
-    }
   }
 }
 

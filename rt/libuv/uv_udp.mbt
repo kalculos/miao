@@ -80,6 +80,17 @@ impl @net.DatagramConnection for UvDatagram with buffer(self) {
 }
 
 ///|
+impl @net.Connection for UvDatagram with unsafe_udp_connection(self) {
+  self as &@net.DatagramConnection
+}
+
+///|
+impl @net.Connection for UvDatagram with unsafe_tcp_connection(_self) {
+  println("unsupport")
+  abort("unsupport")
+}
+
+///|
 struct UvDatagramSocket {
   udp : @uv.Udp
   rt : LibuvRuntime
@@ -197,4 +208,15 @@ impl @net.Socket for UvDatagramSocket with close(self) {
 ///|
 impl @net.Socket for UvDatagramSocket with is_closed(self) {
   self.closed
+}
+
+///|
+impl @net.Socket for UvDatagramSocket with unsafe_udp_socket(self) {
+  self as &@net.DatagramSocket
+}
+
+///|
+impl @net.Socket for UvDatagramSocket with unsafe_tcp_socket(_self) {
+  println("unsupport")
+  abort("unsupport")
 }

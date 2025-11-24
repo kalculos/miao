@@ -1,7 +1,9 @@
 {
   "link": {
     "native": {
-      "stub-cc-flags": "--std=gnu2x"
+      "stub-cc-flags": "--std=gnu2x",
+      "cc-flags": "-Wno-error=int-conversion",
+      "cc": "clang"
     }
   },
   "import": [
@@ -13,7 +15,14 @@
     "iceBear67/miao/net",
     "iceBear67/miao/buffer",
     "iceBear67/time",
-    "iceBear67/miao/process"
+    "iceBear67/miao/process",
+    "iceBear67/miao/debug"
   ],
-  "native-stub": ["coroutine.c"]
+  "native-stub": [
+    "coroutine.c",
+    "net.c"
+  ],
+  "test-import": [
+    "iceBear67/miao/debug"
+  ]
 }

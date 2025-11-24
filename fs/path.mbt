@@ -53,19 +53,16 @@ pub impl Eq for Path with equal(self, another) {
 ///|
 /// A factory of path. It parses the input in unix path style and produce a Path with default file system.
 /// You may manipulate its behaviour by hijacking runtime. It also resolves absoluteness of the given path.
-pub fn path(
-  str : String,
-  using_fs? : &FileSystem = default_file_system.val.unwrap(),
-) -> Path { // todo illegal path detection?
+pub fn path(str : String, using_fs~ : &FileSystem) -> Path { // todo illegal path detection?
   //todo windows support?
   let components = str.split("/").filter(fn(s) { s.length() > 0 }).to_array()
   let path = Path::{ fs: using_fs, components, absolute: false }
-  for root in using_fs.system_roots() {
-    if path.starts_with_path(root) {
-      return { ..path, absolute: true }
-    }
-  }
   path
+}
+
+///|
+pub fn path_def(str : String) -> Path {
+  path(str, using_fs=default_file_system.val.unwrap())
 }
 
 ///|
@@ -168,8 +165,14 @@ pub fn Path::to_absolute(self : Path) -> Path {
   if self.absolute {
     self
   } else {
-    let cwd = self.fs.cwd()
-    cwd.resolve_path(self).clean()
+    for path in self.fs.system_roots() {
+      if self.starts_with_path(path) {
+        return { ..self, absolute: true }
+      }
+    } else {
+      let cwd = self.fs.cwd()
+      { ..cwd.resolve_path(self).clean(), absolute: true }
+    }
   }
 }
 
@@ -263,5 +266,5 @@ pub fn Path::relativize_path(self : Path, other : Path) -> Path {
 
 ///|
 pub fn Path::to_unix_path(self : Path) -> String {
-  self.components.join("/")
+  "/"+self.components.join("/")
 }

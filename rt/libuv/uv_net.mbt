@@ -4,11 +4,6 @@ struct UvNet {
 }
 
 ///|
-fn UvNet::uv(self : UvNet) -> LibuvRuntime {
-  self.uv
-}
-
-///|
 fn parse_and_convert_addr(
   address : String,
 ) -> Result[(@net.SockAddrIn, @uv.Sockaddr), @net.NetworkError] {
@@ -47,7 +42,7 @@ pub impl @net.Network for UvNet with dial(self, network, address, options) {
       let socket = UvTcpSocket::{ uv: handle, rt: self.uv }
       let opt = @net.TcpOption::new(reuseaddr=(options & 1) != 0)
       @net.TcpSocket::dial(socket, @net.SockAddr::Inet(addr), opt).map(it => it
-        as &@net.Connection)
+        as &@net.TcpConnection)
     }
     "udp" => {
       let (addr, uv_sock) = match parse_and_convert_addr(address) {
@@ -87,7 +82,7 @@ pub impl @net.Network for UvNet with dial(self, network, address, options) {
           udp: handle,
           remote: @net.SockAddr::Inet(addr),
         }
-        as &@net.Connection,
+        as &@net.DatagramConnection,
       )
     }
     _ =>
@@ -124,7 +119,7 @@ pub impl @net.Network for UvNet with bind(self, network, bind, options) {
           )
         }
       }
-      Ok(UvTcpSocket::{ uv: handle, rt: self.uv } as &@net.Socket)
+      Ok(UvTcpSocket::{ uv: handle, rt: self.uv } as &@net.TcpSocket)
     }
     "udp" => {
       let (_, uv_sock) = match parse_and_convert_addr(bind) {
@@ -163,7 +158,7 @@ pub impl @net.Network for UvNet with bind(self, network, bind, options) {
           }),
           receiving: false,
         }
-        as &@net.Socket,
+        as &@net.DatagramSocket,
       )
     }
     _ =>
@@ -177,56 +172,51 @@ pub impl @net.Network for UvNet with bind(self, network, bind, options) {
 
 ///|
 fn @uv.Sockaddr::to_miao(self : @uv.Sockaddr) -> @net.SockAddr raise {
-  match mbt_miao_get_safamily(self) {
-    _AF_INET => {
-      // IPv4
-      let port = mbt_miao_get_sin_port(self)
-      let addr_bytes = mbt_miao_get_sin_addr(self)
-      let ip : Int = (addr_bytes[0].to_int() << 24) |
-        (addr_bytes[1].to_int() << 16) |
-        (addr_bytes[2].to_int() << 8) |
-        addr_bytes[3].to_int()
-      @net.SockAddr::Inet(@net.SockAddrIn::{
-        port,
-        addr: @net.InetAddr::IPv4(host=ip),
-      })
+  let family = mbt_miao_get_safamily(self)
+  if family == _AF_INET {
+    let port = mbt_miao_get_sin_port(self)
+    let addr_bytes = mbt_miao_get_sin_addr(self)
+    let ip : Int = (addr_bytes[0].to_int() << 24) |
+      (addr_bytes[1].to_int() << 16) |
+      (addr_bytes[2].to_int() << 8) |
+      addr_bytes[3].to_int()
+    return @net.SockAddr::Inet(@net.SockAddrIn::{
+      port,
+      addr: @net.InetAddr::IPv4(host=ip),
+    })
+  } else if family == _AF_INET6 {
+    let port = mbt_miao_get_sin6_port(self)
+    let addr_bytes = mbt_miao_get_sin6_addr(self)
+    let segments : Array[UInt16] = []
+    let mut i = 0
+    while i < 8 {
+      let high = addr_bytes[i * 2].to_int()
+      let low = addr_bytes[i * 2 + 1].to_int()
+      segments[i] = ((high << 8) | low).to_uint16()
+      i += 1
     }
-    _AF_INET6 => {
-      // IPv6
-      let port = mbt_miao_get_sin6_port(self)
-      let addr_bytes = mbt_miao_get_sin6_addr(self)
-      let segments : Array[UInt16] = []
-      let mut i = 0
-      while i < 8 {
-        let high = addr_bytes[i * 2].to_int()
-        let low = addr_bytes[i * 2 + 1].to_int()
-        segments[i] = ((high << 8) | low).to_uint16()
-        i += 1
-      }
-      @net.SockAddr::Inet(@net.SockAddrIn::{
-        port,
-        addr: @net.InetAddr::IPv6(
-          msb=(segments[0].to_int64() << 48) |
-            (segments[1].to_int64() << 32) |
-            (segments[2].to_int64() << 16) |
-            segments[3].to_int64(),
-          lsb=(segments[4].to_int64() << 48) |
-            (segments[5].to_int64() << 32) |
-            (segments[6].to_int64() << 16) |
-            segments[7].to_int64(),
-        ),
-      })
-    }
-    _AF_UNIX => {
-      // Unix domain socket
-      let path_bytes = mbt_miao_get_sun_path(self)
-      @net.SockAddr::Unix(
-        path=@encoding/utf8.decode(path_bytes) catch {
-          _ => raise fail("Failed to decode Unix socket path")
-        },
-      )
-    }
-    _ => @net.SockAddr::Unspec
+    return @net.SockAddr::Inet(@net.SockAddrIn::{
+      port,
+      addr: @net.InetAddr::IPv6(
+        msb=(segments[0].to_int64() << 48) |
+          (segments[1].to_int64() << 32) |
+          (segments[2].to_int64() << 16) |
+          segments[3].to_int64(),
+        lsb=(segments[4].to_int64() << 48) |
+          (segments[5].to_int64() << 32) |
+          (segments[6].to_int64() << 16) |
+          segments[7].to_int64(),
+      ),
+    })
+  } else if family == _AF_UNIX {
+    let path_bytes = mbt_miao_get_sun_path(self)
+    return @net.SockAddr::Unix(
+      path=@encoding/utf8.decode(path_bytes) catch {
+        _ => raise fail("Failed to decode Unix socket path")
+      },
+    )
+  } else {
+    return @net.SockAddr::Unspec
   }
 }
 

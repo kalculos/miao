@@ -61,7 +61,7 @@ pub(open) trait Context {
 
 pub(open) trait Runtime {
   async unsafe_suspend(Self, ((ResolvedToken) -> Unit, (Error) -> Unit, &Task) -> () -> Unit raise) -> ResolvedToken
-  new_task(Self, async (&Task) -> Unit) -> &Task
+  new_task(Self, async (&Task) -> Unit) -> &Task raise
   async sleep(Self, UInt64) -> Unit
 }
 async fn[T] &Runtime::suspend(Self, ((T) -> Unit, (Error) -> Unit, &Task) -> () -> Unit raise) -> T

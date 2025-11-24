@@ -74,7 +74,7 @@ pub(open) trait Reader {
   async read(Self, FixedArray[Byte], Int, Int) -> Int
   async read_all(Self) -> &@buffer.Buffer = _
   async read_buffer(Self, Int) -> &@buffer.Buffer = _
-  async read_buffer_to(Self, &@buffer.Buffer) -> Int = _
+  async read_buffer_to(Self, &@buffer.ByteSlice) -> Int = _
   async available(Self) -> Int = _
   async close(Self) -> Unit
   async is_closed(Self) -> Bool
@@ -82,7 +82,7 @@ pub(open) trait Reader {
 
 pub(open) trait Writer {
   async write(Self, FixedArray[Byte], Int, Int) -> Int
-  async write_buffer(Self, &@buffer.Buffer) -> Int = _
+  async write_buffer(Self, &@buffer.ByteSlice) -> Int = _
   async close(Self) -> Unit
   async is_closed(Self) -> Bool
 }

@@ -238,7 +238,7 @@ pub impl @io.Reader for MemFileChannel with is_closed(self) {
 
 ///|
 pub impl FileSystem for MemFileSystem with id(self) {
-  self.id()
+  "memfs"
 }
 
 ///|

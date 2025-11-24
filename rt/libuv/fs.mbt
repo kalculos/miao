@@ -37,7 +37,11 @@ impl @fs.FileSystem for LibuvFileSystem with open_file(
   let resolved_path = if follow_links {
     match self.real_path(path) {
       Ok(p) => p
-      Err(e) => return Err(e)
+      Err(e) =>
+        match e {
+          NotFound(_) => path
+          _ => return Err(e)
+        }
     }
   } else {
     path
@@ -136,6 +140,22 @@ impl @fs.FileSystem for LibuvFileSystem with list_directory(self, path) {
           Err(uv_error_to_file_error(err, "Failed to list directory"))
       }
   }
+}
+
+///|
+fn to_access_bits(f : @fs.AccessFlags) -> Int {
+  let mut mode = 0
+  if f.read() {
+    mode = mode | 0o400
+  } // owner read
+  if f.write() {
+    mode = mode | 0o200
+  } // owner write
+  if f.execute() {
+    mode = mode | 0o100
+  } // owner execute
+  // 如果希望 group/other 权限，也可以按需加 0o040,0o004 etc
+  mode
 }
 
 ///|
