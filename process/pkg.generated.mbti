@@ -1,8 +1,8 @@
 // Generated using `moon info`, DON'T EDIT IT
-package "iceBear67/miao/process"
+package "kalculos/miao/process"
 
 import(
-  "iceBear67/miao/io"
+  "kalculos/miao/io"
 )
 
 // Values

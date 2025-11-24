@@ -8,21 +8,21 @@
   },
   "import": [
     "tonyfettes/uv",
-    "iceBear67/miao/io",
-    "iceBear67/miao/fs",
-    "iceBear67/miao/pipe",
-    "iceBear67/miao/rt",
-    "iceBear67/miao/net",
-    "iceBear67/miao/buffer",
+    "kalculos/miao/io",
+    "kalculos/miao/fs",
+    "kalculos/miao/pipe",
+    "kalculos/miao/rt",
+    "kalculos/miao/net",
+    "kalculos/miao/buffer",
     "iceBear67/time",
-    "iceBear67/miao/process",
-    "iceBear67/miao/debug"
+    "kalculos/miao/process",
+    "kalculos/miao/debug"
   ],
   "native-stub": [
     "coroutine.c",
     "net.c"
   ],
   "test-import": [
-    "iceBear67/miao/debug"
+    "kalculos/miao/debug"
   ]
 }

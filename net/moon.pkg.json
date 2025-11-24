@@ -1,8 +1,8 @@
 {
     "import": [
-      "iceBear67/miao/io",
+      "kalculos/miao/io",
       "iceBear67/time",
-      "iceBear67/miao/buffer",
+      "kalculos/miao/buffer",
       "moonbitlang/regexp"
     ]
 }

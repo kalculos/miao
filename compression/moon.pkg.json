@@ -1,7 +1,7 @@
 {
     "import": [
-        "iceBear67/miao/buffer",
-        "iceBear67/miao/io",
-        "iceBear67/miao/checksum"
+        "kalculos/miao/buffer",
+        "kalculos/miao/io",
+        "kalculos/miao/checksum"
     ]
 }

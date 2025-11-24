@@ -1,6 +1,6 @@
 {
   "import": [
-    "iceBear67/miao/io",
-    "iceBear67/miao/rt"
+    "kalculos/miao/io",
+    "kalculos/miao/rt"
   ]
 }

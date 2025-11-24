@@ -1,5 +1,5 @@
 // Generated using `moon info`, DON'T EDIT IT
-package "iceBear67/miao/checksum"
+package "kalculos/miao/checksum"
 
 // Values
 fn adler32(Array[Byte], initial_value? : UInt) -> UInt

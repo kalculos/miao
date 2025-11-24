@@ -1,5 +1,5 @@
 // Generated using `moon info`, DON'T EDIT IT
-package "iceBear67/miao/rt"
+package "kalculos/miao/rt"
 
 // Values
 let _current_runtime : Ref[() -> &Runtime]

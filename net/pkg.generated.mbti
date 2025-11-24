@@ -1,9 +1,9 @@
 // Generated using `moon info`, DON'T EDIT IT
-package "iceBear67/miao/net"
+package "kalculos/miao/net"
 
 import(
-  "iceBear67/miao/buffer"
-  "iceBear67/miao/io"
+  "kalculos/miao/buffer"
+  "kalculos/miao/io"
   "iceBear67/time"
 )
 

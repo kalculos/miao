@@ -1,6 +1,6 @@
 {
     "import": [
-        "iceBear67/miao/buffer"
+        "kalculos/miao/buffer"
     ],
     "test-import": [
         "moonbitlang/async"

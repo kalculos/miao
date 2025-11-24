@@ -1,6 +1,6 @@
 {
   "import": [
-    "iceBear67/miao/io",
+    "kalculos/miao/io",
     "iceBear67/time"
   ],
   "wbtest-import": [
