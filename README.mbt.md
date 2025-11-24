@@ -10,4 +10,9 @@ This project uses [version evolution](https://github.com/saltedfishclub/document
  - For a new version, _every_ package in this repository are published simultaneously.
 
 [CHANGELOG](./CHANGELOG.md)  
+
+Documentation are currently unavailable. To learn more about this library, it is recommended that you refer to our unit tests as they reflects the purpose from designer.
+
+(However, [deepwiki](https://deepwiki.com/kalculos/miao) is always available :D )
+
 [DOCUMENTATION](https://kalculos.github.io/document/miao/)
