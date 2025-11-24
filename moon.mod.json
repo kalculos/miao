@@ -1,5 +1,5 @@
 {
-  "name": "iceBear67/miao",
+  "name": "kalculos/miao",
   "version": "0.1.0-M2",
   "deps": {
     "iceBear67/mnbt": "0.3.3",
@@ -9,9 +9,9 @@
     "moonbitlang/async": "0.13.2"
   },
   "readme": "README.mbt.md",
-  "repository": "",
+  "repository": "https://github.com/kalculos/miao",
   "license": "Apache-2.0",
-  "keywords": [],
-  "description": "",
+  "keywords": ["async","libuv","io"],
+  "description": "Another async I/O for moonbit, with libuv served as the default async runtime implementation.",
   "preferred-target": "native"
 }
