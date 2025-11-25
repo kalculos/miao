@@ -3,5 +3,11 @@
         "kalculos/miao/buffer",
         "kalculos/miao/io",
         "kalculos/miao/checksum"
+    ],
+    "wbtest-import": [
+      "moonbitlang/async"
+    ],
+    "test-import": [
+      "moonbitlang/async"
     ]
 }
