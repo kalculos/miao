@@ -1,3 +1,8 @@
+# Project Status
+
+This project is currently unmaintained since the maintainer leave his job, but the codes are well coveraged and tested(mostly) so it can be continued if anyone interested in this.  
+Just feel free to fork this project and respect the license (if you decided to publish), thank you.
+
 # miao
 
 Welcome to project MIAO. MIAO~ stands for Moonbit Input And Output.
